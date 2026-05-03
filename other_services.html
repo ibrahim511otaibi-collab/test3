@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>الخدمات الأخرى</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap");
+
+        :root {
+            --primary-color: #097834;
+            --secondary-color: #c7ac25;
+        }
+
+        body {
+            font-family: "Noto Sans Arabic", sans-serif;
+            overflow-x: hidden;
+            background-color: #f8fafc;
+        }
+
+        .bg-primary { background-color: var(--primary-color); }
+        .text-primary { color: var(--primary-color); }
+
+        #mainLogo { transition: all 0.4s ease; }
+        #mainLogo:hover { transform: scale(1.12); filter: drop-shadow(0 0 10px rgba(199, 172, 37, 0.5)); }
+
+        .service-card {
+            background: #fff;
+            border-radius: 1.5rem;
+            padding: 1.75rem;
+            border: 1px solid #eef2f7;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+            transition: all 0.35s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .service-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 35px rgba(9, 120, 52, 0.15);
+            border-color: rgba(9, 120, 52, 0.25);
+        }
+        .service-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+        .service-card:hover::before { opacity: 1; }
+
+        .service-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            transition: all 0.35s ease;
+        }
+        .service-card:hover .service-icon {
+            transform: scale(1.08) rotate(-4deg);
+        }
+
+        .service-arrow {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f1f5f9;
+            color: var(--primary-color);
+            transition: all 0.35s ease;
+        }
+        .service-card:hover .service-arrow {
+            background: var(--primary-color);
+            color: #fff;
+            transform: translateX(-4px);
+        }
+
+        .modal-active { display: flex !important; }
+
+        .form-card {
+            background: #fff;
+            border: 1px solid #edf2f7;
+            border-radius: 1rem;
+            padding: 1rem;
+            transition: all 0.25s ease;
+        }
+        .form-card:hover {
+            border-color: rgba(9, 120, 52, 0.25);
+            box-shadow: 0 10px 20px rgba(9, 120, 52, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 pb-24 text-right">
+
+    <header class="bg-primary text-white p-6 rounded-b-[2.5rem] shadow-xl relative overflow-hidden">
+        <div class="relative z-10 mt-6">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-4">
+                    <div class="bg-white p-1 rounded-xl w-16 h-16 flex items-center justify-center shadow-sm">
+                        <img src="https://i.ibb.co/r2LcLwmn/logo.png"
+                             onerror="this.src='https://ui-avatars.com/api/?name=تراث&background=097834&color=fff'"
+                             class="w-full h-full object-contain" id="mainLogo" />
+                    </div>
+                    <div class="flex flex-col text-right border-r-2 border-[#C7AC25]/30 pr-3">
+                        <span class="text-sm font-bold tracking-tight">جمعية إحياء التراث الإسلامي</span>
+                        <span class="text-[#C7AC25] text-xs font-bold uppercase">مركز محافظة الفروانية</span>
+                        <div class="mt-1 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 bg-[#C7AC25] rounded-full"></span>
+                            <span class="text-white/80 text-[10px] font-bold">الخدمات المشتركة</span>
+                        </div>
+                    </div>
+                </div>
+                <a href="main_portal.html" class="bg-white/15 hover:bg-white/25 px-4 py-2 rounded-xl text-sm font-bold transition">
+                    <i class="fas fa-arrow-right ml-1"></i> رجوع
+                </a>
+            </div>
+
+            <div class="text-center mb-6">
+                <h1 class="font-black text-2xl md:text-4xl text-white">الخدمات الأخرى</h1>
+                <p class="text-white/80 text-sm mt-2">اختر الخدمة المطلوبة</p>
+                <div class="w-24 h-1 bg-[#C7AC25] mx-auto mt-3 rounded-full shadow-sm"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-4 max-w-4xl mx-auto mt-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+            <a href="https://ibrahim511otaibi-collab.github.io/zakatcal/" target="_blank" class="service-card block">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="service-icon" style="background:#fdf6e0; color:#c7ac25;">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="service-arrow">
+                        <i class="fas fa-arrow-left text-sm"></i>
+                    </div>
+                </div>
+                <h3 class="text-slate-800 font-black text-lg mb-1">حاسبة الزكاة</h3>
+                <p class="text-slate-500 text-sm">حساب الزكاة بشكل مباشر وسريع.</p>
+            </a>
+
+            <a href="#" onclick="toggleFormsModal(); return false;" class="service-card block">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="service-icon" style="background:#e8f5ee; color:#097834;">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="service-arrow">
+                        <i class="fas fa-arrow-left text-sm"></i>
+                    </div>
+                </div>
+                <h3 class="text-slate-800 font-black text-lg mb-1">النماذج العامة</h3>
+                <p class="text-slate-500 text-sm">عرض جميع النماذج العامة المشتركة للموظفين.</p>
+            </a>
+
+        </div>
+    </main>
+
+    <div id="formsModal" class="fixed inset-0 bg-black/70 z-[110] hidden items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white w-full max-w-5xl rounded-[2rem] overflow-hidden shadow-2xl">
+            <div class="bg-primary p-5 text-white flex justify-between items-center">
+                <h2 class="text-xl font-black">النماذج العامة</h2>
+                <button onclick="toggleFormsModal()" class="text-white/70 hover:text-white">
+                    <i class="fas fa-times-circle text-2xl"></i>
+                </button>
+            </div>
+            <div class="p-5 max-h-[75vh] overflow-y-auto bg-slate-50">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <a href="https://drive.google.com/uc?export=download&id=1tXe4glhlJ6PcyOXR7Owy6k6wCjjwUeJM" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج إجراء تصحيحي</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1TyH9NEVynrggQ6LYsxxqxcypxm-dL1lF" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج استلام عام</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1HhNDJ7R5VlcBi44DelJANDwRpPpaP4sE" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج استلام عهدة</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1dm74gYfTCWiCeV8EKMIXrooWT8GBzyx2" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج استلام وتسليم</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1WfogoBTCzeTRo64qFde9M-V4GKzt8QmX" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج اقتراح</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1s9xKE10nxeyTtSu9nZTBC8MSVMDqF-fX" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج الوصف الوظيفي</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1Sl2HTy39Az3TzYFhLvrNEVp5L2QmfwPU" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج وصف القسم</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1lcBxv1X-GVbzLJHWr_7c3hxT-SxArW3K" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج ترشيح دورة</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1aMhjtG4wUByPMC-_-IMNKd5nZhlnpz_H" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج تعميم داخلي</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1AHPs3bw6tBcFZ90xX04J8V7MZW76XN6w" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج تقييم اداء الموظفين</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1KYJoAGWGB9FllMhJMtnCX3DfAxxoPgED" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج تكليف بمهمة</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1l_B69Hgfl_ectCtH8TzNiXrU6s122lsj" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج توجيه</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1WND9wln8K101zzIWdgf2hpHuFTr5ia9X" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج صيانة</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1oH7QDQDv8iik41pXratg0upbe-ekYGCN" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج طلب استبيان</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1M0x5CX3Z92v4kzPAb2h75QM1ZjeRrXst" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج عدم مطابقة</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1zSGb-jfBA8B9hEApN_rOCAR7GmakVfGP" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج كتاب رسمي داخلي</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1FneWFTwdiXn7fNO2RY4cxzzQPr-1pxJW" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج الخطة التشغيلية</div></a>
+                    <a href="https://drive.google.com/uc?export=download&id=1I0lnBDRQSQwflPbGSaD48YiEDw88FaMw" target="_blank" class="form-card block"><div class="font-bold text-slate-800">نموذج التدقيق الداخلي</div></a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleFormsModal() {
+            document.getElementById('formsModal').classList.toggle('modal-active');
+        }
+    </script>
+</body>
+</html>

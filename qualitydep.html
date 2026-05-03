@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>البوابة الذكية لقسم ضبط الجودة - مركز الفروانية</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap");
+        
+        :root {
+            --primary-color: #097834;
+            --secondary-color: #c7ac25;
+        }
+
+        body {
+            font-family: "Noto Sans Arabic", sans-serif;
+            overflow-x: hidden;
+            background-color: #f8fafc;
+        }
+
+        .text-primary { color: var(--primary-color); }
+        .text-secondary { color: var(--secondary-color); }
+        .bg-primary { background-color: var(--primary-color); }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            scroll-behavior: smooth;
+        }
+
+        .cat-btn.active { background-color: var(--primary-color) !important; color: white !important; }
+
+        .nav-scroll-btn {
+            background: white; border-radius: 50%; width: 35px; height: 35px; display: flex;
+            align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer; z-index: 20; transition: all 0.3s; border: 1px solid #eee;
+        }
+        .nav-scroll-btn:hover { background: #f8f8f8; transform: scale(1.1); }
+
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3); transition: all 0.3s;
+        }
+        .glass-btn:hover { background: rgba(255, 255, 255, 0.25); transform: translateY(-2px); }
+
+        #mainLogo { transition: all 0.4s ease; }
+        #mainLogo:hover { transform: scale(1.3); filter: drop-shadow(0 0 10px rgba(199, 172, 37, 0.5)); }
+
+        .modal-active { display: flex !important; }
+
+        /* حاسبة الزكاة */
+        .btn-primary-zakat { background-color: var(--primary-color); color: white; transition: all 0.3s ease; }
+        .btn-primary-zakat:hover { background-color: #05652e; transform: translateY(-1px); }
+        .editable-price { border: 1px dashed var(--secondary-color); background: #fffdf2; text-align: center; border-radius: 8px; font-size: 13px; color: var(--primary-color); font-weight: bold; width: 90px; }
+        .editable-price:focus { outline: none; border-style: solid; background: #fff; }
+        .label-style { display: block; font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--secondary-color); }
+
+        /* القائمة الجانبية */
+        .sidebar { height: 100%; width: 0; position: fixed; z-index: 3000; top: 0; right: 0; background-color: white; overflow-x: hidden; transition: 0.4s; padding-top: 60px; box-shadow: -2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar a { padding: 15px 25px; text-decoration: none; font-size: 1.2rem; color: #444; display: block; transition: 0.3s; font-weight: bold; border-bottom: 1px solid #f0f0f0; }
+        .sidebar a:hover { background-color: #f8fcf9; color: var(--primary-color); }
+        .sidebar .closebtn { position: absolute; top: 10px; left: 25px; font-size: 36px; cursor: pointer; color: var(--primary-color); border-bottom: none; }
+
+        .openbtn-floating { cursor: pointer; background-color: var(--secondary-color); color: white; width: 55px; height: 55px; border-radius: 50%; position: fixed; bottom: 25px; right: 25px; z-index: 2500; box-shadow: 0 10px 25px rgba(199, 172, 37, 0.4); display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .openbtn-floating:hover { background-color: #b59d22; transform: scale(1.1); }
+
+        /* نافذة حاسبة الزكاة */
+        .zakat-modal-container { display: none; position: fixed; z-index: 3500; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+        .zakat-modal-content { background-color: #f9f9f9; margin: 5% auto; padding: 25px; border-radius: 25px; width: 95%; max-width: 800px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); position: relative; }
+        .zakat-close-modal { color: #aaa; font-size: 28px; font-weight: bold; position: absolute; top: 15px; left: 20px; cursor: pointer; transition: 0.2s; }
+        .zakat-close-modal:hover { color: #000; }
+    </style>
+</head>
+<body class="bg-slate-50 pb-24 text-right">
+
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+        <a href="https://ibrahim511otaibi-collab.github.io/zakatcal/" target="_blank"><i class="fas fa-calculator ml-2"></i> حاسبة الزكاة</a>
+        <a href="#" onclick="location.reload()"><i class="fas fa-home ml-2"></i> الرئيسية</a>
+    </div>
+
+    <div id="aboutModal" class="fixed inset-0 bg-black/70 z-[110] hidden items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+            <div class="bg-primary p-6 text-white flex justify-between items-center">
+                <div class="flex items-center gap-3"><i class="fas fa-info-circle text-xl text-[#C7AC25]"></i><h2 class="text-xl font-black">من نحن</h2></div>
+                <button onclick="toggleAbout()" class="text-white/50 hover:text-white"><i class="fas fa-times-circle text-2xl"></i></button>
+            </div>
+            <div class="p-8 max-h-[70vh] overflow-y-auto no-scrollbar">
+                <div class="text-center mb-6">
+                    <h3 class="text-primary font-bold text-lg mb-1">قسم ضبط الجودة</h3>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">إتقان . تطوير . أثر</p>
+                </div>
+                <div class="space-y-6">
+                    <div class="bg-slate-50 p-4 rounded-2xl border-r-4 border-primary">
+                        <h4 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-fingerprint text-primary text-xs"></i> هويتنا</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed">نحن المحرك التنظيمي لمركز محافظة الفروانية، نؤمن بأن العمل الخيري المؤسسي يبدأ من دقة الإجراء وينتهي بجودة المخرج.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 mb-3 flex items-center gap-2"><i class="fas fa-star text-[#C7AC25] text-xs"></i> ركائزنا الأربعة</h4>
+                        <div class="grid grid-cols-1 gap-3 text-sm text-slate-600">
+                            <div class="flex gap-3"><i class="fas fa-check-circle text-primary mt-1"></i><span><b>هيكلة العمل:</b> وضع الأطر التنظيمية والتوصيفات الدقيقة.</span></div>
+                            <div class="flex gap-3"><i class="fas fa-check-circle text-primary mt-1"></i><span><b>الرقابة الذكية:</b> التدقيق لضمان السير على الطريق الصحيح.</span></div>
+                            <div class="flex gap-3"><i class="fas fa-check-circle text-primary mt-1"></i><span><b>هندسة النماذج:</b> تبسيط المسارات وتقليل الهدر الزمني.</span></div>
+                            <div class="flex gap-3"><i class="fas fa-check-circle text-primary mt-1"></i><span><b>دعم الأقسام:</b> الشريك الاستشاري لرفع كفاءة الأداء.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <header class="bg-primary text-white p-6 rounded-b-[2.5rem] shadow-xl relative overflow-hidden">
+        <div class="relative z-10 mt-10 sm:mt-0">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-4">
+                    <div class="bg-white p-1 rounded-xl w-16 h-16 flex items-center justify-center shadow-sm">
+                        <img src="https://i.ibb.co/r2LcLwmn/logo.png" onerror="this.src='https://ui-avatars.com/api/?name=تراث&background=097834&color=fff'" class="w-full h-full object-contain" id="mainLogo" />
+                    </div>
+                    <div class="flex flex-col text-right border-r-2 border-[#C7AC25]/30 pr-3">
+                        <span class="text-sm font-bold tracking-tight">جمعية إحياء التراث الإسلامي</span>
+                        <span class="text-[#C7AC25] text-xs font-bold uppercase">مركز محافظة الفروانية</span>
+                        <div class="mt-1 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 bg-[#C7AC25] rounded-full"></span>
+                            <span class="text-white/80 text-[10px] font-bold">إعداد / قسم ضبط الجودة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mb-8">
+                <h1 class="font-black text-2xl md:text-4xl text-white">البوابة الذكية لقسم ضبط الجودة</h1>
+                <div class="w-24 h-1 bg-[#C7AC25] mx-auto mt-2 rounded-full shadow-sm"></div>
+            </div>
+
+            <div class="relative max-w-2xl mx-auto flex gap-2">
+                <div class="relative flex-grow">
+                    <input type="text" id="searchInput" onkeyup="filterFiles()" placeholder="ابحث في كل الأقسام عن نموذج، قسم، أو موظف..." class="w-full p-4 pr-12 rounded-2xl border-none text-slate-800 outline-none shadow-inner" />
+                    <i class="fas fa-search absolute right-4 top-4 text-slate-400"></i>
+                </div>
+                <button onclick="toggleDashboard()" class="bg-[#C7AC25] hover:bg-[#b59d22] text-white px-5 rounded-2xl shadow-lg transition-all flex items-center justify-center group">
+                    <i class="fas fa-chart-line text-xl group-hover:scale-110 transition-transform"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="dashboardModal" class="fixed inset-0 bg-black/60 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+            <div class="bg-primary p-6 text-white flex justify-between items-center">
+                <h2 class="text-xl font-black italic">إنجازات الجودة</h2>
+                <button onclick="toggleDashboard()" class="text-white/50 hover:text-white"><i class="fas fa-times-circle text-2xl"></i></button>
+            </div>
+            <div class="p-6 grid grid-cols-2 gap-4 bg-slate-50" id="statsGrid"></div>
+            <div class="p-4 text-center border-t border-slate-100 bg-white">
+                <p class="text-[10px] text-slate-400 font-bold">تحديث تلقائي لمخرجات القسم</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="relative max-w-4xl mx-auto flex items-center px-2 py-6">
+        <button onclick="scrollCats('right')" class="nav-scroll-btn ml-2" id="btnRight"><i class="fas fa-chevron-right text-primary text-sm"></i></button>
+        <div id="catContainer" class="flex gap-2 overflow-x-auto no-scrollbar scroll-smooth flex-grow">
+            <button onclick="filterCategory('النماذج العامة')" class="cat-btn active bg-white text-slate-600 px-6 py-2 rounded-full whitespace-nowrap text-sm font-bold shadow-sm border border-slate-100">النماذج العامة</button>
+            <button onclick="filterCategory('هياكل المركز')" class="cat-btn bg-white text-slate-600 px-6 py-2 rounded-full whitespace-nowrap text-sm font-bold shadow-sm border border-slate-100">هياكل مركز الفروانية</button>
+            <button onclick="filterCategory('توصيفات الاقسام')" class="cat-btn bg-white text-slate-600 px-6 py-2 rounded-full whitespace-nowrap text-sm font-bold shadow-sm border border-slate-100">توصيفات الاقسام</button>
+            <button onclick="filterCategory('التوصيفات الوظيفية')" class="cat-btn bg-white text-slate-600 px-6 py-2 rounded-full whitespace-nowrap text-sm font-bold shadow-sm border border-slate-100">التوصيفات الوظيفية</button>
+            <button onclick="filterCategory('خطط الاقسام')" class="cat-btn bg-white text-slate-600 px-6 py-2 rounded-full whitespace-nowrap text-sm font-bold shadow-sm border border-slate-100">خطط الاقسام</button>
+            <button onclick="filterCategory('إدارة عدم المطابقة')" class="cat-btn bg-white text-slate-600 px-6 py-2 rounded-full whitespace-nowrap text-sm font-bold shadow-sm border border-slate-100">إدارة عدم المطابقة</button>
+        </div>
+        <button onclick="scrollCats('left')" class="nav-scroll-btn mr-2" id="btnLeft"><i class="fas fa-chevron-left text-primary text-sm"></i></button>
+    </div>
+
+    <main class="px-4 max-w-4xl mx-auto" id="filesContainer"></main>
+
+    <div id="zakatModal" class="zakat-modal-container">
+        <div class="zakat-modal-content">
+            <span class="zakat-close-modal" onclick="closeZakat()">&times;</span>
+            <div id="zakat-calculator-section">
+                <h1 class="text-3xl font-bold text-primary mb-2 text-center">حاسبة الزكاة</h1>
+                <p id="loading-prices" class="text-center text-gray-500 mb-8 text-sm italic">جارٍ فحص حالة الأسعار المحدثة...</p>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="money" class="label-style mb-0">زكاة المال:</label>
+                        <span id="money-zakat" class="text-sm font-bold text-green-700 bg-green-50 px-2 py-1 rounded">المستحق: 0.000 د.ك</span>
+                    </div>
+                    <input type="number" id="money" oninput="updateLiveZakat()" class="w-full p-4 rounded-lg border border-gray-200 focus:ring-2 focus:ring-green-600 focus:outline-none text-xl" placeholder="0.000">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-2"><label class="label-style mb-0">ذهب عيار 24</label><span id="g24-zakat" class="text-xs font-bold text-green-700">المستحق: 0.000</span></div>
+                        <div class="flex items-center gap-3"><input type="number" id="gold24" oninput="updateLiveZakat()" class="flex-grow p-3 rounded-lg border border-gray-200 focus:outline-none" placeholder="الوزن"><div class="flex flex-col items-center"><span class="text-xs text-gray-400 mb-1">سعر الجرام</span><input type="number" id="gold24-price" oninput="updateLiveZakat()" class="editable-price p-2" step="0.001"></div></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-2"><label class="label-style mb-0">ذهب عيار 21</label><span id="g21-zakat" class="text-xs font-bold text-green-700">المستحق: 0.000</span></div>
+                        <div class="flex items-center gap-3"><input type="number" id="gold21" oninput="updateLiveZakat()" class="flex-grow p-3 rounded-lg border border-gray-200 focus:outline-none" placeholder="الوزن"><div class="flex flex-col items-center"><span class="text-xs text-gray-400 mb-1">سعر الجرام</span><input type="number" id="gold21-price" oninput="updateLiveZakat()" class="editable-price p-2" step="0.001"></div></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-2"><label class="label-style mb-0">ذهب عيار 18</label><span id="g18-zakat" class="text-xs font-bold text-green-700">المستحق: 0.000</span></div>
+                        <div class="flex items-center gap-3"><input type="number" id="gold18" oninput="updateLiveZakat()" class="flex-grow p-3 rounded-lg border border-gray-200 focus:outline-none" placeholder="الوزن"><div class="flex flex-col items-center"><span class="text-xs text-gray-400 mb-1">سعر الجرام</span><input type="number" id="gold18-price" oninput="updateLiveZakat()" class="editable-price p-2" step="0.001"></div></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-2"><label class="label-style mb-0">الفضة</label><span id="silver-zakat" class="text-xs font-bold text-green-700">المستحق: 0.000</span></div>
+                        <div class="flex items-center gap-3"><input type="number" id="silver" oninput="updateLiveZakat()" class="flex-grow p-3 rounded-lg border border-gray-200 focus:outline-none" placeholder="الوزن"><div class="flex flex-col items-center"><span class="text-xs text-gray-400 mb-1">سعر الجرام</span><input type="number" id="silver-price" oninput="updateLiveZakat()" class="editable-price p-2" step="0.001"></div></div>
+                    </div>
+                </div>
+                <button onclick="calculateZakat()" class="w-full btn-primary-zakat p-4 rounded-xl text-xl font-bold shadow-lg">احسب الزكاة الإجمالية</button>
+                <div id="result" class="mt-8"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ncrOptionsModal" class="fixed inset-0 bg-black/70 z-[200] hidden items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
+            <div class="bg-primary p-5 text-white flex justify-between items-center">
+                <h3 class="text-xl font-bold"><i class="fas fa-clipboard-list ml-2"></i> إدارة عدم المطابقة</h3>
+                <button onclick="closeNcrOptionsModal()" class="text-white/70 hover:text-white"><i class="fas fa-times-circle text-2xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <button id="newNcrBtn" class="w-full text-right bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl p-4 transition flex items-center gap-3">
+                    <i class="fas fa-plus-circle text-green-700 text-2xl"></i><div><div class="font-bold text-lg">نموذج عدم مطابقة جديد</div><div class="text-sm text-gray-500">تسجيل حالة عدم مطابقة (NCR)</div></div>
+                </button>
+                <button id="reportsBtn" class="w-full text-right bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl p-4 transition flex items-center gap-3">
+                    <i class="fas fa-chart-bar text-blue-700 text-2xl"></i><div><div class="font-bold text-lg">تقارير حالات عدم المطابقة</div><div class="text-sm text-gray-500">عرض جميع الحالات السابقة</div></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ncrModal" class="fixed inset-0 bg-black/80 z-[210] hidden items-center justify-center p-4 backdrop-blur-sm overflow-auto">
+        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl relative" style="max-height: 90vh; overflow-y: auto;">
+            <div class="sticky top-0 bg-primary p-3 text-white flex justify-between items-center rounded-t-2xl">
+                <h3 class="font-bold"><i class="fas fa-file-signature ml-2"></i> نموذج عدم مطابقة جديد</h3>
+                <button onclick="closeNcrModal()" class="text-white/70 hover:text-white"><i class="fas fa-times-circle text-2xl"></i></button>
+            </div>
+            <div class="p-5" id="ncrContent"></div>
+        </div>
+    </div>
+
+    <div id="reportsModal" class="fixed inset-0 bg-black/80 z-[220] hidden items-center justify-center p-4 backdrop-blur-sm overflow-auto">
+        <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl relative" style="max-height: 90vh; overflow-y: auto;">
+            <div class="sticky top-0 bg-primary p-3 text-white flex justify-between items-center rounded-t-2xl">
+                <h3 class="font-bold"><i class="fas fa-chart-bar ml-2"></i> تقارير حالات عدم المطابقة</h3>
+                <button onclick="closeReportsModal()" class="text-white/70 hover:text-white"><i class="fas fa-times-circle text-2xl"></i></button>
+            </div>
+            <div class="p-5">
+                <div id="reportsLoading" class="text-center py-10">⏳ جاري تحميل البيانات...</div>
+                <div id="reportsTableContainer" style="display:none;">
+                    <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-2 text-right border-b">رقم الحالة</th>
+                                <th class="px-4 py-2 text-right border-b">القسم</th>
+                                <th class="px-4 py-2 text-right border-b">مقدم الحالة</th>
+                                <th class="px-4 py-2 text-right border-b">تاريخ الإنشاء</th>
+                                <th class="px-4 py-2 text-right border-b">مستوى الخطورة</th>
+                                <th class="px-4 py-2 text-right border-b">الحالة</th>
+                                <th class="px-4 py-2 text-right border-b">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="managerModal" class="fixed inset-0 bg-black/90 z-[300] hidden items-center justify-center p-4 backdrop-blur-md overflow-auto">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl relative" style="max-height: 95vh; overflow-y: auto;">
+            <div class="sticky top-0 bg-red-800 p-4 text-white flex justify-between items-center rounded-t-2xl">
+                <h3 class="font-bold text-lg"><i class="fas fa-user-shield ml-2"></i> بوابة معالجة عدم المطابقة (المدير)</h3>
+                <button onclick="closeManagerModal()" class="text-white/70 hover:text-white"><i class="fas fa-times-circle text-2xl"></i></button>
+            </div>
+            <div class="p-6" id="managerContent">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // الرابط الموحد لقاعدة البيانات (Google Sheets)
+        const scriptURL = "https://script.google.com/macros/s/AKfycbwMPRa86e_QeLZk_7pERO14KWbzS0xs4943JOhPEo0V4AwMr75GK3GeIZyr5x8NPgdJ/exec";
+
+        // ============================================
+        // فحص الرابط تلقائياً لفتح نافذة المدير
+        // ============================================
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const ncrId = urlParams.get('id');
+            if (ncrId && ncrId.startsWith('NCR-')) {
+                openManagerView(ncrId);
+            }
+        });
+
+        // ============================================
+        // دوال الواجهة الرئيسية والملفات (69 ملف)
+        // ============================================
+        function toggleAbout() { document.getElementById("aboutModal").classList.toggle("modal-active"); }
+        function downloadPolicies() { window.open('https://drive.google.com/your-policy-link', '_blank'); }
+        function scrollCats(direction) { const c = document.getElementById("catContainer"); c.scrollLeft += direction === "left" ? -200 : 200; }
+
+        const filesData =[
+            { id: 301, name: "الهيكل الاداري للاشراف الفني والاداري", category: "هياكل المركز", url: "https://drive.google.com/file/d/1eOyLDol2jSEj4z4CLorCo2r7ZO2VWqGI/preview", type: "structure" },
+            { id: 302, name: "الهيكل التنظيمي", category: "هياكل المركز", url: "https://drive.google.com/file/d/1aSN2jvUaPpmKYeufXqGLUPfd9EmT6jZe/preview", type: "structure" },
+            { id: 303, name: "الهيكل الوظيفي", category: "هياكل المركز", url: "https://drive.google.com/file/d/1IdZ-zExU-yYOlLEdK9n0KXj2YVkYBfWV/view?usp=drive_link", type: "structure" },
+            { id: 1, name: "نموذج إجراء تصحيحي", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1tXe4glhlJ6PcyOXR7Owy6k6wCjjwUeJM" },
+            { id: 2, name: "نموذج استلام عام", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1TyH9NEVynrggQ6LYsxxqxcypxm-dL1lF" },
+            { id: 3, name: "نموذج استلام عهدة", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1HhNDJ7R5VlcBi44DelJANDwRpPpaP4sE" },
+            { id: 4, name: "نموذج استلام وتسليم", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1dm74gYfTCWiCeV8EKMIXrooWT8GBzyx2" },
+            { id: 5, name: "نموذج اقتراح", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1WfogoBTCzeTRo64qFde9M-V4GKzt8QmX" },
+            { id: 6, name: "نموذج الوصف الوظيفي", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1s9xKE10nxeyTtSu9nZTBC8MSVMDqF-fX" },
+            { id: 7, name: "نموذج وصف القسم", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1Sl2HTy39Az3TzYFhLvrNEVp5L2QmfwPU" },
+            { id: 8, name: "نموذج ترشيح دورة", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1lcBxv1X-GVbzLJHWr_7c3hxT-SxArW3K" },
+            { id: 9, name: "نموذج تعميم داخلي", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1aMhjtG4wUByPMC-_-IMNKd5nZhlnpz_H" },
+            { id: 10, name: "نموذج تقييم اداء الموظفين", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1AHPs3bw6tBcFZ90xX04J8V7MZW76XN6w" },
+            { id: 11, name: "نموذج تكليف بمهمة", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1KYJoAGWGB9FllMhJMtnCX3DfAxxoPgED" },
+            { id: 12, name: "نموذج توجيه", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1l_B69Hgfl_ectCtH8TzNiXrU6s122lsj" },
+            { id: 13, name: "نموذج صيانة", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1WND9wln8K101zzIWdgf2hpHuFTr5ia9X" },
+            { id: 14, name: "نموذج طلب استبيان", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1oH7QDQDv8iik41pXratg0upbe-ekYGCN" },
+            { id: 15, name: "نموذج عدم مطابقة", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1M0x5CX3Z92v4kzPAb2h75QM1ZjeRrXst" },
+            { id: 16, name: "نموذج كتاب رسمي داخلي", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1zSGb-jfBA8B9hEApN_rOCAR7GmakVfGP" },
+            { id: 17, name: "نموذج الخطة التشغيلية", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1FneWFTwdiXn7fNO2RY4cxzzQPr-1pxJW" },
+            { id: 18, name: "نموذج التدقيق الداخلي", category: "النماذج العامة", url: "https://drive.google.com/uc?export=download&id=1I0lnBDRQSQwflPbGSaD48YiEDw88FaMw" },
+            { id: 1001, name: "خالد صالح - قسم الارشيف", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1phHC47vOb0vubGiJ-8VXpiwrABx8EVYt/preview" },
+            { id: 1002, name: "احمد جبار - قسم الاستقبال", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1sllQ9c5YwuctIjnJQ7F3qz1gLN2THybG/preview" },
+            { id: 1003, name: "رسام عبدالله - قسم الاستقبال", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1aOwjik18D_NQQWHURKHqyfiMzp87kL5d/preview" },
+            { id: 1004, name: "عبدالله سالم - قسم الاستقبال", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1qAPD2RZrkeHI4kvX8h6XMwSoq0wdO-pK/preview" },
+            { id: 1005, name: "لافي هجرس - قسم الاستقبال", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1nRPc7vs3EikT3qSWxgwwV60PdjO-UwV_/preview" },
+            { id: 1006, name: "محمد عمر سالمين - قسم الاستقبال", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1sEQGrFAtyWNN1JC9z2zvyvL2-qlpF6nx/preview" },
+            { id: 1007, name: "مساعد جمعة - قسم الاستقبال", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1NjHumNnkPkhjsssDDEtDopJeS_RwHddK/preview" },
+            { id: 1008, name: "علاء حسين - قسم الاستقطاعات", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1vp1PmUsahPlAXDxSVOg9jsooJx1vYaRQ/preview" },
+            { id: 1009, name: "محمد زين العابدين - قسم الاستقطاعات", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1nkTJP3MhkOWUsWSayQ1C1GRyxV7ZdAoJ/preview" },
+            { id: 1010, name: "عقاب الشمري - قسم الاشراف الاداري", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/10L4PeViYuFdwC8fbPh1JY7W00uNko0LY/preview" },
+            { id: 1011, name: "وليد الفقيه - قسم الاشراف الفني", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1jFhyAjG-z8SaHVYpokifdfKE8vYJCfAk/preview" },
+            { id: 1012, name: "سعود ماجد - قسم الاعلامية والتسويق", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1MJ0KLZjilTy6JgR-_mFSOhWmEhvYOlp5/preview" },
+            { id: 1013, name: "ابراهيم خليل - قسم ضبط الجودة", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1dv92JhpnNG8ObUpJxfyW0OgJPQDOKrV_/preview" },
+            { id: 1014, name: "وليد الهتاري - قسم الدعم الفني", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1_vV0WH2PxgPqyTMEVAyY35HP8bCaw82N/preview" },
+            { id: 1015, name: "موسى حسانين - قسم الكلمة الطيبة", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/10rIN2a87Evf1VzNC6-Y4e1LVfgCwNPti/preview" },
+            { id: 1016, name: "عبدالرشيد بلوشي - قسم الكلمة الطيبة", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1RLnf9m9eRp6HoeJFc1za7t1V7Jm4mVFr/preview" },
+            { id: 1017, name: "محمد ناظر خان - قسم الكلمة الطيبة", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/11GC25_xRQ1t0pKy2A9oTMIj0FOkQ2Kzf/preview" },
+            { id: 1018, name: "عصام ابراهيم - قسم الكلمة الطيبة", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1IDJrCQzUJwJ3hD7biydyFEQ_V6THhvI8/preview" },
+            { id: 1019, name: "مشعل صالح - قسم المشاريع", category: "التوصيفات الوظيفية", url: "https://drive.google.com/file/d/1i_AzTN2WRKFrgWvDWNkTdkQlvq0cGTtp/preview" },
+            { id: 201, name: "توصيف قسم الارشيف", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1PMR_pQXy2782_owykLLQUumvCAL1_1Dx/preview" },
+            { id: 202, name: "توصيف قسم الاستقبال", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1gjwxPuIBKpjsNzIrhbkCy0xXAjMZsOci/preview" },
+            { id: 203, name: "توصيف قسم الاستقطاعات", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1NRkeOxSouxSdz29d_hkVodeAeWtpvbL1/preview" },
+            { id: 204, name: "توصيف قسم الاشراف الاداري", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1Tg9kNeFKVc9HkpCcqkEydOXeYkPuhUGQ/preview" },
+            { id: 205, name: "توصيف قسم الاشراف الفني", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1Xn2HtcIggFHJroEwvdSsgZNcs3nsn3EA/preview" },
+            { id: 206, name: "توصيف قسم الاعلامية والتسويق", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1cB4Wm-wuNJszTPGArho-U11zIpkiTbRB/preview" },
+            { id: 207, name: "توصيف قسم ضبط الجودة", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1-YAlN57rdUp44uq73mLoYa6eCrbguUxf/preview" },
+            { id: 208, name: "توصيف قسم الدعم الفني", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1JQZ9yR9DUKz5BRRN-mci685tZD6Umvbj/preview" },
+            { id: 209, name: "توصيف قسم المشاريع", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1A5Mbc7kL77u3CsJ2YOZ8lHztUFoAJWTA/preview" },
+            { id: 210, name: "توصيف قسم الكلمة الطيبة", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1CWlzYx2rNlawu2OIBlnBeVizyxHqbmJG/preview" },
+            { id: 211, name: "توصيف قسم اللجنة العلمية", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1s5-JzGItTGhkGNBkVRohsZC2G4fCydim/preview" },
+            { id: 212, name: "توصيف قسم حلقات القران الكريم", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1V_eCXiRSlZg51pg-ZKlUlA3C47B8kQrL/preview" },
+            { id: 213, name: "توصيف قسم النشء والشباب", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1LXKPbSNT5hqM3PCzrXcRP4_XZ5x42XSO/preview" },
+            { id: 214, name: "توصيف قسم الرعاية الاجتماعية", category: "توصيفات الاقسام", url: "https://drive.google.com/file/d/1ggiQxMFeNvk7FWLnlB-C8MAS1ssWAvfG/preview" },
+            { id: 501, name: "خطة قسم الرعاية الاجتماعية", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1A2MpsYDisYVWXzOy3hRt-SrNdYGZwQIX/preview" },
+            { id: 502, name: "خطة قسم حلقات القرآن الكريم", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1ybXkCZJXYriPMelj5F0q4nTv5W6Oletx/preview" },
+            { id: 503, name: "خطة قسم الارشيف", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1URFVbOkfyKbw0Z4RTzgFfMme8XY2KYT2/preview" },
+            { id: 504, name: "خطة قسم الاستقبال", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1u_StkQe-4uHYmL4256Oo6jezv-jIb_tr/preview" },
+            { id: 505, name: "خطة قسم الاستقطاعات", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1TptC_FhHoYIQItYQYMb1K5N-jM13D2d1/preview" },
+            { id: 506, name: "خطة قسم الاشراف الفني", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1Bi2oPqqXSMX2eX2shRyoRFmFxVXMrpmN/preview" },
+            { id: 507, name: "خطة قسم الاعلامية والتسويق", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1swOhziGQZVOCZ90IqJnkBf8d9qPfA5YK/preview" },
+            { id: 508, name: "خطة قسم ضبط الجودة", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1TLXtyhDQT-87zPGpOpEmzynTrgDygzeC/preview" },
+            { id: 509, name: "خطة قسم الدعم الفني", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1VXnonKAlL2GjvuLp4zLl1JLwan-7Tc9h/preview" },
+            { id: 510, name: "خطة قسم الكلمة الطيبة", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1qKOnKHXhptHOdf2-WevEGDY35CJ_yBsG/preview" },
+            { id: 511, name: "خطة قسم اللجنة العلمية", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1oVjeQdAMBEB6sbZtF1plRlAyu8AvJ_O-/preview" },
+            { id: 512, name: "خطة قسم المشاريع", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1kNq8uXipDQY3TrbsmWNP22ymePpVAcYi/preview" },
+            { id: 513, name: "خطة قسم النشء والشباب", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1c10LHQy8S7UIV_NEV9R3vpUHmIuc-txL/preview" },
+            { id: 514, name: "خطة قسم الاشراف الاداري", category: "خطط الاقسام", url: "https://drive.google.com/file/d/1hfo9Y4kGUItgmE1DEjBgL1LHrEhWt967/preview" },
+            { id: 401, name: "إدارة عدم المطابقة", category: "إدارة عدم المطابقة", url: "https://drive.google.com/file/d/1RqhHUVVoPvfPCayX1uwvGUpNhsebkfm0/preview" }
+        ];
+
+        let currentCategory = "النماذج العامة";
+
+        function toggleDashboard() { const m = document.getElementById("dashboardModal"); updateStats(); m.classList.toggle("modal-active"); }
+        function updateStats() {
+            const grid = document.getElementById("statsGrid");
+            const stats =[
+                { title: "النماذج العامة", icon: "fa-file-alt", color: "text-blue-600" },
+                { title: "توصيفات الاقسام", icon: "fa-building", color: "text-green-600" },
+                { title: "التوصيفات الوظيفية", icon: "fa-user-tie", color: "text-orange-500" },
+                { title: "خطط الاقسام", icon: "fa-tasks", color: "text-purple-600" },
+                { title: "هياكل المركز", icon: "fa-sitemap", color: "text-yellow-600" },
+            ];
+            grid.innerHTML = "";
+            stats.forEach((item) => {
+                const count = filesData.filter((f) => f.category === item.title).length;
+                grid.innerHTML += `<div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 text-center"><i class="fas ${item.icon} ${item.color} text-xl mb-2"></i><div class="text-2xl font-black text-slate-800">${count}</div><div class="text-[9px] font-bold text-slate-400 uppercase">${item.title}</div></div>`;
+            });
+        }
+
+        function renderFiles() {
+            const container = document.getElementById("filesContainer");
+            const term = document.getElementById("searchInput").value.trim().toLowerCase();
+            container.innerHTML = "";
+            let filtered = term === "" ? filesData.filter((f) => f.category === currentCategory) : filesData.filter((f) => f.name.toLowerCase().includes(term) || f.category.toLowerCase().includes(term));
+            
+            if (filtered.length === 0) { container.innerHTML = '<div class="text-center py-10 text-slate-400 font-bold">لا توجد نتائج تطابق بحثك</div>'; return; }
+            
+            filtered.forEach((file) => {
+                const isDownload = file.url.includes("export=download");
+                const icon = file.type === "structure" ? "fa-sitemap" : isDownload ? "fa-file-word" : "fa-file-pdf";
+                const iconBg = file.type === "structure" ? "bg-yellow-50" : isDownload ? "bg-blue-50" : "bg-green-50";
+                const iconColor = file.type === "structure" ? "text-[#C7AC25]" : isDownload ? "text-blue-600" : "text-[#097834]";
+                const actionIcon = isDownload ? "fa-download" : "fa-eye";
+                const btnColor = isDownload ? "bg-primary" : "bg-[#C7AC25]";
+
+                container.innerHTML += `
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-4 flex items-center justify-between transition hover:shadow-md animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div class="flex items-center gap-4 text-right">
+                            <div class="${iconBg} w-12 h-12 rounded-xl flex items-center justify-center"><i class="fas ${icon} ${iconColor} text-xl"></i></div>
+                            <div><h3 class="font-bold text-slate-800 text-sm">${file.name}</h3><span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold">${file.category}</span></div>
+                        </div>
+                        <a href="${file.url}" target="_blank" class="${btnColor} text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition hover:scale-110"><i class="fas ${actionIcon} text-xs"></i></a>
+                    </div>`;
+            });
+        }
+
+        function filterFiles() { renderFiles(); }
+        window.onload = renderFiles;
+
+        // ============================================
+        // دوال حاسبة الزكاة
+        // ============================================
+        function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
+        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+        function showZakat() { document.getElementById("zakatModal").style.display = "block"; closeNav(); fetchMetalPrices(); }
+        function closeZakat() { document.getElementById("zakatModal").style.display = "none"; }
+
+        const STORAGE_KEY = "zakat_metal_data";
+        async function fetchMetalPrices() {
+            const loadingText = document.getElementById('loading-prices');
+            const now = new Date(); const todayDate = now.toISOString().split('T')[0];
+            const storedData = JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+            if (storedData && storedData.date === todayDate) {
+                applyPrices(storedData.prices);
+                loadingText.innerHTML = `✅ الاسعار محدثة في تاريخ ${todayDate} (يمكنك تعديلها يدوياً)`;
+                loadingText.classList.replace('text-gray-500', 'text-green-600'); return;
+            }
+
+            try {
+                const headers = { "x-access-token": "goldapi-2podhqsmo5yvfh5-io", "Content-Type": "application/json" };
+                const goldRes = await fetch('https://www.goldapi.io/api/XAU/KWD', { headers });
+                const silverRes = await fetch('https://www.goldapi.io/api/XAG/KWD', { headers });
+                const goldData = await goldRes.json();
+                const silverData = await silverRes.json();
+
+                if(goldData.price) {
+                    const baseGold = goldData.price / 31.1035;
+                    const prices = { g24: baseGold.toFixed(3), g21: (baseGold * 0.875).toFixed(3), g18: (baseGold * 0.75).toFixed(3), silver: (silverData.price / 31.1035).toFixed(3) };
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: todayDate, prices: prices }));
+                    applyPrices(prices);
+                    loadingText.innerHTML = `✅ الاسعار محدثة في تاريخ ${todayDate} (يمكنك تعديلها يدوياً)`;
+                    loadingText.classList.replace('text-gray-500', 'text-green-600');
+                }
+            } catch (error) {
+                loadingText.innerHTML = "⚠️ فشل التحديث التلقائي. يرجى إدخال أسعار الجرام يدوياً.";
+                loadingText.classList.replace('text-gray-500', 'text-red-600');
+                if(storedData) applyPrices(storedData.prices);
+            }
+        }
+
+        function applyPrices(p) { document.getElementById('gold24-price').value = p.g24; document.getElementById('gold21-price').value = p.g21; document.getElementById('gold18-price').value = p.g18; document.getElementById('silver-price').value = p.silver; }
+        
+        function updateLiveZakat() {
+            const m = parseFloat(document.getElementById('money').value) || 0;
+            const g24 = parseFloat(document.getElementById('gold24').value) || 0; const p24 = parseFloat(document.getElementById('gold24-price').value) || 0;
+            const g21 = parseFloat(document.getElementById('gold21').value) || 0; const p21 = parseFloat(document.getElementById('gold21-price').value) || 0;
+            const g18 = parseFloat(document.getElementById('gold18').value) || 0; const p18 = parseFloat(document.getElementById('gold18-price').value) || 0;
+            const sil = parseFloat(document.getElementById('silver').value) || 0; const pSil = parseFloat(document.getElementById('silver-price').value) || 0;
+
+            document.getElementById('money-zakat').innerText = `المستحق: ${(m * 0.025).toFixed(3)} د.ك`;
+            document.getElementById('g24-zakat').innerText = `المستحق: ${(g24 * p24 * 0.025).toFixed(3)}`;
+            document.getElementById('g21-zakat').innerText = `المستحق: ${(g21 * p21 * 0.025).toFixed(3)}`;
+            document.getElementById('g18-zakat').innerText = `المستحق: ${(g18 * p18 * 0.025).toFixed(3)}`;
+            document.getElementById('silver-zakat').innerText = `المستحق: ${(sil * pSil * 0.025).toFixed(3)}`;
+        }
+
+        function calculateZakat() {
+            const m = parseFloat(document.getElementById('money').value) || 0;
+            const g24 = parseFloat(document.getElementById('gold24').value) || 0; const p24 = parseFloat(document.getElementById('gold24-price').value) || 0;
+            const g21 = parseFloat(document.getElementById('gold21').value) || 0; const p21 = parseFloat(document.getElementById('gold21-price').value) || 0;
+            const g18 = parseFloat(document.getElementById('gold18').value) || 0; const p18 = parseFloat(document.getElementById('gold18-price').value) || 0;
+            const sil = parseFloat(document.getElementById('silver').value) || 0; const pSil = parseFloat(document.getElementById('silver-price').value) || 0;
+            
+            const total = m + (g24 * p24) + (g21 * p21) + (g18 * p18) + (sil * pSil);
+            document.getElementById('result').innerHTML = `<div class="bg-green-50 border-r-8 border-green-600 p-6 rounded-lg shadow-md text-right mt-4"><p class="text-2xl font-bold text-primary italic">إجمالي الزكاة المستحقة هي: ${(total * 0.025).toFixed(3)} د.ك</p></div>`;
+        }
+
+        // ============================================
+        // نظام إدارة عدم المطابقة (NCR)
+        // ============================================
+        function openNcrOptionsModal() { document.getElementById('ncrOptionsModal').classList.add('modal-active'); }
+        function closeNcrOptionsModal() { document.getElementById('ncrOptionsModal').classList.remove('modal-active'); }
+        function closeNcrModal() { document.getElementById('ncrModal').classList.remove('modal-active'); }
+        function closeReportsModal() { document.getElementById('reportsModal').classList.remove('modal-active'); }
+        function closeManagerModal() { document.getElementById('managerModal').classList.remove('modal-active'); }
+
+        function loadNCRForm() {
+            const container = document.getElementById('ncrContent');
+            container.innerHTML = `
+                <div class="ncr-wrapper">
+                    <style>
+                        .ncr-wrapper .form-group { margin-bottom: 15px; }
+                        .ncr-wrapper label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+                        .ncr-wrapper input, .ncr-wrapper select, .ncr-wrapper textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; font-family: 'Noto Sans Arabic', sans-serif; }
+                        .ncr-wrapper .locked { background-color: #f0f0f0 !important; cursor: not-allowed; border: 1px solid #ccc !important; color: #555 !important; }
+                    </style>
+                    <div id="ncrForm">
+                        <div class="form-group"><label>رقم الحالة (ID):</label><input type="text" id="ncrId" class="locked" readonly></div>
+                        <div class="form-group"><label>اسم مقدم الحالة:</label><input type="text" id="ncrAuditor" placeholder="أدخل اسمك"></div>
+                        <div class="form-group"><label>القسم المعني:</label><select id="ncrDepartment">${generateDepartmentOptions()}</select></div>
+                        <div class="form-group"><label>مصدر الحالة:</label><select id="ncrSource"><option value="شكوى">شكوى</option><option value="تدقيق داخلي">تدقيق داخلي</option><option value="ملاحظة">ملاحظة</option><option value="تحليل بيانات">تحليل بيانات</option></select></div>
+                        <div class="form-group"><label>مستوى الخطورة:</label><select id="ncrRisk"><option value="منخفضة">منخفضة</option><option value="متوسطة">متوسطة</option><option value="عالية">عالية</option></select></div>
+                        <div class="form-group"><label>وصف عدم المطابقة:</label><textarea id="ncrDesc" rows="3" placeholder="اشرح حالة عدم المطابقة هنا..."></textarea></div>
+                        <button id="saveNcrBtn" class="w-full bg-[#097834] text-white p-4 rounded-lg font-bold text-lg mt-2 shadow-lg hover:bg-green-800 transition">💾 حفظ وإرسال إلى الجهة المعنية</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('ncrId').value = "NCR-" + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('saveNcrBtn').addEventListener('click', saveNCR);
+        }
+
+        function generateDepartmentOptions() {
+            const depts =["قسم الرعاية الاجتماعية", "قسم حلقات تحفيظ القرآن", "قسم الارشيف", "قسم الاستقبال", "قسم الاستقطاعات", "قسم الاشراف الفني", "قسم الاشراف الاداري", "قسم الاعلامية والتسويق", "قسم ضبط الجودة", "قسم الدعم الفني", "قسم الكلمة الطيبة", "قسم اللجنة العلمية", "قسم المشاريع", "قسم النشء والشباب"];
+            return '<option value="">-- اختر القسم --</option>' + depts.map(d => `<option value="${d}">${d}</option>`).join('');
+        }
+
+        async function saveNCR() {
+            const id = document.getElementById('ncrId').value;
+            const auditor = document.getElementById('ncrAuditor').value;
+            const department = document.getElementById('ncrDepartment').value;
+            const source = document.getElementById('ncrSource').value;
+            const risk = document.getElementById('ncrRisk').value;
+            const desc = document.getElementById('ncrDesc').value;
+            if (!auditor || !desc || !department) { alert("الرجاء تعبئة جميع البيانات المطلوبة."); return; }
+            
+            const btn = document.getElementById('saveNcrBtn');
+            btn.disabled = true; btn.innerText = "⏳ جاري الحفظ...";
+            
+            // رابط الموقع الحالي ديناميكياً لإرساله في الواتساب
+            const managerPortalURL = window.location.href.split('?')[0];
+            const payload = { id, auditor, department, source, risk, desc, rootCause: "", action: "", manager: "" };
+            
+            try {
+                await fetch(scriptURL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                btn.innerText = "⏳ جاري التوجيه للواتساب...";
+                const shortPageUrl = `${managerPortalURL}?id=${id}`;
+                const msgText = `*تنبيه جودة (NCR)*\nرقم الحالة: ${id}\nمقدم الحالة: ${auditor}\nالقسم: ${department}\nالوصف: ${desc}\n---\n*يرجى معالجة الحالة عبر الرابط التالي:*\n${shortPageUrl}`;
+                window.location.href = `https://wa.me/96596690217?text=${encodeURIComponent(msgText)}`;
+            } catch(err) { alert("حدث خطأ أثناء الحفظ."); btn.disabled = false; btn.innerText = "💾 حفظ وإرسال"; }
+        }
+
+        function openNCRModalWithForm() { closeNcrOptionsModal(); loadNCRForm(); document.getElementById('ncrModal').classList.add('modal-active'); }
+
+        async function loadReports() {
+            const loadingDiv = document.getElementById('reportsLoading');
+            const tableContainer = document.getElementById('reportsTableContainer');
+            const tbody = document.getElementById('reportsTableBody');
+            loadingDiv.style.display = 'block'; tableContainer.style.display = 'none';
+            
+            try {
+                const response = await fetch(`${scriptURL}?action=list`);
+                const data = await response.json();
+                if (data && data.length) {
+                    tbody.innerHTML = data.map(r => `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="px-4 py-2">${r.id || ''}</td>
+                            <td class="px-4 py-2">${r.department || ''}</td>
+                            <td class="px-4 py-2">${r.auditor || ''}</td>
+                            <td class="px-4 py-2">${r.created || ''}</td>
+                            <td class="px-4 py-2">${r.risk || ''}</td>
+                            <td class="px-4 py-2"><span class="px-2 py-1 rounded-full text-xs ${r.status === 'مغلق' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">${r.status || 'قيد المعالجة'}</span></td>
+                            <td class="px-4 py-2"><button onclick="viewNCRDetails('${r.id}')" class="bg-primary text-white px-3 py-1 rounded-lg text-sm">معالجة / تفاصيل</button></td>
+                        </tr>`).join('');
+                    loadingDiv.style.display = 'none'; tableContainer.style.display = 'block';
+                } else { loadingDiv.innerHTML = '⚠️ لا توجد حالات مسجلة بعد.'; }
+            } catch (err) { loadingDiv.innerHTML = '❌ حدث خطأ في تحميل البيانات.'; }
+        }
+
+        function viewNCRDetails(id) {
+            closeReportsModal();
+            openManagerView(id); // استدعاء دالة المدير المدمجة
+        }
+
+        function openReportsModal() { closeNcrOptionsModal(); document.getElementById('reportsModal').classList.add('modal-active'); loadReports(); }
+
+        // ============================================
+        // بوابة معالجة المدير (Manager Portal Logic)
+        // ============================================
+        async function openManagerView(id) {
+            document.getElementById('managerModal').classList.add('modal-active');
+            const container = document.getElementById('managerContent');
+            container.innerHTML = '<div class="text-center py-10">⏳ جاري جلب تفاصيل الحالة من قاعدة البيانات...</div>';
+
+            try {
+                const response = await fetch(`${scriptURL}?action=list`);
+                const data = await response.json();
+                const record = data.find(r => r.id === id);
+
+                if (!record) {
+                    container.innerHTML = '<div class="text-center py-10 text-red-600 font-bold">❌ لم يتم العثور على الحالة المطلوبة!</div>';
+                    return;
+                }
+
+                const isClosed = record.status === 'مغلق';
+
+                container.innerHTML = `
+                    <div class="space-y-4 text-right">
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                            <p class="text-sm text-gray-500 mb-3 border-b pb-2">تفاصيل المشكلة (NCR):</p>
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                <div><span class="font-bold text-gray-700">رقم الحالة:</span> <span class="text-primary font-bold">${record.id}</span></div>
+                                <div><span class="font-bold text-gray-700">القسم:</span> <span>${record.department}</span></div>
+                                <div><span class="font-bold text-gray-700">مقدم الحالة:</span> <span>${record.auditor}</span></div>
+                                <div><span class="font-bold text-gray-700">الخطورة:</span> <span class="text-red-500 font-bold">${record.risk}</span></div>
+                            </div>
+                            <div class="mt-4">
+                                <span class="font-bold text-gray-700 block mb-1">وصف عدم المطابقة:</span>
+                                <div class="p-3 bg-white border rounded-lg text-sm">${record.desc}</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold mb-1 text-sm text-red-800">السبب الجذري (Root Cause):</label>
+                            <textarea id="mgrRootCause" rows="2" class="w-full p-3 border rounded-lg" ${isClosed ? 'readonly' : ''}>${record.rootCause || ''}</textarea>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1 text-sm text-red-800">الإجراء التصحيحي (Corrective Action):</label>
+                            <textarea id="mgrAction" rows="2" class="w-full p-3 border rounded-lg" ${isClosed ? 'readonly' : ''}>${record.action || ''}</textarea>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1 text-sm text-red-800">اسم المسؤول المعتمد:</label>
+                            <input type="text" id="mgrName" class="w-full p-3 border rounded-lg" value="${record.manager || ''}" ${isClosed ? 'readonly' : ''}>
+                        </div>
+
+                        ${isClosed ? 
+                            '<div class="text-center p-4 bg-green-100 text-green-800 font-bold rounded-lg border border-green-200">✅ تم إغلاق هذه الحالة مسبقاً</div>' 
+                            : 
+                            `<button id="updateNcrBtn" onclick="updateNCR('${record.id}', '${record.auditor}', '${record.department}', '${record.source}', '${record.risk}', '${record.desc}')" class="w-full bg-red-800 text-white p-4 rounded-lg font-bold text-lg mt-2 shadow-lg hover:bg-red-900 transition">💾 إعتماد الإجراء وإغلاق الحالة</button>`
+                        }
+                    </div>
+                `;
+            } catch (err) {
+                container.innerHTML = '<div class="text-center py-10 text-red-600 font-bold">❌ حدث خطأ في الاتصال بقاعدة البيانات.</div>';
+            }
+        }
+
+        async function updateNCR(id, auditor, department, source, risk, desc) {
+            const rootCause = document.getElementById('mgrRootCause').value.trim();
+            const action = document.getElementById('mgrAction').value.trim();
+            const manager = document.getElementById('mgrName').value.trim();
+
+            if (!rootCause || !action || !manager) {
+                alert("الرجاء تعبئة السبب الجذري، الإجراء التصحيحي، واسم المسؤول قبل الإغلاق.");
+                return;
+            }
+
+            const btn = document.getElementById('updateNcrBtn');
+            btn.disabled = true; btn.innerText = "⏳ جاري التحديث والإغلاق...";
+
+            const payload = { id, auditor, department, source, risk, desc, rootCause, action, manager };
+
+            try {
+                await fetch(scriptURL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                alert("✅ تم إغلاق الحالة بنجاح.");
+                closeManagerModal();
+                
+                // إذا كان المدير قد دخل عبر الرابط، نقوم بتنظيف الرابط ليعود للصفحة الرئيسية
+                if(window.location.search.includes("id=")) {
+                    window.location.href = window.location.href.split('?')[0];
+                }
+            } catch(err) {
+                alert("❌ حدث خطأ أثناء التحديث.");
+                btn.disabled = false; btn.innerText = "💾 إعتماد الإجراء وإغلاق الحالة";
+            }
+        }
+
+        // ربط الأزرار
+        document.getElementById('newNcrBtn')?.addEventListener('click', openNCRModalWithForm);
+        document.getElementById('reportsBtn')?.addEventListener('click', openReportsModal);
+
+        window.filterCategory = function(cat) {
+            if (cat === "عمليات التدقيق الداخلي" || cat === "إدارة عدم المطابقة") { openNcrOptionsModal(); return; }
+            currentCategory = cat;
+            document.getElementById("searchInput").value = "";
+            document.querySelectorAll(".cat-btn").forEach((btn) => {
+                btn.classList.toggle("active", btn.innerText.trim() === cat || (cat === "هياكل المركز" && btn.innerText.includes("هياكل")));
+            });
+            renderFiles();
+        };
+    </script>
+</body>
+  <button onclick="toggleSidebar()" class="fixed top-6 left-6 z-[6000] bg-white/20 hover:bg-white/40 backdrop-blur-md p-3 rounded-xl border border-white/30 shadow-lg transition-all">
+    <div class="space-y-1.5">
+        <span class="block w-6 h-0.5 bg-white"></span>
+        <span class="block w-6 h-0.5 bg-white"></span>
+        <span class="block w-6 h-0.5 bg-white"></span>
+    </div>
+</button>
+
+<div id="sideNavigation" class="fixed inset-y-0 left-0 w-72 bg-white shadow-2xl z-[7000] transform -translate-x-full transition-transform duration-300 ease-in-out border-r border-gray-100">
+    <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-primary/5">
+        <span class="font-bold text-primary">أخرى </span>
+        <button onclick="toggleSidebar()" class="text-gray-400 hover:text-red-500 transition-colors">
+            <i class="fas fa-times text-xl"></i>
+        </button>
+    </div>
+
+    <nav class="p-4 space-y-2">
+        <a href="javascript:void(0)" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); toggleSidebar();" class="block px-4 py-3 text-sm font-bold text-gray-700 hover:bg-primary/10 hover:text-primary rounded-lg transition-all">
+            الصفحة الرئيسية
+        </a>
+        
+        <a href="https://ibrahim511otaibi-collab.github.io/zakatcal/" target="_blank" onclick="toggleSidebar();" class="block px-4 py-3 text-sm font-bold text-gray-700 hover:bg-primary/10 hover:text-primary rounded-lg transition-all border-t border-gray-50">
+            حاسبة الزكاة
+        </a>
+
+        <a href="javascript:void(0)" onclick="downloadPolicies(); toggleSidebar();" class="block px-4 py-3 text-sm font-bold text-gray-700 hover:bg-primary/10 hover:text-primary rounded-lg transition-all border-t border-gray-50">
+            دليل السياسات والإجراءات
+        </a>
+
+        <a href="javascript:void(0)" onclick="toggleAbout(); toggleSidebar();" class="block px-4 py-3 text-sm font-bold text-gray-700 hover:bg-primary/10 hover:text-primary rounded-lg transition-all border-t border-gray-50">
+            من نحن (تعريف بالقسم)
+        </a>
+
+        <a href="https://wa.me/96596690217t="_blank" onclick="toggleSidebar();" class="block px-4 py-3 text-sm font-bold text-green-600 hover:bg-green-50 rounded-lg transition-all border-t border-gray-50">
+            تواصل معنا (واتساب)
+        </a>
+    </nav>
+</div>
+
+<div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-[6500] hidden backdrop-blur-sm"></div>
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('sideNavigation');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    if (sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+    } else {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+    }
+}
+</script>
+</html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>البوابة الذكية للأقسام</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap");
+
+        :root {
+            --primary-color: #097834;
+            --secondary-color: #c7ac25;
+        }
+
+        body {
+            font-family: "Noto Sans Arabic", sans-serif;
+            overflow-x: hidden;
+            background-color: #f8fafc;
+        }
+
+        .text-primary { color: var(--primary-color); }
+        .text-secondary { color: var(--secondary-color); }
+        .bg-primary { background-color: var(--primary-color); }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            scroll-behavior: smooth;
+        }
+
+        #mainLogo { transition: all 0.4s ease; }
+        #mainLogo:hover { transform: scale(1.3); filter: drop-shadow(0 0 10px rgba(199, 172, 37, 0.5)); }
+
+        /* بطاقات الأقسام */
+        .dept-card {
+            background: #ffffff;
+            border-radius: 1.5rem;
+            padding: 1.75rem;
+            border: 1px solid #eef2f7;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+            transition: all 0.35s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .dept-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 35px rgba(9, 120, 52, 0.15);
+            border-color: rgba(9, 120, 52, 0.25);
+        }
+        .dept-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+        .dept-card:hover::before { opacity: 1; }
+
+        .dept-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            transition: all 0.35s ease;
+        }
+        .dept-card:hover .dept-icon {
+            transform: scale(1.08) rotate(-4deg);
+        }
+
+        .dept-arrow {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: #f1f5f9;
+            color: var(--primary-color);
+            transition: all 0.35s ease;
+        }
+        .dept-card:hover .dept-arrow {
+            background: var(--primary-color);
+            color: #fff;
+            transform: translateX(-4px);
+        }
+
+        /* القائمة الجانبية */
+        .side-panel {
+            position: fixed;
+            top: 0; left: 0;
+            width: 300px;
+            height: 100%;
+            background: #ffffff;
+            box-shadow: 4px 0 25px rgba(0,0,0,0.08);
+            transform: translateX(-100%);
+            transition: transform 0.35s ease;
+            z-index: 7000;
+            border-right: 1px solid #f0f0f0;
+        }
+        .side-panel.open { transform: translateX(0); }
+        .side-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(3px);
+            z-index: 6500;
+            display: none;
+        }
+        .side-overlay.show { display: block; }
+
+        .side-link {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 22px;
+            font-weight: 700;
+            color: #444;
+            border-bottom: 1px solid #f3f4f6;
+            transition: all 0.25s ease;
+        }
+        .side-link:hover {
+            background: #f8fcf9;
+            color: var(--primary-color);
+            padding-right: 28px;
+        }
+
+        .openbtn-floating {
+            position: fixed;
+            top: 22px;
+            left: 22px;
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            z-index: 6000;
+            transition: all 0.3s ease;
+        }
+        .openbtn-floating:hover { background: rgba(255,255,255,0.32); }
+
+        /* رسالة عدم العثور */
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: #94a3b8;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 pb-24 text-right">
+
+    <button onclick="toggleSidebar()" class="openbtn-floating" aria-label="فتح القائمة">
+        <div class="space-y-1.5">
+            <span class="block w-6 h-0.5 bg-white"></span>
+            <span class="block w-6 h-0.5 bg-white"></span>
+            <span class="block w-6 h-0.5 bg-white"></span>
+        </div>
+    </button>
+
+    <div id="sidePanel" class="side-panel">
+        <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-primary/5">
+            <span class="font-bold text-primary text-lg">القائمة</span>
+            <button onclick="toggleSidebar()" class="text-gray-400 hover:text-red-500 transition">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <nav class="py-3">
+            <a href="javascript:void(0)" onclick="window.scrollTo({top:0,behavior:'smooth'}); toggleSidebar();" class="side-link">
+                <i class="fas fa-home text-primary"></i> الصفحة الرئيسية
+            </a>
+            <a href="#" onclick="openDepartment('quality'); toggleSidebar();" class="side-link">
+                <i class="fas fa-shield-alt text-primary"></i> قسم ضبط الجودة
+            </a>
+            <a href="#" onclick="openDepartment('projects'); toggleSidebar();" class="side-link">
+                <i class="fas fa-briefcase text-primary"></i> قسم المشاريع
+            </a>
+            <a href="#" onclick="openDepartment('others'); toggleSidebar();" class="side-link">
+                <i class="fas fa-th-large text-primary"></i> خدمات أخرى
+            </a>
+            <a href="https://wa.me/96596690217" target="_blank" onclick="toggleSidebar();" class="side-link" style="color:#16a34a;">
+                <i class="fab fa-whatsapp"></i> تواصل معنا (واتساب)
+            </a>
+        </nav>
+    </div>
+    <div id="sideOverlay" class="side-overlay" onclick="toggleSidebar()"></div>
+
+    <header class="bg-primary text-white p-6 rounded-b-[2.5rem] shadow-xl relative overflow-hidden">
+        <div class="relative z-10 mt-10 sm:mt-0">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-4">
+                    <div class="bg-white p-1 rounded-xl w-16 h-16 flex items-center justify-center shadow-sm">
+                        <img src="https://i.ibb.co/r2LcLwmn/logo.png"
+                             onerror="this.src='https://ui-avatars.com/api/?name=تراث&background=097834&color=fff'"
+                             class="w-full h-full object-contain" id="mainLogo" />
+                    </div>
+                    <div class="flex flex-col text-right border-r-2 border-[#C7AC25]/30 pr-3">
+                        <span class="text-sm font-bold tracking-tight">جمعية إحياء التراث الإسلامي</span>
+                        <span class="text-[#C7AC25] text-xs font-bold uppercase">مركز محافظة الفروانية</span>
+                        <div class="mt-1 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 bg-[#C7AC25] rounded-full"></span>
+                            <span class="text-white/80 text-[10px] font-bold">إعداد قسم ضبط الجودة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mb-8">
+                <h1 class="font-black text-2xl md:text-4xl text-white">البوابة الذكية للأقسام</h1>
+                <p class="text-white/80 text-sm mt-2">اختر القسم أو ابحث عن خدمة للانتقال السريع</p>
+                <div class="w-24 h-1 bg-[#C7AC25] mx-auto mt-3 rounded-full shadow-sm"></div>
+            </div>
+
+            <div class="relative max-w-2xl mx-auto">
+                <input type="text" id="searchInput" onkeyup="filterCards()"
+                       placeholder="ابحث عن قسم أو خدمة..."
+                       class="w-full p-4 pr-12 rounded-2xl border-none text-slate-800 outline-none shadow-inner" />
+                <i class="fas fa-search absolute right-4 top-4 text-slate-400"></i>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-4 max-w-5xl mx-auto mt-8" id="cardsContainer">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="cardsGrid">
+
+            <a href="#" onclick="openDepartment('quality'); return false;"
+               class="dept-card group block"
+               data-keywords="قسم ضبط الجودة جودة نماذج خطط توصيفات عدم مطابقة">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="dept-icon" style="background:#e8f5ee; color:#097834;">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="dept-arrow">
+                        <i class="fas fa-arrow-left text-sm"></i>
+                    </div>
+                </div>
+                <h3 class="text-slate-800 font-black text-lg mb-1">قسم ضبط الجودة</h3>
+                <span class="inline-block text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold">
+                    يتطلب تسجيل الدخول
+                </span>
+            </a>
+
+            <a href="#" onclick="openDepartment('projects'); return false;"
+               class="dept-card group block"
+               data-keywords="قسم المشاريع مشاريع تنفيذ متابعة تقارير">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="dept-icon" style="background:#fdf6e0; color:#c7ac25;">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div class="dept-arrow">
+                        <i class="fas fa-arrow-left text-sm"></i>
+                    </div>
+                </div>
+                <h3 class="text-slate-800 font-black text-lg mb-1">قسم المشاريع</h3>
+                <span class="inline-block text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold">
+                    يتطلب تسجيل الدخول
+                </span>
+            </a>
+
+            <a href="#" onclick="openDepartment('others'); return false;"
+               class="dept-card group block"
+               data-keywords="خدمات أخرى عامة مشتركة موظفين صيانة تعاميم نماذج">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="dept-icon" style="background:#eef2ff; color:#4f46e5;">
+                        <i class="fas fa-th-large"></i>
+                    </div>
+                    <div class="dept-arrow">
+                        <i class="fas fa-arrow-left text-sm"></i>
+                    </div>
+                </div>
+                <h3 class="text-slate-800 font-black text-lg mb-1">خدمات أخرى</h3>
+                <p class="text-slate-500 text-xs leading-relaxed mb-2">
+                    الخدمات المشتركة لجميع الموظفين على اختلاف أقسامهم.
+                </p>
+                <span class="inline-block text-[10px] bg-[#eef2ff] text-[#4f46e5] px-2 py-0.5 rounded font-bold">
+                    دخول مباشر
+                </span>
+            </a>
+
+        </div>
+
+        <div id="emptyState" class="empty-state hidden">
+            لا توجد نتائج تطابق بحثك
+        </div>
+    </main>
+
+    <div id="loginModal" class="fixed inset-0 bg-black/70 z-[8000] hidden items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl p-6 relative">
+            
+            <button onclick="closeLoginModal()" class="absolute top-4 left-4 text-slate-400 hover:text-red-500 transition">
+                <i class="fas fa-times-circle text-2xl"></i>
+            </button>
+
+            <div class="text-center mb-6 mt-2">
+                <div class="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl">
+                    <i class="fas fa-id-badge"></i>
+                </div>
+                <h2 class="text-xl font-black text-slate-800">تسجيل الدخول</h2>
+                <p id="modalSubtitle" class="text-slate-500 text-sm mt-1">يرجى إدخال الرقم الوظيفي للمتابعة</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <input type="text" id="employeeIdInput" placeholder="أدخل الرقم الوظيفي هنا..." 
+                           class="w-full p-4 rounded-xl border border-slate-200 text-center font-bold text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition" />
+                    <p id="loginError" class="text-red-500 text-xs font-bold text-center mt-2 hidden">الرقم الوظيفي غير صحيح!</p>
+                </div>
+
+                <button onclick="verifyAndLogin()" class="w-full bg-primary hover:bg-[#075f29] text-white font-bold py-4 rounded-xl transition shadow-lg shadow-primary/30">
+                    دخول للقسم
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // روابط الأقسام
+        const departmentLinks = {
+            quality: "https://ibrahim511otaibi-collab.github.io/test-acap/", // قسم ضبط الجودة
+            projects: "#", // قسم المشاريع
+            others: "other_services.html"    // صفحة الخدمات الأخرى
+        };
+
+        // =======================================================
+        // !! هنا تضع الأرقام الوظيفية لكل قسم يتطلب تسجيل دخول !!
+        // =======================================================
+        const departmentPermissions = {
+            quality: ["400152", "1002", "1003"],    // أرقام موظفي قسم الجودة فقط
+            projects: ["400152", "440103", "2003"]    // أرقام موظفي قسم المشاريع فقط
+            // لاحظ: تم إزالة قسم "others" من هنا لأنه لا يحتاج تصريح
+        };
+
+        // --- نظام تسجيل الدخول ---
+        let targetSectionUrl = "";
+        let targetDepartmentKey = ""; // لحفظ اسم القسم المطلوب وقت الضغط
+
+        function openDepartment(key) {
+            const url = departmentLinks[key];
+            if (!url || url === "#") {
+                alert("سيتم إضافة رابط هذا القسم قريبًا.");
+                return;
+            }
+            
+            // ===================================================
+            // استثناء قسم "الخدمات الأخرى" ليفتح مباشرة بدون رقم وظيفي
+            // ===================================================
+            if (key === "others") {
+                window.open(url, "_blank"); // يفتح رابط الخدمات الأخرى في نافذة جديدة مباشرة
+                return; // يوقف إكمال الكود حتى لا تظهر نافذة التسجيل
+            }
+
+            // باقي الأقسام سيظهر لها نافذة تسجيل الدخول
+            targetSectionUrl = url;
+            targetDepartmentKey = key; // حفظ القسم للتحقق من صلاحياته
+
+            const modal = document.getElementById('loginModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('employeeIdInput').value = ''; 
+            document.getElementById('loginError').classList.add('hidden');
+            
+            setTimeout(() => {
+                document.getElementById('employeeIdInput').focus();
+            }, 100);
+        }
+
+        function closeLoginModal() {
+            const modal = document.getElementById('loginModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            targetSectionUrl = "";
+            targetDepartmentKey = "";
+        }
+
+        function verifyAndLogin() {
+            const empId = document.getElementById('employeeIdInput').value.trim();
+            const errorMsg = document.getElementById('loginError');
+
+            if (empId === "") {
+                errorMsg.innerText = "الرجاء كتابة الرقم الوظيفي.";
+                errorMsg.classList.remove('hidden');
+                return; // يوقف إكمال العملية
+            }
+
+            // استخراج قائمة الأرقام المسموح لها للقسم الذي تم الضغط عليه
+            const allowedIdsForThisDept = departmentPermissions[targetDepartmentKey];
+
+            // التحقق مما إذا كان الرقم المدخل موجوداً في قائمة هذا القسم تحديداً
+            if (allowedIdsForThisDept && allowedIdsForThisDept.includes(empId)) {
+                // الرقم صحيح ومصرح له بدخول هذا القسم
+                window.open(targetSectionUrl, "_blank"); // يفتح الرابط أولاً
+                closeLoginModal(); // ثم يغلق النافذة
+            } else {
+                // الرقم خاطئ أو لا يملك صلاحية لهذا القسم
+                errorMsg.innerText = "عذراً، هذا الرقم غير مصرح له بدخول القسم المختار.";
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        // الدخول بزر Enter
+        document.getElementById('employeeIdInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                verifyAndLogin();
+            }
+        });
+
+        // البحث في البطاقات
+        function filterCards() {
+            const term = document.getElementById("searchInput").value.trim().toLowerCase();
+            const cards = document.querySelectorAll("#cardsGrid .dept-card");
+            let visible = 0;
+            cards.forEach(card => {
+                const text = (card.innerText + " " + (card.dataset.keywords || "")).toLowerCase();
+                const match = term === "" || text.includes(term);
+                card.style.display = match ? "" : "none";
+                if (match) visible++;
+            });
+            document.getElementById("emptyState").classList.toggle("hidden", visible !== 0);
+        }
+
+        // القائمة الجانبية
+        function toggleSidebar() {
+            const panel = document.getElementById("sidePanel");
+            const overlay = document.getElementById("sideOverlay");
+            panel.classList.toggle("open");
+            overlay.classList.toggle("show");
+        }
+    </script>
+</body>
+</html>
