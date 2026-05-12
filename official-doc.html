@@ -80,6 +80,7 @@ legend {
   font-size: 0.7rem;
   margin-top: 5px;
   border-radius: 5px;
+  cursor: pointer;
 }
 
 input, textarea {
@@ -97,8 +98,9 @@ input, textarea {
 .page {
   width: 210mm;
   height: 297mm;
-  background-image: url('https://i.ibb.co/WWmVm38y/2.jpg');
-  background-size: 100% 100%;
+  /* سيتم تعيين الخلفية ديناميكياً بواسطة JS بعد تحويلها إلى Base64 */
+  background-size: cover;
+  background-position: center;
   position: relative;
   background-color: white;
 }
@@ -137,13 +139,13 @@ input, textarea {
     <legend>المحتوى</legend>
     <label>المرسل إليه <input type="text" id="recipient" value="السيد/ مدير الإدارة"></label>
     <label>الموضوع <input type="text" id="subject" value="تحديث بيانات الموظفين"></label>
-    <label>النص <textarea id="bodyText">بالإشارة إلى الموضوع أعلاه...</textarea></label>
+    <label>النص <textarea id="bodyText">بالإشارة إلى الموضوع أعلاه، يرجى التكرم بالعلم بأنه قد تم تحديث كافة البيانات المطلوبة وفقاً للوائح المعمول بها.</textarea></label>
   </fieldset>
 
   <fieldset>
     <legend>المرفقات</legend>
     <div id="attachmentsList"></div>
-    <button class="btn-add" onclick="addAttachment()">+ إضافة مرفق جديد</button>
+    <button class="btn-add" id="addAttBtn">+ إضافة مرفق جديد</button>
   </fieldset>
 
   <fieldset>
@@ -161,7 +163,36 @@ input, textarea {
 <script>
 const $ = id => document.getElementById(id);
 let attachments = ["نسخة من القرار المعتمد"];
+let backgroundDataURL = null;  // لتخزين الخلفية بصيغة Base64
 
+// تحويل صورة الخلفية إلى Base64 مسبقاً لحل مشكلة CORS
+async function loadBackgroundAsBase64() {
+  const imageUrl = 'https://i.ibb.co/WWmVm38y/2.jpg';
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";  // محاولة الحصول على CORS (قد لا تنجح إذا كان الخادم لا يسمح)
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const dataURL = canvas.toDataURL('image/jpeg');
+      resolve(dataURL);
+    };
+    img.onerror = () => reject(new Error('فشل تحميل الصورة'));
+    img.src = imageUrl;
+  });
+}
+
+// تطبيق الخلفية على عنصر الصفحة باستخدام Base64
+function setBackgroundFromBase64(dataURL) {
+  $('page').style.backgroundImage = `url('${dataURL}')`;
+  $('page').style.backgroundSize = 'cover';
+  $('page').style.backgroundPosition = 'center';
+}
+
+// وظائف المرفقات
 function addAttachment() {
     attachments.push("");
     renderControls();
@@ -180,65 +211,119 @@ function renderControls() {
     attachments.forEach((att, i) => {
         list.innerHTML += `
             <div class="att-item">
-                <input type="text" value="${att}" oninput="attachments[${i}]=this.value; updateDoc()">
+                <input type="text" value="${escapeHtml(att)}" oninput="attachments[${i}]=this.value; updateDoc()">
                 <button class="btn-del" onclick="removeAttachment(${i})">✕</button>
             </div>`;
     });
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+
 function updateDoc() {
-    const attHtml = attachments.filter(a => a.trim() !== "").map(a => `• ${a}`).join('<br>');
+    const attHtml = attachments.filter(a => a.trim() !== "").map(a => `• ${escapeHtml(a)}`).join('<br>');
     
     $('doc').innerHTML = `
         <div class="doc-header">
             <div class="meta-box">
-                <div>التاريخ الهجري: ${$('dateH').value}</div>
-                <div>التاريخ الميلادي: ${$('dateM').value}</div>
-                <div>رقم الكتاب: ${$('docNum').value}</div>
+                <div>التاريخ الهجري: ${escapeHtml($('dateH').value)}</div>
+                <div>التاريخ الميلادي: ${escapeHtml($('dateM').value)}</div>
+                <div>رقم الكتاب: ${escapeHtml($('docNum').value)}</div>
             </div>
         </div>
 
-        <div class="recipient-section">الأخ الكريم/ ${$('recipient').value} المحترم</div>
+        <div class="recipient-section">الأخ الكريم/ ${escapeHtml($('recipient').value)} المحترم</div>
         <div class="salutation">السلام عليكم ورحمة الله وبركاته،، وبعد</div>
 
         <div class="subject-container">
-            <div class="subject-line">الموضوع: ${$('subject').value}</div>
+            <div class="subject-line">الموضوع: ${escapeHtml($('subject').value)}</div>
         </div>
 
         <div class="body-content">
-            ${$('bodyText').value.replace(/\n/g, '<br>')}
+            ${$('bodyText').value.replace(/\n/g, '<br>').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             <br><br>
             وتقبلوا منا فائق الاحترام والتقدير،،
         </div>
 
         <div class="signature-wrap">
             <div class="signature-box">
-                <div style="font-weight:bold">${$('signName').value}</div>
+                <div style="font-weight:bold">${escapeHtml($('signName').value)}</div>
                 <br><br>
                 __________________
             </div>
         </div>
 
-        <div class="attachments-section" style="${attachments.length > 0 ? '' : 'display:none'}">
+        <div class="attachments-section" style="${attachments.length > 0 && attachments.some(a=>a.trim()) ? '' : 'display:none'}">
             <b>المرفقات:</b><br>
             ${attHtml}
         </div>
     `;
 }
 
+// ربط الأحداث
 const ids = ['dateH', 'dateM', 'docNum', 'recipient', 'subject', 'bodyText', 'signName'];
 ids.forEach(id => $(id).addEventListener('input', updateDoc));
+$('addAttBtn').onclick = addAttachment;
 
+// زر PDF مع تجهيز الخلفية
 $('btnPDF').onclick = async () => {
-    const canvas = await html2canvas($('page'), { scale: 3 });
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
-    pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
-    pdf.save("كتاب_رسمي.pdf");
+    const btn = $('btnPDF');
+    const originalText = btn.innerText;
+    btn.innerText = 'جاري تجهيز PDF...';
+    btn.disabled = true;
+    
+    try {
+        // التأكد من وجود الخلفية بصيغة Base64
+        if (!backgroundDataURL) {
+            // محاولة تحميل الخلفية وتحويلها
+            backgroundDataURL = await loadBackgroundAsBase64();
+            setBackgroundFromBase64(backgroundDataURL);
+        }
+        
+        // انتظار بسيط لتطبيق الخلفية
+        await new Promise(r => setTimeout(r, 50));
+        
+        // استخدام html2canvas مع خيارات CORS والخلفية
+        const canvas = await html2canvas($('page'), {
+            scale: 3,
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: null
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+        pdf.save("كتاب_رسمي.pdf");
+    } catch (error) {
+        console.error(error);
+        alert('حدث خطأ أثناء إنشاء PDF. قد تكون الخلفية غير متاحة بسبب سياسات الموقع. حاول استخدام صورة محلية أو رابط يدعم CORS.');
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
 };
 
-window.onload = () => { renderControls(); updateDoc(); };
+// بدء التطبيق: تحميل الخلفية أولاً ثم عرض المستند
+window.onload = async () => {
+    renderControls();
+    updateDoc();
+    try {
+        backgroundDataURL = await loadBackgroundAsBase64();
+        setBackgroundFromBase64(backgroundDataURL);
+    } catch(e) {
+        console.warn('لا يمكن تحميل الخلفية، سيتم استخدام لون أبيض بدلاً منها');
+        $('page').style.backgroundColor = '#fff';
+    }
+};
 </script>
-
 </body>
 </html>
