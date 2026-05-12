@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>البوابة الذكية – منشئ الكتب الرسمية</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+
+body, input, textarea, button, .doc {
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+}
+
+:root {
+  --green: #1a6b2f;
+  --gold: #c9a227;
+  --ink: #111;
+}
+
+body {
+  background: #f0f2f0;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  padding: 30px;
+  flex-wrap: wrap;
+}
+
+.panel {
+  width: 340px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+fieldset {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+legend {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gold);
+  padding: 0 8px;
+}
+
+.att-item {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.att-item input { flex-grow: 1; }
+
+.btn-del {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  width: 30px;
+  cursor: pointer;
+}
+
+.btn-add {
+  background: #eee;
+  color: #333;
+  padding: 5px;
+  font-size: 0.7rem;
+  margin-top: 5px;
+  border-radius: 5px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-top: 5px;
+  font-size: 0.9rem;
+}
+
+.btn-pdf { background: var(--green); color: white; border-radius: 10px; padding: 12px; font-weight: bold; width: 100%; cursor: pointer; border: none; margin-top: 10px; }
+
+/* وثيقة A4 */
+.page {
+  width: 210mm;
+  height: 297mm;
+  background-image: url('https://i.ibb.co/WWmVm38y/2.jpg');
+  background-size: 100% 100%;
+  position: relative;
+  background-color: white;
+}
+
+.doc {
+  position: absolute;
+  inset: 40mm 20mm 30mm 20mm;
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-header { display: flex; justify-content: flex-end; margin-bottom: 10mm; }
+.meta-box { text-align: right; font-size: 11pt; line-height: 1.6; }
+.recipient-section { font-weight: 700; font-size: 13pt; margin-bottom: 5mm; }
+.subject-container { text-align: center; margin-bottom: 10mm; }
+.subject-line { display: inline-block; font-weight: 700; font-size: 14pt; border-bottom: 2px solid var(--ink); padding-bottom: 5px; }
+.body-content { text-align: justify; font-size: 12pt; line-height: 1.9; flex-grow: 1; }
+.signature-wrap { display: flex; justify-content: flex-end; padding-bottom: 20mm; }
+.signature-box { text-align: center; min-width: 200px; }
+.attachments-section { font-size: 10pt; color: #444; border-top: 1px solid #eee; padding-top: 5px; }
+
+@media print { .panel { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="panel" id="controlPanel">
+  <fieldset>
+    <legend>بيانات الترويسة</legend>
+    <label>الهجري <input type="text" id="dateH" value="14 محرم 1447هـ"></label>
+    <label>الميلادي <input type="text" id="dateM" value="10 يوليو 2026م"></label>
+    <label>الرقم <input type="text" id="docNum" value="ف/ج/2026/10"></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>المحتوى</legend>
+    <label>المرسل إليه <input type="text" id="recipient" value="السيد/ مدير الإدارة"></label>
+    <label>الموضوع <input type="text" id="subject" value="تحديث بيانات الموظفين"></label>
+    <label>النص <textarea id="bodyText">بالإشارة إلى الموضوع أعلاه...</textarea></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>المرفقات</legend>
+    <div id="attachmentsList"></div>
+    <button class="btn-add" onclick="addAttachment()">+ إضافة مرفق جديد</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>التوقيع</legend>
+    <label>المنصب <input type="text" id="signName" value="رئيس المركز"></label>
+  </fieldset>
+
+  <button class="btn-pdf" id="btnPDF">حفظ كـ PDF</button>
+</div>
+
+<div class="page" id="page">
+  <div class="doc" id="doc"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let attachments = ["نسخة من القرار المعتمد"];
+
+function addAttachment() {
+    attachments.push("");
+    renderControls();
+    updateDoc();
+}
+
+function removeAttachment(index) {
+    attachments.splice(index, 1);
+    renderControls();
+    updateDoc();
+}
+
+function renderControls() {
+    const list = $('attachmentsList');
+    list.innerHTML = "";
+    attachments.forEach((att, i) => {
+        list.innerHTML += `
+            <div class="att-item">
+                <input type="text" value="${att}" oninput="attachments[${i}]=this.value; updateDoc()">
+                <button class="btn-del" onclick="removeAttachment(${i})">✕</button>
+            </div>`;
+    });
+}
+
+function updateDoc() {
+    const attHtml = attachments.filter(a => a.trim() !== "").map(a => `• ${a}`).join('<br>');
+    
+    $('doc').innerHTML = `
+        <div class="doc-header">
+            <div class="meta-box">
+                <div>التاريخ الهجري: ${$('dateH').value}</div>
+                <div>التاريخ الميلادي: ${$('dateM').value}</div>
+                <div>رقم الكتاب: ${$('docNum').value}</div>
+            </div>
+        </div>
+
+        <div class="recipient-section">الأخ الكريم/ ${$('recipient').value} المحترم</div>
+        <div class="salutation">السلام عليكم ورحمة الله وبركاته،، وبعد</div>
+
+        <div class="subject-container">
+            <div class="subject-line">الموضوع: ${$('subject').value}</div>
+        </div>
+
+        <div class="body-content">
+            ${$('bodyText').value.replace(/\n/g, '<br>')}
+            <br><br>
+            وتقبلوا منا فائق الاحترام والتقدير،،
+        </div>
+
+        <div class="signature-wrap">
+            <div class="signature-box">
+                <div style="font-weight:bold">${$('signName').value}</div>
+                <br><br>
+                __________________
+            </div>
+        </div>
+
+        <div class="attachments-section" style="${attachments.length > 0 ? '' : 'display:none'}">
+            <b>المرفقات:</b><br>
+            ${attHtml}
+        </div>
+    `;
+}
+
+const ids = ['dateH', 'dateM', 'docNum', 'recipient', 'subject', 'bodyText', 'signName'];
+ids.forEach(id => $(id).addEventListener('input', updateDoc));
+
+$('btnPDF').onclick = async () => {
+    const canvas = await html2canvas($('page'), { scale: 3 });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+    pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+    pdf.save("كتاب_رسمي.pdf");
+};
+
+window.onload = () => { renderControls(); updateDoc(); };
+</script>
+
+</body>
+</html>
