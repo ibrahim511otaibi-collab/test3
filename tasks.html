@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظمة التكاليف - مركز الفروانية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap');
+        body { font-family: 'Noto Sans Arabic', sans-serif; background-color: #f8fafc; }
+        .primary-bg { background-color: #097834; }
+        .secondary-bg { background-color: #c7ac25; }
+        .gold-text { color: #c7ac25; }
+        .card-shadow { box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body class="pb-10">
+
+    <!-- الهيدر الموحد -->
+    <header class="primary-bg text-white p-6 rounded-b-[2.5rem] shadow-xl text-center mb-8">
+        <h1 class="text-2xl md:text-3xl font-black">منظمة التكاليف الإدارية</h1>
+        <p class="text-sm opacity-90 mt-2">مركز محافظة الفروانية - جمعية إحياء التراث</p>
+    </header>
+
+    <div class="max-w-4xl mx-auto px-4 space-y-8">
+        
+        <!-- نموذج إصدار التكليف -->
+        <div class="bg-white rounded-3xl p-6 card-shadow border border-gray-100">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <i class="fas fa-plus-circle text-[#c7ac25]"></i> إصدار تكليف جديد
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-600 mb-1">جهة طلب التكليف (المسؤول):</label>
+                    <input type="text" id="requester" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-green-600 transition" placeholder="اكتب اسمك">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-600 mb-1">الموظف المكلَّف:</label>
+                    <input type="text" id="employee" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-green-600 transition" placeholder="اسم الموظف">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-gray-600 mb-1">وصف المهمة المطلوبة:</label>
+                    <textarea id="task" rows="3" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-green-600 transition" placeholder="اشرح الشغل بوضوح..."></textarea>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-gray-600 mb-1">آخر موعد للإنجاز:</label>
+                    <input type="date" id="deadline" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-green-600 transition">
+                </div>
+            </div>
+
+            <button onclick="saveAssignment()" id="saveBtn" class="w-full mt-6 primary-bg text-white p-4 rounded-2xl font-bold text-lg hover:bg-green-800 transition shadow-lg flex items-center justify-center gap-2">
+                <i class="fas fa-paper-plane"></i> حفظ وإرسال عبر الواتساب
+            </button>
+        </div>
+
+        <!-- جدول المتابعة (الرد والنتائج) -->
+        <div class="bg-white rounded-3xl p-6 card-shadow border border-gray-100 overflow-hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <i class="fas fa-tasks text-[#c7ac25]"></i> سجل متابعة التكاليف
+            </h2>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-right border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-600 text-sm">
+                            <th class="p-4 border-b">الموظف</th>
+                            <th class="p-4 border-b">المهمة</th>
+                            <th class="p-4 border-b">الحالة</th>
+                            <th class="p-4 border-b">الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignmentsContainer">
+                        <!-- تظهر البيانات هنا -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="loader" class="text-center py-10 text-gray-400">جاري تحميل البيانات...</div>
+        </div>
+    </div>
+
+    <script>
+        const scriptURL = "https://script.google.com/macros/s/AKfycbykAmLMHctwiICiFLtfZOPIjULYXX-joqk66BtK_RkqiOkhmPKkj0QSmRMXSqAFZza7/exec";
+
+        // 1. وظيفة حفظ التكليف
+        async function saveAssignment() {
+            const requester = document.getElementById('requester').value;
+            const employee = document.getElementById('employee').value;
+            const task = document.getElementById('task').value;
+            const deadline = document.getElementById('deadline').value;
+            const id = "T-" + Math.floor(1000 + Math.random() * 9000);
+
+            if (!requester || !employee || !task) { 
+                alert("الرجاء تعبئة البيانات الأساسية"); 
+                return; 
+            }
+
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+
+            const payload = { id, requester, employee, task, deadline };
+
+            try {
+                // إرسال البيانات لقاعدة البيانات (Google Sheets)
+                await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                
+                // تجهيز رسالة الواتساب الرسمية
+                const msg = `*تكليف عمل رسمي - مركز الفروانية*\n\n*رقم التكليف:* ${id}\n*من:* ${requester}\n*إلى:* ${employee}\n*المهمة:* ${task}\n*موعد التسليم:* ${deadline}\n\n_يرجى مراجعة البوابة لتحديث حالة الإنجاز._`;
+                
+                // توجيه للواتساب
+                window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                
+                // تصفير الخانات
+                document.getElementById('task').value = "";
+                loadAssignments(); // تحديث الجدول
+            } catch (e) {
+                alert("حدث خطأ في الاتصال");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> حفظ وإرسال عبر الواتساب';
+            }
+        }
+
+        // 2. وظيفة جلب البيانات من الجدول
+        async function loadAssignments() {
+            try {
+                const res = await fetch(scriptURL);
+                const data = await res.json();
+                const container = document.getElementById('assignmentsContainer');
+                const loader = document.getElementById('loader');
+                
+                loader.style.display = 'none';
+                container.innerHTML = data.reverse().slice(0, 10).map(a => `
+                    <tr class="border-b hover:bg-gray-50 transition">
+                        <td class="p-4 font-bold text-gray-700">${a.employee}</td>
+                        <td class="p-4 text-sm text-gray-600">${a.task}</td>
+                        <td class="p-4">
+                            <span class="px-3 py-1 rounded-full text-[10px] font-bold ${a.status.includes('تم') ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
+                                ${a.status}
+                            </span>
+                        </td>
+                        <td class="p-4">
+                            ${a.status.includes('تم') ? 
+                                '<i class="fas fa-check-double text-green-500"></i>' : 
+                                `<button onclick="completeTask('${a.id}')" class="text-xs bg-gray-100 hover:bg-green-600 hover:text-white px-2 py-1 rounded-lg transition">تم الإنجاز؟</button>`
+                            }
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                document.getElementById('loader').innerText = "لا توجد بيانات حالياً";
+            }
+        }
+
+        // 3. وظيفة رد الموظف (تم الإنجاز)
+        async function completeTask(id) {
+            if(!confirm("هل تأكد إتمام المهمة؟")) return;
+            
+            try {
+                const payload = { id: id, action: "updateStatus" };
+                await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                alert("كفو! تم تسجيل إنجاز المهمة بنجاح ✅");
+                setTimeout(loadAssignments, 2000); // تحديث الجدول بعد ثانيتين
+            } catch (e) {
+                alert("خطأ في التحديث");
+            }
+        }
+
+        window.onload = loadAssignments;
+    </script>
+</body>
+</html>
+
