@@ -1,175 +1,353 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظمة التكاليف - مركز الفروانية</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap');
-        body { font-family: 'Noto Sans Arabic', sans-serif; background-color: #f8fafc; }
-        .primary-bg { background-color: #097834; }
-        .secondary-bg { background-color: #c7ac25; }
-        .gold-text { color: #c7ac25; }
-        .card-shadow { box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نظام التكاليف</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background: #f7faf8;
+    }
+    .primary-bg {
+      background: #097834;
+    }
+    .primary-text {
+      color: #097834;
+    }
+    .soft-card {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+  </style>
 </head>
-<body class="pb-10">
+<body>
+  <div class="min-h-screen py-8 px-4">
+    <div class="max-w-4xl mx-auto bg-white rounded-3xl soft-card overflow-hidden border border-gray-100">
+      <div class="primary-bg text-white p-6">
+        <h1 class="text-2xl font-extrabold">نظام التكاليف</h1>
+        <p class="text-sm mt-2 opacity-90">صفحة واحدة للمدير والموظف</p>
+      </div>
 
-    <!-- الهيدر الموحد -->
-    <header class="primary-bg text-white p-6 rounded-b-[2.5rem] shadow-xl text-center mb-8">
-        <h1 class="text-2xl md:text-3xl font-black">منظمة التكاليف الإدارية</h1>
-        <p class="text-sm opacity-90 mt-2">مركز محافظة الفروانية - جمعية إحياء التراث</p>
-    </header>
+      <div class="p-6">
+        <!-- قسم المدير -->
+        <div id="managerSection" class="space-y-6 hidden">
+          <div class="bg-green-50 border border-green-100 rounded-2xl p-4 text-green-800 text-sm">
+            من هنا تقدر تنشئ التكليف، وبعد الحفظ يتحول مباشرة للواتساب برسالة جاهزة فيها رابط رد الموظف.
+          </div>
 
-    <div class="max-w-4xl mx-auto px-4 space-y-8">
-        
-        <!-- نموذج إصدار التكليف -->
-        <div class="bg-white rounded-3xl p-6 card-shadow border border-gray-100">
-            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <i class="fas fa-plus-circle text-[#c7ac25]"></i> إصدار تكليف جديد
-            </h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-bold text-gray-600 mb-1">جهة طلب التكليف (المسؤول):</label>
-                    <input type="text" id="requester" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-green-600 transition" placeholder="اكتب اسمك">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-600 mb-1">الموظف المكلَّف:</label>
-                    <input type="text" id="employee" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-green-600 transition" placeholder="اسم الموظف">
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-bold text-gray-600 mb-1">وصف المهمة المطلوبة:</label>
-                    <textarea id="task" rows="3" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-green-600 transition" placeholder="اشرح الشغل بوضوح..."></textarea>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-bold text-gray-600 mb-1">آخر موعد للإنجاز:</label>
-                    <input type="date" id="deadline" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-green-600 transition">
-                </div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold mb-2">اسم الجهة الطالبة</label>
+              <input id="requesterName" type="text" class="w-full border border-gray-200 rounded-2xl p-4" placeholder="اكتب الاسم" />
             </div>
 
-            <button onclick="saveAssignment()" id="saveBtn" class="w-full mt-6 primary-bg text-white p-4 rounded-2xl font-bold text-lg hover:bg-green-800 transition shadow-lg flex items-center justify-center gap-2">
-                <i class="fas fa-paper-plane"></i> حفظ وإرسال عبر الواتساب
+            <div>
+              <label class="block font-bold mb-2">اسم الموظف المكلف</label>
+              <input id="employeeName" type="text" class="w-full border border-gray-200 rounded-2xl p-4" placeholder="اكتب الاسم" />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block font-bold mb-2">تفاصيل التكليف</label>
+              <textarea id="taskDetails" rows="6" class="w-full border border-gray-200 rounded-2xl p-4" placeholder="اكتب تفاصيل التكليف بشكل واضح"></textarea>
+            </div>
+
+            <div>
+              <label class="block font-bold mb-2">آخر موعد</label>
+              <input id="dueDate" type="date" class="w-full border border-gray-200 rounded-2xl p-4" />
+            </div>
+          </div>
+
+          <button id="createTaskBtn" type="button" class="w-full primary-bg text-white rounded-2xl py-4 font-bold text-lg hover:opacity-95 transition">
+            حفظ وإرسال للواتساب
+          </button>
+
+          <div id="managerMessage" class="hidden rounded-2xl p-4 text-sm"></div>
+        </div>
+
+        <!-- قسم الموظف -->
+        <div id="employeeSection" class="space-y-6 hidden">
+          <div id="loadingBox" class="text-center text-gray-500 py-8">جاري تحميل بيانات التكليف...</div>
+
+          <div id="taskBox" class="hidden space-y-5">
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="bg-gray-50 rounded-2xl p-4">
+                <div class="text-sm text-gray-500">رقم التكليف</div>
+                <div id="taskIdText" class="font-bold text-lg primary-text"></div>
+              </div>
+
+              <div class="bg-gray-50 rounded-2xl p-4">
+                <div class="text-sm text-gray-500">حالة التكليف</div>
+                <div id="taskStatusText" class="font-bold text-lg"></div>
+              </div>
+
+              <div class="bg-gray-50 rounded-2xl p-4">
+                <div class="text-sm text-gray-500">اسم الجهة الطالبة</div>
+                <div id="requesterNameText" class="font-bold"></div>
+              </div>
+
+              <div class="bg-gray-50 rounded-2xl p-4">
+                <div class="text-sm text-gray-500">اسم الموظف المكلف</div>
+                <div id="employeeNameText" class="font-bold"></div>
+              </div>
+
+              <div class="bg-gray-50 rounded-2xl p-4 md:col-span-2">
+                <div class="text-sm text-gray-500">تفاصيل التكليف</div>
+                <div id="taskDetailsText" class="font-bold leading-8 whitespace-pre-wrap"></div>
+              </div>
+
+              <div class="bg-gray-50 rounded-2xl p-4">
+                <div class="text-sm text-gray-500">آخر موعد</div>
+                <div id="dueDateText" class="font-bold"></div>
+              </div>
+            </div>
+
+            <div class="border-t pt-6">
+              <label class="block font-bold mb-2">رد الموظف</label>
+              <textarea id="replyText" rows="6" class="w-full border border-gray-200 rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-green-700" placeholder="اكتب الرد هنا"></textarea>
+            </div>
+
+            <div>
+              <label class="block font-bold mb-2">إرفاق ملف</label>
+              <input id="fileInput" type="file" class="w-full border border-gray-200 rounded-2xl p-3 bg-white" />
+              <div id="fileNameText" class="text-sm text-gray-500 mt-2"></div>
+              <div class="text-xs text-gray-400 mt-1">المرفقات المناسبة: صور، PDF، Word، Excel</div>
+            </div>
+
+            <button id="submitReplyBtn" type="button" class="w-full primary-bg text-white rounded-2xl py-4 font-bold text-lg hover:opacity-95 transition">
+              إرسال الرد
             </button>
-        </div>
 
-        <!-- جدول المتابعة (الرد والنتائج) -->
-        <div class="bg-white rounded-3xl p-6 card-shadow border border-gray-100 overflow-hidden">
-            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <i class="fas fa-tasks text-[#c7ac25]"></i> سجل متابعة التكاليف
-            </h2>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 text-gray-600 text-sm">
-                            <th class="p-4 border-b">الموظف</th>
-                            <th class="p-4 border-b">المهمة</th>
-                            <th class="p-4 border-b">الحالة</th>
-                            <th class="p-4 border-b">الإجراء</th>
-                        </tr>
-                    </thead>
-                    <tbody id="assignmentsContainer">
-                        <!-- تظهر البيانات هنا -->
-                    </tbody>
-                </table>
-            </div>
-            <div id="loader" class="text-center py-10 text-gray-400">جاري تحميل البيانات...</div>
+            <div id="employeeMessage" class="hidden rounded-2xl p-4 text-sm"></div>
+          </div>
+
+          <div id="errorBox" class="hidden bg-red-50 text-red-700 p-4 rounded-2xl"></div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        const scriptURL = "https://script.google.com/macros/s/AKfycbykAmLMHctwiICiFLtfZOPIjULYXX-joqk66BtK_RkqiOkhmPKkj0QSmRMXSqAFZza7/exec";
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyZDfTUZFucwgs_n35UZU6-tQcwXYZK2KIW5Hw5TU7xvhJ8SB1O5eFC_wtjUS0jfnwD/exec';
+    const params = new URLSearchParams(window.location.search);
+    const taskId = params.get('id');
 
-        // 1. وظيفة حفظ التكليف
-        async function saveAssignment() {
-            const requester = document.getElementById('requester').value;
-            const employee = document.getElementById('employee').value;
-            const task = document.getElementById('task').value;
-            const deadline = document.getElementById('deadline').value;
-            const id = "T-" + Math.floor(1000 + Math.random() * 9000);
+    const managerSection = document.getElementById('managerSection');
+    const employeeSection = document.getElementById('employeeSection');
 
-            if (!requester || !employee || !task) { 
-                alert("الرجاء تعبئة البيانات الأساسية"); 
-                return; 
-            }
+    if (taskId) {
+      employeeSection.classList.remove('hidden');
+      loadTask();
+    } else {
+      managerSection.classList.remove('hidden');
+    }
 
-            const btn = document.getElementById('saveBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+    function showBox(id, text, type) {
+      const box = document.getElementById(id);
+      box.classList.remove('hidden');
+      box.textContent = text;
 
-            const payload = { id, requester, employee, task, deadline };
+      if (type === 'success') {
+        box.className = 'rounded-2xl p-4 text-sm bg-green-50 text-green-700';
+      } else {
+        box.className = 'rounded-2xl p-4 text-sm bg-red-50 text-red-700';
+      }
+    }
 
-            try {
-                // إرسال البيانات لقاعدة البيانات (Google Sheets)
-                await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                
-                // تجهيز رسالة الواتساب الرسمية
-                const msg = `*تكليف عمل رسمي - مركز الفروانية*\n\n*رقم التكليف:* ${id}\n*من:* ${requester}\n*إلى:* ${employee}\n*المهمة:* ${task}\n*موعد التسليم:* ${deadline}\n\n_يرجى مراجعة البوابة لتحديث حالة الإنجاز._`;
-                
-                // توجيه للواتساب
-                window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-                
-                // تصفير الخانات
-                document.getElementById('task').value = "";
-                loadAssignments(); // تحديث الجدول
-            } catch (e) {
-                alert("حدث خطأ في الاتصال");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane"></i> حفظ وإرسال عبر الواتساب';
-            }
+    function generateTaskId() {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      return 'TASK-' +
+        now.getFullYear() +
+        pad(now.getMonth() + 1) +
+        pad(now.getDate()) + '-' +
+        pad(now.getHours()) +
+        pad(now.getMinutes()) +
+        pad(now.getSeconds());
+    }
+
+    async function createTask() {
+      const requesterName = document.getElementById('requesterName').value.trim();
+      const employeeName = document.getElementById('employeeName').value.trim();
+      const taskDetails = document.getElementById('taskDetails').value.trim();
+      const dueDate = document.getElementById('dueDate').value;
+      const btn = document.getElementById('createTaskBtn');
+
+      if (!requesterName || !employeeName || !taskDetails) {
+        showBox('managerMessage', 'اكمل البيانات الأساسية', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'جاري الحفظ...';
+
+      try {
+        const newTaskId = generateTaskId();
+        const taskLink = window.location.origin + window.location.pathname + '?id=' + encodeURIComponent(newTaskId);
+
+        const payload = {
+          action: 'createTask',
+          taskId: newTaskId,
+          requesterName: requesterName,
+          employeeName: employeeName,
+          taskDetails: taskDetails,
+          dueDate: dueDate,
+          taskLink: taskLink
+        };
+
+        const response = await fetch(scriptURL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          showBox('managerMessage', result.message || 'ما تم حفظ التكليف', 'error');
+          btn.disabled = false;
+          btn.textContent = 'حفظ وإرسال للواتساب';
+          return;
         }
 
-        // 2. وظيفة جلب البيانات من الجدول
-        async function loadAssignments() {
-            try {
-                const res = await fetch(scriptURL);
-                const data = await res.json();
-                const container = document.getElementById('assignmentsContainer');
-                const loader = document.getElementById('loader');
-                
-                loader.style.display = 'none';
-                container.innerHTML = data.reverse().slice(0, 10).map(a => `
-                    <tr class="border-b hover:bg-gray-50 transition">
-                        <td class="p-4 font-bold text-gray-700">${a.employee}</td>
-                        <td class="p-4 text-sm text-gray-600">${a.task}</td>
-                        <td class="p-4">
-                            <span class="px-3 py-1 rounded-full text-[10px] font-bold ${a.status.includes('تم') ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
-                                ${a.status}
-                            </span>
-                        </td>
-                        <td class="p-4">
-                            ${a.status.includes('تم') ? 
-                                '<i class="fas fa-check-double text-green-500"></i>' : 
-                                `<button onclick="completeTask('${a.id}')" class="text-xs bg-gray-100 hover:bg-green-600 hover:text-white px-2 py-1 rounded-lg transition">تم الإنجاز؟</button>`
-                            }
-                        </td>
-                    </tr>
-                `).join('');
-            } catch (e) {
-                document.getElementById('loader').innerText = "لا توجد بيانات حالياً";
-            }
+        const messageText =
+          'السلام عليكم\n' +
+          'تم إصدار تكليف جديد لك.\n\n' +
+          'رقم التكليف: ' + newTaskId + '\n' +
+          'الجهة الطالبة: ' + requesterName + '\n' +
+          'اسم الموظف: ' + employeeName + '\n' +
+          'تفاصيل التكليف: ' + taskDetails + '\n' +
+          'آخر موعد: ' + (dueDate || '-') + '\n\n' +
+          'رابط الرد على التكليف:\n' +
+          taskLink;
+
+        showBox('managerMessage', 'تم حفظ التكليف، وجاري تحويلك إلى الواتساب', 'success');
+        btn.textContent = 'تم الحفظ';
+
+        setTimeout(() => {
+          window.location.href = 'https://wa.me/?text=' + encodeURIComponent(messageText);
+        }, 300);
+
+      } catch (error) {
+        showBox('managerMessage', 'صار خطأ أثناء الحفظ أو الربط مع السكربت', 'error');
+        btn.disabled = false;
+        btn.textContent = 'حفظ وإرسال للواتساب';
+        console.error(error);
+      }
+    }
+
+    async function loadTask() {
+      const loadingBox = document.getElementById('loadingBox');
+      const taskBox = document.getElementById('taskBox');
+      const errorBox = document.getElementById('errorBox');
+
+      try {
+        const response = await fetch(scriptURL + '?action=getTask&taskId=' + encodeURIComponent(taskId));
+        const data = await response.json();
+
+        if (!data.success || !data.task) {
+          loadingBox.classList.add('hidden');
+          errorBox.classList.remove('hidden');
+          errorBox.textContent = 'التكليف غير موجود أو الرابط غير صحيح';
+          return;
         }
 
-        // 3. وظيفة رد الموظف (تم الإنجاز)
-        async function completeTask(id) {
-            if(!confirm("هل تأكد إتمام المهمة؟")) return;
-            
-            try {
-                const payload = { id: id, action: "updateStatus" };
-                await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                alert("كفو! تم تسجيل إنجاز المهمة بنجاح ✅");
-                setTimeout(loadAssignments, 2000); // تحديث الجدول بعد ثانيتين
-            } catch (e) {
-                alert("خطأ في التحديث");
-            }
+        const task = data.task;
+
+        loadingBox.classList.add('hidden');
+        taskBox.classList.remove('hidden');
+
+        document.getElementById('taskIdText').textContent = task.taskId || '-';
+        document.getElementById('taskStatusText').textContent = task.taskStatus || '-';
+        document.getElementById('requesterNameText').textContent = task.requesterName || '-';
+        document.getElementById('employeeNameText').textContent = task.employeeName || '-';
+        document.getElementById('taskDetailsText').textContent = task.taskDetails || '-';
+        document.getElementById('dueDateText').textContent = task.dueDate || '-';
+
+      } catch (error) {
+        loadingBox.classList.add('hidden');
+        errorBox.classList.remove('hidden');
+        errorBox.textContent = 'صار خطأ أثناء تحميل بيانات التكليف';
+        console.error(error);
+      }
+    }
+
+    let selectedFile = null;
+
+    document.getElementById('fileInput')?.addEventListener('change', function () {
+      selectedFile = this.files[0] || null;
+      document.getElementById('fileNameText').textContent = selectedFile ? ('الملف المختار: ' + selectedFile.name) : '';
+    });
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function submitReply() {
+      const replyText = document.getElementById('replyText').value.trim();
+      const btn = document.getElementById('submitReplyBtn');
+
+      if (!replyText && !selectedFile) {
+        showBox('employeeMessage', 'اكتب رد أو ارفع ملف على الأقل', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'جاري الإرسال...';
+
+      try {
+        const payload = {
+          action: 'submitReply',
+          taskId: taskId,
+          replyText: replyText
+        };
+
+        if (selectedFile) {
+          const base64Data = await fileToBase64(selectedFile);
+          payload.fileBase64 = base64Data;
+          payload.fileName = selectedFile.name;
+          payload.mimeType = selectedFile.type || 'application/octet-stream';
         }
 
-        window.onload = loadAssignments;
-    </script>
+        const response = await fetch(scriptURL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showBox('employeeMessage', 'تم إرسال الرد بنجاح', 'success');
+          btn.textContent = 'تم الإرسال';
+        } else {
+          showBox('employeeMessage', result.message || 'تعذر إرسال الرد', 'error');
+          btn.disabled = false;
+          btn.textContent = 'إرسال الرد';
+        }
+
+      } catch (error) {
+        showBox('employeeMessage', 'صار خطأ أثناء الإرسال', 'error');
+        btn.disabled = false;
+        btn.textContent = 'إرسال الرد';
+        console.error(error);
+      }
+    }
+
+    document.getElementById('createTaskBtn')?.addEventListener('click', createTask);
+    document.getElementById('submitReplyBtn')?.addEventListener('click', submitReply);
+  </script>
 </body>
 </html>
-
