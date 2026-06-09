@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة التكاليف</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#097834',
+                        secondary: '#c7ac25',
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans Arabic"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Noto Sans Arabic', sans-serif; background: #f4f7f6; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 24px; box-shadow: 0 10px 40px rgba(9, 120, 52, 0.08); border: 1px solid rgba(9, 120, 52, 0.1); }
+        .kanban-col { min-height: 200px; }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #c7ac25; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #097834; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto glass-card overflow-hidden">
+        
+        <!-- Header -->
+        <div class="bg-primary text-white p-6 md:p-8 flex flex-col items-center justify-center relative overflow-hidden text-center rounded-b-3xl mb-4">
+            <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+            
+            <div class="relative z-10 w-full flex justify-between items-start">
+                <div class="w-24 flex justify-start">
+                    <button onclick="globalGoBack()" id="globalBackBtn" class="hidden bg-white/20 hover:bg-white/30 transition px-4 py-2 rounded-xl text-sm font-bold backdrop-blur-md">
+                        رجوع
+                    </button>
+                </div>
+                <div class="flex flex-col items-center justify-center flex-1">
+                    <h1 class="text-3xl md:text-4xl font-extrabold flex items-center justify-center gap-3">
+                        <span class="text-secondary text-4xl">◓</span> بوابة التكليف الذكي
+                    </h1>
+                    <div class="flex flex-col items-center mt-3 space-y-1">
+                        <p class="text-base md:text-lg font-bold text-white opacity-95">جمعية إحياء التراث الإسلامي - مركز محافظة الفروانية</p>
+                        <p class="text-sm font-bold text-secondary opacity-90">تم بواسطة / قسم ضبط الجودة</p>
+                    </div>
+                </div>
+                <div class="w-24 flex justify-end">
+                    <button onclick="logout()" id="logoutBtn" class="hidden bg-white/20 hover:bg-white/30 transition px-4 py-2 rounded-xl text-sm font-bold backdrop-blur-md">
+                        تسجيل الخروج
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 md:p-8">
+            
+            <!-- Loading Indicator -->
+            <div id="globalLoading" class="hidden py-12 text-center text-primary font-bold animate-pulse">
+                جاري التحميل، يرجى الانتظار...
+            </div>
+
+            <!-- Login Section -->
+            <div id="loginSection" class="max-w-5xl mx-auto py-12 hidden grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                
+                <!-- Employee Login (Right Side in RTL) -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border-2 border-primary relative overflow-hidden">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-extrabold text-primary mb-2">بوابة الموظفين</h2>
+                        <p class="text-gray-500 text-sm">أدخل رقمك الوظيفي لمتابعة تكاليفك</p>
+                    </div>
+                    <div class="space-y-4">
+                        <input type="text" id="empIdInput" onkeypress="if(event.key === 'Enter') verifyEmployee()" class="w-full bg-gray-50 border-2 border-gray-200 focus:border-primary rounded-xl p-4 text-center text-xl tracking-widest font-bold outline-none transition" placeholder="الرقم الوظيفي">
+                        <button onclick="verifyEmployee()" class="w-full bg-primary hover:bg-green-800 text-white font-extrabold rounded-xl py-4 transition shadow-lg shadow-green-900/20 text-lg">
+                            تسجيل الدخول
+                        </button>
+                        <p id="empLoginError" class="text-red-500 text-center text-sm font-bold hidden">الرقم الوظيفي غير صحيح!</p>
+                    </div>
+                </div>
+
+                <!-- Manager Login (Left Side in RTL) -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border-2 border-primary relative overflow-hidden">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-extrabold text-primary mb-2">بوابة دخول الإدارة</h2>
+                        <p class="text-gray-500 text-sm">أدخل رمز المرور للوصول للوحة التحكم</p>
+                    </div>
+                    <div class="space-y-4">
+                        <input type="password" id="adminPin" onkeypress="if(event.key === 'Enter') verifyPin()" class="w-full bg-gray-50 border-2 border-gray-200 focus:border-primary rounded-xl p-4 text-center text-2xl tracking-[1em] font-bold outline-none transition" placeholder="PIN" maxlength="4">
+                        <button onclick="verifyPin()" class="w-full bg-primary hover:bg-green-800 text-white font-extrabold rounded-xl py-4 transition shadow-lg shadow-green-900/20 text-lg">
+                            تسجيل الدخول
+                        </button>
+                        <p id="loginError" class="text-red-500 text-center text-sm font-bold hidden">الرمز غير صحيح!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employee Dashboard Section -->
+            <div id="employeeDashboardSection" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex justify-between items-center flex-wrap gap-4">
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-gray-800">أهلاً بك، <span id="empWelcomeName" class="text-secondary"></span> 👋</h2>
+                        <p class="text-gray-500 mt-1">هنا تجد جميع التكاليف المسندة إليك</p>
+                    </div>
+                    <button onclick="logout()" class="bg-gray-100 hover:bg-red-50 hover:text-red-600 text-gray-700 px-6 py-3 rounded-xl font-bold transition">
+                        تسجيل الخروج
+                    </button>
+                </div>
+
+                <!-- Employee Stats Cards -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 text-center">
+                        <div class="text-3xl font-extrabold text-primary mb-1" id="empStatTotal">0</div>
+                        <div class="text-xs font-bold text-gray-500">إجمالي المهام 📁</div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-2xl shadow-sm border border-green-100 text-center">
+                        <div class="text-3xl font-extrabold text-green-700 mb-1" id="empStatCompleted">0</div>
+                        <div class="text-xs font-bold text-green-700">المهام المنجزة ✅</div>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-2xl shadow-sm border border-blue-100 text-center">
+                        <div class="text-3xl font-extrabold text-blue-700 mb-1" id="empStatPending">0</div>
+                        <div class="text-xs font-bold text-blue-700">المهام المعلقة ⏳</div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-600 text-sm">
+                                    <th class="p-4 font-bold border-b">التكليف</th>
+                                    <th class="p-4 font-bold border-b text-center">آخر موعد للتسليم</th>
+                                    <th class="p-4 font-bold border-b text-center">الحالة</th>
+                                    <th class="p-4 font-bold border-b text-center">مؤشر الإنجاز</th>
+                                    <th class="p-4 font-bold border-b text-center">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="empDashboardTableBody" class="divide-y divide-gray-100">
+                                <tr><td colspan="5" class="p-8 text-center text-secondary font-bold animate-pulse">جاري جلب التكاليف الخاصة بك...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manager Section -->
+            <div id="managerSection" class="hidden space-y-8">
+                
+                <!-- Tab Navigation -->
+                <div class="flex gap-4 border-b pb-4">
+                    <button onclick="switchManagerTab('create')" id="tabCreate" class="font-bold text-lg text-primary border-b-4 border-primary pb-2 px-2">إنشاء تكليف</button>
+                    <button onclick="switchManagerTab('dashboard')" id="tabDashboard" class="font-bold text-lg text-gray-400 hover:text-primary transition pb-2 px-2">لوحة المتابعة</button>
+                    <button onclick="switchManagerTab('report')" id="tabReport" class="font-bold text-lg text-gray-400 hover:text-primary transition pb-2 px-2">تقرير تقييم الإنجاز</button>
+                </div>
+
+                <!-- Create Task Tab -->
+                <div id="tabContentCreate" class="space-y-6">
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">الجهة الطالبة للتكليف <span class="text-red-500">*</span></label>
+                            <input id="requesterName" type="text" class="w-full bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl p-3 outline-none transition" placeholder="مثال: الموارد البشرية">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">عنوان التكليف <span class="text-red-500">*</span></label>
+                            <input id="taskTitle" type="text" class="w-full bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl p-3 outline-none transition" placeholder="مثال: إعداد التقرير المالي">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">الموظف المكلف <span class="text-red-500">*</span></label>
+                            <select id="employeeSelect" class="w-full bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl p-3 outline-none transition">
+                                <option value="">اختر الموظف...</option>
+                                <option value="96566695443|ابراهيم خليل مزهر">ابراهيم خليل مزهر</option>
+                                <option value="96566460464|عبدالله سالم مهوس">عبدالله سالم مهوس</option>
+                                <option value="96599582005|مشعل صالح الشمري">مشعل صالح الشمري</option>
+                                <option value="96597244213|لافي هجرس عبدالله">لافي هجرس عبدالله</option>
+                                <option value="96555963037|وليد محمد أحمد علي الهتاري">وليد محمد أحمد علي الهتاري</option>
+                                <option value="96599545705|سعود ماجد محسن">سعود ماجد محسن</option>
+                                <option value="96599807881|رسام عبدالله مضحي عبدالله">رسام عبدالله مضحي عبدالله</option>
+                                <option value="96598853383|علاء حسين سعيد حسين">علاء حسين سعيد حسين</option>
+                                <option value="96597915529|مشعل مضحي موسي">مشعل مضحي موسي</option>
+                                <option value="96597288577|محمد زين العابدين محمد سليم">محمد زين العابدين محمد سليم</option>
+                                <option value="96599497497|مساعد جمعة الشمري">مساعد جمعة الشمري</option>
+                                <option value="96597536333|احمد جبار نخيلان">احمد جبار نخيلان</option>
+                                <option value="96599222624|عقاب لافي جندار">عقاب لافي جندار</option>
+                                <option value="96598770453|عصام">عصام</option>
+                                <option value="96599096467|محمد ناظر خان محمد طاهر">محمد ناظر خان محمد طاهر</option>
+                                <option value="96555410444|وليد الفقيه">وليد الفقيه</option>
+                                <option value="96599501171|موسى حسانين محمد">موسى حسانين محمد</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">آخر موعد للتسليم <span class="text-red-500">*</span></label>
+                            <input id="taskDate" type="date" class="w-full bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl p-3 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">الأولوية</label>
+                            <select id="taskPriority" class="w-full bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl p-3 outline-none transition">
+                                <option value="عادي">عادي 🟢</option>
+                                <option value="هام">هام 🟡</option>
+                                <option value="عاجل">عاجل 🔴</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">إرفاق ملف (اختياري)</label>
+                            <input type="file" id="managerTaskFile" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition cursor-pointer">
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block font-bold text-gray-700 mb-2">تفاصيل التكليف <span class="text-red-500">*</span></label>
+                            <textarea id="taskDesc" rows="4" class="w-full bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl p-3 outline-none transition" placeholder="اكتب المطلوب بدقة..."></textarea>
+                        </div>
+                    </div>
+
+                    <button onclick="createTask()" id="btnCreate" class="w-full md:w-auto bg-primary hover:bg-green-800 text-white font-bold rounded-xl px-12 py-4 transition shadow-lg shadow-green-900/20 text-lg">
+                        اعتماد التكليف وإرساله في الواتساب
+                    </button>
+                    <div id="createMsg" class="hidden p-4 rounded-xl font-bold text-sm"></div>
+                </div>
+
+                <!-- Dashboard Tab -->
+                <div id="tabContentDashboard" class="hidden space-y-6">
+                    <!-- شريط الفلترة -->
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-wrap gap-4 items-center">
+                        <div class="flex-1 min-w-[200px]">
+                            <input type="text" id="dashSearch" oninput="filterDashboard()" placeholder="بحث باسم التكليف أو الرقم..." class="w-full bg-gray-50 rounded-xl border border-gray-200 p-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition">
+                        </div>
+                        <div class="w-full md:w-auto min-w-[150px]">
+                            <select id="dashFilterEmp" onchange="filterDashboard()" class="w-full bg-gray-50 rounded-xl border border-gray-200 p-3 outline-none focus:border-primary transition font-bold text-gray-700">
+                                <option value="">كل الموظفين</option>
+                            </select>
+                        </div>
+                        <div class="w-full md:w-auto min-w-[150px]">
+                            <select id="dashFilterStatus" onchange="filterDashboard()" class="w-full bg-gray-50 rounded-xl border border-gray-200 p-3 outline-none focus:border-primary transition font-bold text-gray-700">
+                                <option value="">كل الحالات</option>
+                                <option value="مرسل">مرسل (جديد)</option>
+                                <option value="جاري">جاري العمل</option>
+                                <option value="جاهز">جاهز للمراجعة</option>
+                                <option value="مرتجع للتعديل">مرتجع للتعديل</option>
+                                <option value="متوقف">متوقف / معتذر عنه</option>
+                                <option value="مغلق">مغلق ومُقيم</option>
+                                <option value="ملغي">ملغي من الإدارة</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-600 text-sm">
+                                    <th class="p-4 rounded-tr-xl font-bold">التكليف</th>
+                                    <th class="p-4 font-bold">الموظف</th>
+                                    <th class="p-4 font-bold text-center">الأولوية</th>
+                                    <th class="p-4 font-bold">الحالة</th>
+                                    <th class="p-4 font-bold">آخر موعد للتسليم</th>
+                                    <th class="p-4 font-bold text-center">إجراءات</th>
+                                    <th class="p-4 rounded-tl-xl font-bold text-center">مؤشر الإنجاز</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tasksTableBody" class="divide-y divide-gray-100">
+                                <tr><td colspan="5" class="p-8 text-center text-gray-500 font-bold">جاري جلب التكاليف من قاعدة البيانات...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Report Tab -->
+                <div id="tabContentReport" class="hidden space-y-6">
+                    <div class="flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <div class="flex items-center gap-4 w-full max-w-md">
+                            <label class="font-bold text-gray-700">الموظف:</label>
+                            <select id="reportEmployeeSelect" onchange="loadEmployeeReport()" class="flex-1 bg-white border border-gray-200 focus:border-primary rounded-xl p-3 outline-none">
+                                <option value="">اختر الموظف لعرض تقاريره...</option>
+                                <option value="أحمد محمد">أحمد محمد</option>
+                                <option value="خالد عبدالله">خالد عبدالله</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="exportToPDF()" class="bg-primary hover:bg-green-800 text-white px-6 py-3 rounded-xl font-bold transition flex items-center gap-2 shadow-lg shadow-green-900/20">
+                                <span>تصدير PDF</span> 📥
+                            </button>
+                            <button onclick="openStatsModal()" class="bg-white border border-gray-200 hover:bg-gray-100 text-gray-600 w-12 h-12 rounded-xl font-bold transition flex items-center justify-center shadow-sm" title="إحصائيات عامة">
+                                📊
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Printable Report Area -->
+                    <div id="reportPrintArea" class="bg-white border border-gray-200 p-8 rounded-2xl shadow-sm hidden">
+                        <div class="text-center mb-8 border-b pb-6">
+                            <h2 class="text-3xl font-extrabold text-primary mb-2">تقرير تقييم إنجاز التكاليف</h2>
+                            <p class="text-lg text-gray-600">الموظف: <span id="reportEmpName" class="font-bold text-secondary"></span></p>
+                            <p class="text-sm text-gray-400 mt-2" id="reportDate"></p>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-6 mb-8 text-center">
+                            <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                                <div class="text-xs font-bold text-green-600 mb-1">متوسط التقييم العام</div>
+                                <div id="reportAvgScore" class="text-2xl font-extrabold text-primary">0%</div>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                                <div class="text-xs font-bold text-blue-600 mb-1">إجمالي التكاليف</div>
+                                <div id="reportTotalTasks" class="text-2xl font-extrabold text-primary">0</div>
+                            </div>
+                            <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-100">
+                                <div class="text-xs font-bold text-yellow-600 mb-1">متوسط سرعة الإنجاز</div>
+                                <div id="reportAvgSpeed" class="text-2xl font-extrabold text-primary">0/30</div>
+                            </div>
+                        </div>
+
+                        <table class="w-full text-right border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-700">
+                                    <th class="p-3 border-b-2 font-bold">رقم التكليف</th>
+                                    <th class="p-3 border-b-2 font-bold">عنوان التكليف</th>
+                                    <th class="p-3 border-b-2 font-bold text-center">سرعة الرد (30)</th>
+                                    <th class="p-3 border-b-2 font-bold text-center">التقييم (70)</th>
+                                    <th class="p-3 border-b-2 font-bold text-center">الإجمالي</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody" class="divide-y divide-gray-100">
+                                <!-- Data injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Employee Section (Task Details) -->
+            <div id="employeeSection" class="hidden space-y-8">
+                
+                <div class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
+                    <h2 class="text-xl font-bold text-gray-400 mb-2">بيانات التكليف: <span id="empTaskTitle" class="text-primary text-2xl">العنوان</span></h2>
+                    
+                    <div class="flex flex-wrap gap-4 mb-4 mt-3">
+                        <div class="bg-blue-50 text-blue-700 px-4 py-2 rounded-xl text-sm font-bold border border-blue-100">
+                            الجهة الطالبة: <span id="empTaskRequester">...</span>
+                        </div>
+                        <div class="bg-red-50 text-red-700 px-4 py-2 rounded-xl text-sm font-bold border border-red-100">
+                            آخر موعد للتسليم: <span id="empTaskDueDate">...</span>
+                        </div>
+                        <div class="bg-yellow-50 text-yellow-700 px-4 py-2 rounded-xl text-sm font-bold border border-yellow-100">
+                            الأولوية: <span id="empTaskPriority">...</span>
+                        </div>
+                    </div>
+
+                    <p id="empTaskDesc" class="text-gray-700 leading-relaxed whitespace-pre-wrap bg-gray-50 p-4 rounded-xl border border-gray-100 mt-4">وصف التكليف يظهر هنا...</p>
+                    <p class="text-sm text-gray-400 mt-3 text-left">رقم التكليف: <span id="empTaskId">TASK-12345</span></p>
+                </div>
+
+                <!-- Timeline / Chat History for Employee -->
+                <div class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
+                    <h3 class="font-bold text-lg mb-4 text-primary">سجل الردود الزمني (Timeline)</h3>
+                    <div id="chatHistory" class="space-y-4 max-h-60 overflow-y-auto pr-2">
+                        <!-- Timeline bubbles -->
+                    </div>
+                </div>
+
+                <!-- Kanban Status & Mandatory Reply -->
+                <div class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
+                    <h3 class="font-bold text-lg mb-4">إرسال رد وتحديث الحالة</h3>
+                    
+                    <div class="space-y-4 mb-6">
+                        <label class="block font-bold text-gray-700">يرجى كتابة ردك أو تفاصيل الإنجاز/العائق (إجباري) <span class="text-red-500">*</span></label>
+                        <textarea id="empReplyMsg" rows="3" class="w-full bg-gray-50 border border-gray-200 focus:border-secondary rounded-xl p-3 outline-none transition" placeholder="مثال: جاري إعداد التقرير المطلوب..."></textarea>
+                        
+                        <div>
+                            <label class="block text-sm font-bold text-gray-600 mb-2">إرفاق ملف (اختياري)</label>
+                            <input type="file" id="empFile" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-secondary/10 file:text-secondary hover:file:bg-secondary/20 transition cursor-pointer">
+                        </div>
+                    </div>
+
+                    <h3 class="font-bold text-sm text-gray-500 mb-3">اختر الحالة لتأكيد وإرسال الرد:</h3>
+                    <div class="flex flex-wrap gap-3" id="kanbanButtons">
+                        <button onclick="setEmpStatusAndSubmit('جاري العمل')" class="flex-1 min-w-[120px] border-2 border-blue-200 bg-blue-50 text-blue-700 font-bold py-3 rounded-xl hover:bg-blue-100 transition focus:ring-2 focus:ring-blue-400">جاري العمل 🏃</button>
+                        <button onclick="setEmpStatusAndSubmit('متوقف لعائق')" class="flex-1 min-w-[120px] border-2 border-orange-200 bg-orange-50 text-orange-700 font-bold py-3 rounded-xl hover:bg-orange-100 transition focus:ring-2 focus:ring-orange-400">متوقف لعائق ✋</button>
+                        <button onclick="setEmpStatusAndSubmit('مرفوض/اعتذار')" class="flex-1 min-w-[120px] border-2 border-red-200 bg-red-50 text-red-700 font-bold py-3 rounded-xl hover:bg-red-100 transition focus:ring-2 focus:ring-red-400">اعتذار ❌</button>
+                        <button onclick="setEmpStatusAndSubmit('جاهز للمراجعة')" class="flex-1 min-w-[120px] border-2 border-green-200 bg-green-50 text-green-700 font-bold py-3 rounded-xl hover:bg-green-100 transition focus:ring-2 focus:ring-green-400">جاهز للمراجعة ✅</button>
+                    </div>
+                    
+                    <div id="replyMsg" class="hidden p-4 rounded-xl font-bold text-sm text-center mt-4"></div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- System Stats Modal -->
+    <div id="statsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl relative">
+            <button onclick="closeStatsModal()" class="absolute top-4 left-4 text-gray-400 hover:text-red-500 font-bold text-xl">&times;</button>
+            <h3 class="text-xl font-bold text-primary mb-6 flex items-center gap-2">📊 إحصائيات النظام</h3>
+            
+            <div class="space-y-4">
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <span class="font-bold text-gray-600">إجمالي التكاليف</span>
+                    <span class="text-xl font-extrabold text-primary">145</span>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-green-50 rounded-xl border border-green-100">
+                    <span class="font-bold text-green-700">المغلقة والمُقيمة</span>
+                    <span class="text-xl font-extrabold text-green-700">112</span>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-blue-50 rounded-xl border border-blue-100">
+                    <span class="font-bold text-blue-700">قيد العمل</span>
+                    <span class="text-xl font-extrabold text-blue-700">28</span>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-red-50 rounded-xl border border-red-100">
+                    <span class="font-bold text-red-700">متوقفة لعائق</span>
+                    <span class="text-xl font-extrabold text-red-700">5</span>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-yellow-50 rounded-xl border border-yellow-100">
+                    <span class="font-bold text-yellow-700">أداء المنظمة العام</span>
+                    <span class="text-xl font-extrabold text-secondary">87%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evaluation Modal -->
+    <div id="evalModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-2xl w-full shadow-2xl relative max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-start mb-4 border-b pb-4">
+                <h3 class="text-2xl font-bold text-primary">التقييم النهائي للتكليف</h3>
+                
+                <!-- Speed Auto Score -->
+                <div id="speedScoreDisplay" class="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-2 rounded-xl text-center">
+                    <div class="text-xs font-bold opacity-80 mb-1">سرعة الإنجاز الآلية</div>
+                    <div id="speedScoreText" class="text-2xl font-extrabold">30 <span class="text-sm">/ 30</span></div>
+                </div>
+            </div>
+            
+            <p class="text-sm text-gray-500 mb-6">يرجى الإجابة على الأسئلة التالية لتحديد نسبة الـ 70% المخصصة للمدير.</p>
+            
+            <div class="overflow-y-auto pr-2 space-y-4 mb-6" style="max-height: 40vh;">
+                <!-- Q1 -->
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">1. جودة المخرجات وتلبية المطلوب</label>
+                    <select id="q1" onchange="calculateLiveScore()" class="w-full bg-gray-50 border border-gray-200 focus:border-primary rounded-xl p-3 outline-none eval-select">
+                        <option value="10">ممتاز (10)</option>
+                        <option value="5">جيد (5)</option>
+                        <option value="0">ضعيف (0)</option>
+                    </select>
+                </div>
+                <!-- Q2 -->
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">2. الابتكار والقيمة المضافة</label>
+                    <select id="q2" onchange="calculateLiveScore()" class="w-full bg-gray-50 border border-gray-200 focus:border-primary rounded-xl p-3 outline-none eval-select">
+                        <option value="10">نعم (10)</option>
+                        <option value="0">لا (0)</option>
+                    </select>
+                </div>
+                <!-- Q3 -->
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">3. الدقة والخلو من الأخطاء</label>
+                    <select id="q3" onchange="calculateLiveScore()" class="w-full bg-gray-50 border border-gray-200 focus:border-primary rounded-xl p-3 outline-none eval-select">
+                        <option value="10">خالٍ تماماً (10)</option>
+                        <option value="5">أخطاء بسيطة (5)</option>
+                        <option value="0">مليء بالأخطاء (0)</option>
+                    </select>
+                </div>
+                <!-- Q4 -->
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">4. الالتزام بالتعليمات والهوية</label>
+                    <select id="q4" onchange="calculateLiveScore()" class="w-full bg-gray-50 border border-gray-200 focus:border-primary rounded-xl p-3 outline-none eval-select">
+                        <option value="10">التزام تام (10)</option>
+                        <option value="5">جزئياً (5)</option>
+                        <option value="0">لا (0)</option>
+                    </select>
+                </div>
+                <!-- Q5 -->
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">5. مستوى التواصل والمتابعة</label>
+                    <select id="q5" onchange="calculateLiveScore()" class="w-full bg-gray-50 border border-gray-200 focus:border-primary rounded-xl p-3 outline-none eval-select">
+                        <option value="10">ممتاز (10)</option>
+                        <option value="5">مقبول (5)</option>
+                        <option value="0">سيء/لم يتجاوب (0)</option>
+                    </select>
+                </div>
+                <!-- Q6 -->
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">6. الاعتمادية وحل العوائق</label>
+                    <select id="q6" onchange="calculateLiveScore()" class="w-full bg-gray-50 border border-gray-200 focus:border-primary rounded-xl p-3 outline-none eval-select">
+                        <option value="10">اعتمد على نفسه (10)</option>
+                        <option value="5">جزئياً (5)</option>
+                        <option value="0">أشغل الإدارة كثيراً (0)</option>
+                    </select>
+                </div>
+                <!-- Q7 -->
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">7. التقييم العام للجهد</label>
+                    <select id="q7" onchange="calculateLiveScore()" class="w-full bg-gray-50 border border-gray-200 focus:border-primary rounded-xl p-3 outline-none eval-select">
+                        <option value="10">جهد استثنائي (10)</option>
+                        <option value="5">جهد طبيعي (5)</option>
+                        <option value="0">جهد ضعيف (0)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mt-auto border-t pt-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="font-bold text-gray-500">النتيجة النهائية للموظف:</div>
+                    <div id="totalScoreDisplay" class="text-3xl font-extrabold text-primary">100%</div>
+                </div>
+                <div class="flex gap-3">
+                    <button id="btnSubmitEval" onclick="submitEvaluation()" class="flex-1 bg-primary hover:bg-green-800 text-white font-bold rounded-xl py-4 transition">اعتماد وإغلاق نهائي</button>
+                    <button onclick="closeEvalModal()" class="px-6 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl py-4 transition">إلغاء</button>
+                </div>
+                <div id="evalMsg" class="hidden p-4 rounded-xl font-bold text-sm mt-4 text-center"></div>
+            </div>
+        </div>
+    </div>
+    <!-- Manager Task Details Modal -->
+    <div id="managerTaskDetailsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-3xl w-full shadow-2xl relative max-h-[90vh] flex flex-col">
+            <button onclick="closeManagerTaskDetails()" class="absolute top-4 left-4 text-gray-400 hover:text-red-500 font-bold text-xl">&times;</button>
+            
+            <h2 class="text-2xl font-bold text-primary mb-2 border-b pb-4">تفاصيل التكليف</h2>
+            
+            <div class="bg-white p-6 rounded-2xl mb-6 shadow-[0_0_20px_rgba(9,120,52,0.08)] border-r-4 border-primary relative">
+                <div class="flex flex-wrap gap-3 mb-4">
+                    <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm font-bold border border-gray-200">الموظف: <span id="mngTaskEmployee">...</span></span>
+                    <span class="bg-red-50 text-red-700 px-3 py-1 rounded text-sm font-bold border border-red-100">آخر موعد للتسليم: <span id="mngTaskDueDate">...</span></span>
+                    <span class="bg-yellow-50 text-yellow-700 px-3 py-1 rounded text-sm font-bold border border-yellow-100">الأولوية: <span id="mngTaskPriority">...</span></span>
+                </div>
+                <div class="font-bold text-2xl text-gray-800 mb-3" id="mngTaskTitle">العنوان</div>
+                <div class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100" id="mngTaskDesc">التفاصيل</div>
+                <div class="text-xs text-gray-400 mt-4 text-left font-bold" id="mngTaskId">TASK-ID</div>
+            </div>
+
+            <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">السجل الزمني لردود الموظف</h3>
+            
+            <div id="mngTimeline" class="overflow-y-auto pr-2 flex-1 space-y-4 min-h-[200px] bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <!-- Timeline injected via JS -->
+            </div>
+            
+            <div id="mngRejectSection" class="mt-4 bg-red-50 p-4 rounded-xl border border-red-100 hidden">
+                <label class="block font-bold text-red-800 mb-2">ملاحظات التعديل (سيتم إرجاع التكليف للموظف وتغيير الحالة)</label>
+                <textarea id="mngRejectNote" rows="2" class="w-full rounded-lg border-red-200 p-3 outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 mb-2 font-medium" placeholder="اكتب النواقص أو الأخطاء التي يجب تعديلها..."></textarea>
+                <div class="flex gap-2 items-center">
+                    <button onclick="submitManagerRejection()" id="btnSubmitRejection" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition">تأكيد إرجاع التكليف</button>
+                    <button onclick="document.getElementById('mngRejectSection').classList.add('hidden')" class="text-gray-500 hover:text-gray-700 font-bold px-2 py-2 text-sm transition">إلغاء</button>
+                </div>
+                <div id="mngRejectMsg" class="hidden text-sm font-bold mt-2"></div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t flex flex-wrap justify-between items-center gap-3">
+                <div class="flex gap-2">
+                    <button id="btnShowReject" onclick="document.getElementById('mngRejectSection').classList.remove('hidden')" class="px-4 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-xl py-3 transition hidden">إعادة للموظف (تعديل)</button>
+                    <button id="btnCancelTask" onclick="cancelManagerTask()" class="px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl py-3 transition hidden">إلغاء التكليف ❌</button>
+                </div>
+                
+                <div class="flex gap-3 flex-1 justify-end">
+                    <button onclick="closeManagerTaskDetails()" class="px-6 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl py-3 transition">إغلاق النافذة</button>
+                    <button id="mngEvalBtn" class="px-6 bg-secondary hover:bg-yellow-600 text-white font-bold rounded-xl py-3 transition hidden">الانتقال للتقييم النهائي</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // منع اختيار تواريخ سابقة في نموذج إنشاء التكليف
+        window.onload = function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('taskDate').setAttribute('min', today);
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            
+            if (id) {
+                currentTaskId = id;
+                document.getElementById('employeeSection').classList.remove('hidden');
+                document.getElementById('globalBackBtn').classList.remove('hidden');
+                loadTaskData(id);
+            } else {
+                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('loginSection').classList.add('grid');
+            }
+        };
+
+        // CONFIG
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbw6MEO9aITFQ2woeU78QSQG7rjiUjEuDaHhjYjStGbWP1ySGLMz3d-CucY-0mofWUY/exec';
+        const ADMIN_PIN = '1234'; // رمز افتراضي للمدير
+        
+        const employeesData = [
+            { name: 'ابراهيم خليل مزهر', id: '400152', phone: '96566695443' },
+            { name: 'عبدالله سالم مهوس', id: '465154', phone: '96566460464' },
+            { name: 'مشعل صالح الشمري', id: '440103', phone: '96599582005' },
+            { name: 'لافي هجرس عبدالله', id: '435103', phone: '96597244213' },
+            { name: 'وليد محمد أحمد علي الهتاري', id: '325145', phone: '96555963037' },
+            { name: 'سعود ماجد محسن', id: '325137', phone: '96599545705' },
+            { name: 'رسام عبدالله مضحي عبدالله', id: '465113', phone: '96599807881' },
+            { name: 'علاء حسين سعيد حسين', id: '315125', phone: '96598853383' },
+            { name: 'مشعل مضحي موسي', id: '466103', phone: '96597915529' },
+            { name: 'محمد زين العابدين محمد سليم', id: '470125', phone: '96597288577' },
+            { name: 'مساعد جمعة الشمري', id: '325109', phone: '96599497497' },
+            { name: 'احمد جبار نخيلان', id: '315103', phone: '96597536333' },
+            { name: 'عقاب لافي جندار', id: '465104', phone: '96599222624' },
+            { name: 'عصام', id: '465133', phone: '96598770453' },
+            { name: 'محمد ناظر خان محمد طاهر', id: '400137', phone: '96599096467' },
+            { name: 'وليد الفقيه', id: '325143', phone: '96555410444' },
+            { name: 'موسى حسانين محمد', id: '315102', phone: '96599501171' }
+        ];
+
+        let currentTaskId = null;
+        let selectedStatus = null;
+        let globalTasks = []; // لحفظ التكاليف لفتحها في الشاشة المنبثقة
+        let loggedInEmployee = null; // الموظف المسجل دخوله
+
+        // Init
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            
+            if (id) {
+                currentTaskId = id;
+                document.getElementById('employeeSection').classList.remove('hidden');
+                loadTaskData(id);
+                if(localStorage.getItem('empId')) document.getElementById('logoutBtn').classList.remove('hidden');
+                return;
+            }
+
+            // التحقق من تسجيل الدخول السابق (تذكرني)
+            const adminLogged = localStorage.getItem('adminLoggedIn');
+            const savedEmpId = localStorage.getItem('empId');
+
+            if (adminLogged === 'true') {
+                document.getElementById('managerSection').classList.remove('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                switchManagerTab('Dashboard');
+            } else if (savedEmpId) {
+                const employee = employeesData.find(e => e.id === savedEmpId);
+                if (employee) {
+                    loggedInEmployee = employee;
+                    document.getElementById('employeeDashboardSection').classList.remove('hidden');
+                    document.getElementById('logoutBtn').classList.remove('hidden');
+                    document.getElementById('empWelcomeName').innerText = employee.name.split(' ')[0];
+                    loadEmployeeDashboardData();
+                } else {
+                    showLoginSection();
+                }
+            } else {
+                showLoginSection();
+            }
+        };
+
+        function showLoginSection() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('loginSection').classList.add('grid');
+        }
+
+        // --- Manager Functions ---
+        function verifyPin() {
+            const pin = document.getElementById('adminPin').value;
+            if (pin === ADMIN_PIN) {
+                localStorage.setItem('adminLoggedIn', 'true');
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('loginSection').classList.remove('grid');
+                document.getElementById('managerSection').classList.remove('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                switchManagerTab('Dashboard');
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('adminLoggedIn');
+            localStorage.removeItem('empId');
+            
+            document.getElementById('managerSection').classList.add('hidden');
+            document.getElementById('employeeDashboardSection').classList.add('hidden');
+            document.getElementById('employeeSection').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            showLoginSection();
+            
+            document.getElementById('adminPin').value = '';
+            document.getElementById('empIdInput').value = '';
+            loggedInEmployee = null;
+            currentTaskId = null;
+        }
+
+        // --- Employee Dashboard Functions ---
+        function verifyEmployee() {
+            const empId = document.getElementById('empIdInput').value.trim();
+            const errorMsg = document.getElementById('empLoginError');
+            
+            if (!empId) return;
+
+            const employee = employeesData.find(e => e.id === empId);
+            if (employee) {
+                errorMsg.classList.add('hidden');
+                loggedInEmployee = employee;
+                localStorage.setItem('empId', empId);
+                
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('loginSection').classList.remove('grid');
+                document.getElementById('employeeDashboardSection').classList.remove('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                document.getElementById('empWelcomeName').innerText = employee.name.split(' ')[0];
+
+                loadEmployeeDashboardData();
+            } else {
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        function loadEmployeeDashboardData() {
+            const tbody = document.getElementById('empDashboardTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-secondary font-bold animate-pulse">اشغل الإنتظار بالاستغفار لحين جلب البيانات...</td></tr>';
+            
+            fetch(scriptURL + '?action=list')
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    tbody.innerHTML = '';
+                    const myTasks = (data.tasks || []).filter(t => t.employeeName === loggedInEmployee.name && t.taskStatus !== 'ملغي');
+                    
+                    if(myTasks.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500 font-bold">لا يوجد تكاليف مسندة إليك حالياً.</td></tr>';
+                        return;
+                    }
+
+                    // إحصائيات الموظف
+                    let completed = 0;
+                    let pending = 0;
+                    myTasks.forEach(t => {
+                        if(t.taskStatus === 'جاهز للمراجعة' || t.taskStatus === 'مغلق ومُقيم') completed++;
+                        else pending++;
+                    });
+                    
+                    document.getElementById('empStatTotal').innerText = myTasks.length;
+                    document.getElementById('empStatCompleted').innerText = completed;
+                    document.getElementById('empStatPending').innerText = pending;
+
+                    myTasks.reverse().forEach(task => {
+                        let title = String(task.taskDetails || '').split('\n')[0].replace('العنوان: ', '');
+                        if(!title) title = 'تكليف: ' + task.taskId;
+                        
+                        let statusColor = 'bg-blue-100 text-blue-800';
+                        if(task.taskStatus === 'تم الرد' || task.taskStatus === 'جاهز للمراجعة' || task.taskStatus === 'مغلق ومُقيم') statusColor = 'bg-green-100 text-green-800';
+                        else if(String(task.taskStatus).includes('متوقف') || String(task.taskStatus).includes('مرفوض') || String(task.taskStatus).includes('اعتذار')) statusColor = 'bg-red-100 text-red-800';
+
+                        let dateStr = task.dueDate;
+                        try { dateStr = new Date(dateStr).toISOString().split('T')[0]; } catch(e){}
+
+                        // حساب المؤشر الزمني
+                        let indicatorColor = 'bg-gray-300';
+                        let indicatorTitle = 'غير محدد';
+                        
+                        if (task.createdAt && task.dueDate) {
+                            const start = new Date(task.createdAt).getTime();
+                            const due = new Date(task.dueDate);
+                            due.setHours(23, 59, 59);
+                            const end = due.getTime();
+                            const totalDuration = end - start;
+                            
+                            let targetTime = Date.now();
+                            if (task.taskStatus === 'جاهز للمراجعة' || task.taskStatus === 'مغلق ومُقيم') {
+                                if (task.replyHistory) {
+                                    for (let item of task.replyHistory) {
+                                        if (item.status === 'جاهز للمراجعة' || item.status === 'مغلق ومُقيم') {
+                                            targetTime = new Date(item.date).getTime();
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            const elapsed = targetTime - start;
+                            if (totalDuration > 0) {
+                                const ratio = elapsed / totalDuration;
+                                if (targetTime > end) {
+                                    indicatorColor = 'bg-red-500 shadow-red-500/50 animate-pulse';
+                                    indicatorTitle = 'متأخر (أحمر)';
+                                } else if (ratio <= 0.40) {
+                                    indicatorColor = 'bg-green-500 shadow-green-500/50';
+                                    indicatorTitle = 'في البداية (أخضر)';
+                                } else if (ratio <= 0.70) {
+                                    indicatorColor = 'bg-yellow-400 shadow-yellow-400/50';
+                                    indicatorTitle = 'منتصف المدة (أصفر)';
+                                } else {
+                                    indicatorColor = 'bg-red-500 shadow-red-500/50';
+                                    indicatorTitle = 'قارب على الانتهاء / متأخر (أحمر)';
+                                }
+                            }
+                        }
+
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-gray-50 transition border-b border-gray-100">
+                                <td class="p-4">
+                                    <div class="font-bold text-gray-800 truncate max-w-[200px]" title="${title}">${title}</div>
+                                    <div class="text-xs text-gray-500">${task.taskId}</div>
+                                </td>
+                                <td class="p-4 text-sm font-bold text-gray-600 text-center">${dateStr}</td>
+                                <td class="p-4 text-center">
+                                    <span class="${statusColor} text-xs px-3 py-1 rounded-full font-bold">${task.taskStatus || 'مرسل'}</span>
+                                </td>
+                                <td class="p-4 text-center">
+                                    <div title="${indicatorTitle}" class="inline-block w-4 h-4 rounded-full shadow-md ${indicatorColor}"></div>
+                                </td>
+                                <td class="p-4 text-center">
+                                    <button class="bg-secondary hover:bg-yellow-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition" onclick="openTaskFromDashboard('${task.taskId}')">تفاصيل التكليف</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            })
+            .catch(err => {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-red-500 font-bold">فشل جلب البيانات. الرجاء المحاولة لاحقاً.</td></tr>';
+            });
+        }
+
+        function openTaskFromDashboard(taskId) {
+            currentTaskId = taskId;
+            document.getElementById('employeeDashboardSection').classList.add('hidden');
+            document.getElementById('employeeSection').classList.remove('hidden');
+            document.getElementById('globalBackBtn').classList.remove('hidden');
+            
+            // تهيئة الحقول قبل تحميل التكليف
+            document.getElementById('empReplyMsg').value = '';
+            document.getElementById('empReplyMsg').disabled = false;
+            document.getElementById('empReplyMsg').placeholder = 'مثال: جاري إعداد التقرير المطلوب...';
+            document.getElementById('empFile').value = '';
+            document.getElementById('empFile').disabled = false;
+            document.getElementById('replyMsg').className = 'hidden';
+            
+            const buttons = document.getElementById('kanbanButtons').children;
+            for(let b of buttons) {
+                b.disabled = false;
+                b.classList.remove('opacity-50', 'cursor-not-allowed', 'ring-4');
+            }
+
+            loadTaskData(taskId);
+        }
+
+        function backToEmployeeDashboard() {
+            document.getElementById('employeeSection').classList.add('hidden');
+            document.getElementById('employeeDashboardSection').classList.remove('hidden');
+            document.getElementById('globalBackBtn').classList.add('hidden');
+            loadEmployeeDashboardData(); // تحديث الجدول في حال تم إرسال رد
+        }
+
+        function globalGoBack() {
+            if (!document.getElementById('employeeSection').classList.contains('hidden')) {
+                backToEmployeeDashboard();
+            }
+        }
+
+        function switchManagerTab(tab) {
+            const tabs = ['Create', 'Dashboard', 'Report'];
+            
+            tabs.forEach(t => {
+                const btn = document.getElementById('tab' + t);
+                const content = document.getElementById('tabContent' + t);
+                
+                if (tab.toLowerCase() === t.toLowerCase()) {
+                    btn.className = "font-bold text-lg text-primary border-b-4 border-primary pb-2 px-2";
+                    content.classList.remove('hidden');
+                    if (t === 'Dashboard') loadDashboard();
+                } else {
+                    btn.className = "font-bold text-lg text-gray-400 hover:text-primary transition pb-2 px-2";
+                    content.classList.add('hidden');
+                }
+            });
+        }
+
+        function loadDashboard() {
+            const tbody = document.getElementById('tasksTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-primary font-bold animate-pulse">اشغل الإنتظار بالاستغفار لحين جلب البيانات...</td></tr>';
+            
+            fetch(scriptURL + '?action=list')
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    tbody.innerHTML = '';
+                    if(!data.tasks || data.tasks.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-500 font-bold">لا يوجد تكاليف حالياً.</td></tr>';
+                        return;
+                    }
+                    globalTasks = data.tasks;
+                    
+                    // تحديث قائمة الموظفين للتقرير وللفلترة
+                    const emps = new Set();
+                    globalTasks.forEach(t => { if(t.employeeName) emps.add(t.employeeName); });
+                    
+                    const selectReport = document.getElementById('reportEmployeeSelect');
+                    if(selectReport) {
+                        selectReport.innerHTML = '<option value="">اختر الموظف لعرض تقاريره...</option>';
+                        emps.forEach(emp => { selectReport.innerHTML += `<option value="${emp}">${emp}</option>`; });
+                    }
+                    
+                    const selectFilter = document.getElementById('dashFilterEmp');
+                    if(selectFilter) {
+                        selectFilter.innerHTML = '<option value="">كل الموظفين</option>';
+                        emps.forEach(emp => { selectFilter.innerHTML += `<option value="${emp}">${emp}</option>`; });
+                    }
+
+                    renderDashboardTable(globalTasks);
+                }
+            })
+            .catch(err => {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-red-500 font-bold">فشل جلب البيانات. تأكد من إعدادات Google Script.</td></tr>';
+            });
+        }
+        
+        function filterDashboard() {
+            const search = document.getElementById('dashSearch').value.toLowerCase();
+            const emp = document.getElementById('dashFilterEmp').value;
+            const status = document.getElementById('dashFilterStatus').value;
+            
+            const filtered = globalTasks.filter(t => {
+                const titleStr = String(t.taskDetails || '').toLowerCase();
+                const idStr = String(t.taskId || '').toLowerCase();
+                const matchSearch = titleStr.includes(search) || idStr.includes(search);
+                const matchEmp = emp ? t.employeeName === emp : true;
+                const matchStatus = status ? String(t.taskStatus).includes(status) : true;
+                return matchSearch && matchEmp && matchStatus;
+            });
+            renderDashboardTable(filtered);
+        }
+
+        function renderDashboardTable(tasksList) {
+            const tbody = document.getElementById('tasksTableBody');
+            tbody.innerHTML = '';
+            
+            if(tasksList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-gray-500 font-bold">لا توجد نتائج تطابق بحثك.</td></tr>';
+                return;
+            }
+
+            // الفرز الذكي (Smart Sorting)
+            let sortedTasks = tasksList.map(task => {
+                let priority = 'عادي';
+                let title = 'تكليف عمل';
+                let desc = task.taskDetails || '';
+                
+                if (desc.includes('العنوان:')) {
+                    const lines = desc.split('\n');
+                    title = lines[0].replace('العنوان: ', '');
+                    if (lines.length > 1 && lines[1].includes('الأولوية:')) priority = lines[1].replace('الأولوية: ', '');
+                } else {
+                    title = desc.split('\n')[0];
+                }
+                if(!title) title = 'تكليف: ' + task.taskId;
+                
+                let pWeight = 3;
+                if (priority.includes('عاجل')) pWeight = 1;
+                else if (priority.includes('هام')) pWeight = 2;
+
+                let sWeight = 2; 
+                if (String(task.taskStatus).includes('جاهز')) sWeight = 1;
+                else if (String(task.taskStatus).includes('متوقف') || String(task.taskStatus).includes('مرفوض') || String(task.taskStatus).includes('اعتذار')) sWeight = 3;
+                else if (String(task.taskStatus).includes('مغلق') || String(task.taskStatus).includes('ملغي')) sWeight = 4;
+
+                let timeWeight = new Date(task.createdAt || 0).getTime();
+
+                return { ...task, _pWeight: pWeight, _sWeight: sWeight, _timeWeight: timeWeight, _extractedPriority: priority, _extractedTitle: title };
+            });
+
+            sortedTasks.sort((a, b) => {
+                if (a._sWeight !== b._sWeight) return a._sWeight - b._sWeight; // الحالة أولاً
+                if (a._pWeight !== b._pWeight) return a._pWeight - b._pWeight; // الأولوية ثانياً
+                return b._timeWeight - a._timeWeight; // الأحدث ثالثاً
+            });
+
+            sortedTasks.forEach(task => {
+                let priority = task._extractedPriority;
+                let title = task._extractedTitle;
+                
+                let pColor = 'bg-gray-100 text-gray-600';
+                if(priority.includes('عاجل')) pColor = 'bg-red-50 text-red-700 border border-red-200';
+                else if(priority.includes('هام')) pColor = 'bg-yellow-50 text-yellow-700 border border-yellow-200';
+                else if(priority.includes('عادي')) pColor = 'bg-green-50 text-green-700 border border-green-200';
+                
+                let statusColor = 'bg-blue-100 text-blue-800';
+                if(task.taskStatus === 'تم الرد' || String(task.taskStatus).includes('جاهز')) statusColor = 'bg-green-100 text-green-800';
+                else if(String(task.taskStatus).includes('متوقف') || String(task.taskStatus).includes('مرفوض') || String(task.taskStatus).includes('اعتذار')) statusColor = 'bg-red-100 text-red-800';
+                else if(String(task.taskStatus).includes('ملغي')) statusColor = 'bg-gray-200 text-gray-600';
+
+                let dateStr = task.dueDate;
+                try { dateStr = new Date(dateStr).toISOString().split('T')[0]; } catch(e){}
+
+                // حساب المؤشر الزمني
+                let indicatorColor = 'bg-gray-300';
+                let indicatorTitle = 'غير محدد';
+                
+                if (task.createdAt && task.dueDate) {
+                    const start = new Date(task.createdAt).getTime();
+                    const due = new Date(task.dueDate);
+                    due.setHours(23, 59, 59); // نهاية يوم التسليم
+                    const end = due.getTime();
+                    
+                    const totalDuration = end - start;
+                    let targetTime = Date.now();
+                    if (task.taskStatus === 'جاهز للمراجعة' || task.taskStatus === 'مغلق ومُقيم') {
+                        if (task.replyHistory) {
+                            for (let item of task.replyHistory) {
+                                if (item.status === 'جاهز للمراجعة' || item.status === 'مغلق ومُقيم') {
+                                    targetTime = new Date(item.date).getTime();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    const elapsed = targetTime - start;
+                    if (totalDuration > 0) {
+                        const ratio = elapsed / totalDuration;
+                        if (targetTime > end) {
+                            indicatorColor = 'bg-red-500 shadow-red-500/50 animate-pulse';
+                            indicatorTitle = 'متأخر (أحمر)';
+                        } else if (ratio <= 0.40) {
+                            indicatorColor = 'bg-green-500 shadow-green-500/50';
+                            indicatorTitle = 'في البداية (أخضر)';
+                        } else if (ratio <= 0.70) {
+                            indicatorColor = 'bg-yellow-400 shadow-yellow-400/50';
+                            indicatorTitle = 'منتصف المدة (أصفر)';
+                        } else {
+                            indicatorColor = 'bg-red-500 shadow-red-500/50';
+                            indicatorTitle = 'قارب على الانتهاء / متأخر (أحمر)';
+                        }
+                    }
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition border-b border-gray-100">
+                        <td class="p-4">
+                            <div class="font-bold text-primary truncate max-w-[200px]" title="${title}">${title}</div>
+                            <div class="text-xs text-gray-500">${task.taskId}</div>
+                        </td>
+                        <td class="p-4 font-medium">${task.employeeName}</td>
+                        <td class="p-4 text-center">
+                            <span class="${pColor} text-xs px-2 py-1 rounded font-bold">${priority}</span>
+                        </td>
+                        <td class="p-4">
+                            <span class="${statusColor} text-xs px-3 py-1 rounded-full font-bold">${task.taskStatus || 'مرسل'}</span>
+                        </td>
+                        <td class="p-4 text-sm font-bold text-gray-600">${dateStr}</td>
+                        <td class="p-4 flex justify-center gap-2 flex-wrap">
+                            <button class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded text-xs font-bold transition" onclick="openManagerTaskDetails('${task.taskId}')">تفاصيل</button>
+                            ${(task.taskStatus !== 'مغلق ومُقيم' && task.taskStatus !== 'ملغي') ? `<button class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded text-xs font-bold transition" onclick="sendReminder('${task.taskId}')">تذكير</button>` : ''}
+                            ${(task.taskStatus !== 'ملغي') ? `<button class="bg-secondary/20 hover:bg-secondary/40 text-yellow-800 px-3 py-1 rounded text-xs font-bold transition" onclick="openEvalModal('${task.taskId}')">تقييم</button>` : ''}
+                        </td>
+                        <td class="p-4 text-center">
+                            <div title="${indicatorTitle}" class="inline-block w-4 h-4 rounded-full shadow-md ${indicatorColor}"></div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function sendReminder(taskId) {
+            const task = globalTasks.find(t => t.taskId === taskId);
+            if (!task) return;
+            
+            // استخراج رقم الجوال من القائمة المنسدلة المخفية
+            let phone = '';
+            const select = document.getElementById('employeeSelect');
+            for (let option of select.options) {
+                if (option.text === task.employeeName) {
+                    phone = option.value.split('|')[0];
+                    break;
+                }
+            }
+            
+            if (!phone) {
+                alert('لم يتم العثور على رقم هاتف الموظف: ' + task.employeeName);
+                return;
+            }
+
+            let title = String(task.taskDetails || '').split('\n')[0].replace('العنوان: ', '');
+            if(!title) title = 'تكليف: ' + task.taskId;
+            
+            const message = `السلام عليكم\nتذكير !\nعنوان التكليف: ${title}\nانقر لمشاهدة تفاصيل التكليف:\n${task.taskLink}`;
+            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // --- Reports & Stats Functions ---
+        function openManagerTaskDetails(taskId) {
+            const task = globalTasks.find(t => t.taskId === taskId);
+            if (!task) return;
+
+            let title = String(task.taskDetails || '').split('\n')[0].replace('العنوان: ', '');
+            if (!title) title = 'تكليف: ' + task.taskId;
+            
+            let priority = 'عادي';
+            let desc = task.taskDetails || '';
+            if (desc.includes('العنوان:')) {
+                const lines = desc.split('\n');
+                if (lines.length > 1 && lines[1].includes('الأولوية:')) priority = lines[1].replace('الأولوية: ', '');
+                desc = lines.slice(3).join('\n');
+            }
+            
+            let dDate = task.dueDate;
+            try { dDate = new Date(dDate).toISOString().split('T')[0]; } catch(e){}
+
+            document.getElementById('mngTaskEmployee').innerText = task.employeeName || 'غير محدد';
+            document.getElementById('mngTaskDueDate').innerText = dDate || 'غير محدد';
+            document.getElementById('mngTaskPriority').innerText = priority;
+            document.getElementById('mngTaskTitle').innerText = title;
+            document.getElementById('mngTaskDesc').innerText = desc || 'لا يوجد تفاصيل إضافية.';
+            document.getElementById('mngTaskId').innerText = taskId;
+
+            const timeline = document.getElementById('mngTimeline');
+            timeline.innerHTML = '';
+
+            if (task.replyHistory && task.replyHistory.length > 0) {
+                // العكس لعرض الأحدث في الأعلى
+                const history = [...task.replyHistory].reverse();
+                history.forEach(item => {
+                    let dateStr = item.date;
+                    try { dateStr = new Date(item.date).toLocaleString('ar-SA'); } catch(e){}
+                    
+                    let bg = 'bg-gray-100';
+                    let textC = 'text-gray-800';
+                    if (item.status.includes('متوقف') || item.status.includes('اعتذار')) {
+                        bg = 'bg-red-100'; textC = 'text-red-800';
+                    } else if (item.status.includes('جاهز') || item.status.includes('مغلق')) {
+                        bg = 'bg-green-100'; textC = 'text-green-800';
+                    } else if (item.status.includes('جاري')) {
+                        bg = 'bg-blue-100'; textC = 'text-blue-800';
+                    }
+
+                    timeline.innerHTML += `
+                        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative ml-2 md:ml-12 hover:shadow-md transition">
+                            <div class="flex justify-between items-start mb-3 border-b border-gray-50 pb-2">
+                                <span class="${bg} ${textC} px-3 py-1 rounded-full text-xs font-bold shadow-sm">${item.status}</span>
+                                <span class="text-xs text-gray-500 font-bold bg-gray-50 px-2 py-1 rounded" dir="ltr">🕒 ${dateStr}</span>
+                            </div>
+                            <div class="text-gray-700 whitespace-pre-wrap text-sm font-medium leading-relaxed">${item.reply || 'لم يتم كتابة تفاصيل إضافية.'}</div>
+                            ${item.attachmentUrl ? `<a href="${item.attachmentUrl}" target="_blank" class="inline-block mt-4 bg-primary/10 border border-primary/20 px-4 py-2 rounded-xl text-xs font-bold text-primary hover:bg-primary hover:text-white transition shadow-sm">📎 تحميل المرفق</a>` : ''}
+                        </div>
+                    `;
+                });
+            } else {
+                timeline.innerHTML = '<div class="text-center text-gray-400 font-bold py-12 bg-white rounded-xl border border-gray-100">لا يوجد أي ردود في السجل الزمني حتى الآن.</div>';
+            }
+
+            const evalBtn = document.getElementById('mngEvalBtn');
+            const rejectBtn = document.getElementById('btnShowReject');
+            const cancelBtn = document.getElementById('btnCancelTask');
+            
+            if (task.taskStatus === 'مغلق ومُقيم' || task.taskStatus === 'ملغي') {
+                evalBtn.classList.add('hidden');
+                rejectBtn.classList.add('hidden');
+                cancelBtn.classList.add('hidden');
+            } else {
+                evalBtn.classList.remove('hidden');
+                rejectBtn.classList.remove('hidden');
+                cancelBtn.classList.remove('hidden');
+                evalBtn.onclick = () => {
+                    closeManagerTaskDetails();
+                    openEvalModal(taskId);
+                };
+            }
+            
+            document.getElementById('mngRejectSection').classList.add('hidden');
+            document.getElementById('mngRejectNote').value = '';
+            document.getElementById('mngRejectMsg').classList.add('hidden');
+
+            document.getElementById('managerTaskDetailsModal').classList.remove('hidden');
+        }
+
+        function closeManagerTaskDetails() {
+            document.getElementById('managerTaskDetailsModal').classList.add('hidden');
+        }
+
+        function submitManagerRejection() {
+            const note = document.getElementById('mngRejectNote').value.trim();
+            const msgBox = document.getElementById('mngRejectMsg');
+            const btn = document.getElementById('btnSubmitRejection');
+            const taskId = document.getElementById('mngTaskId').innerText;
+
+            if (!note) {
+                msgBox.innerText = 'يرجى كتابة ملاحظات التعديل أولاً!';
+                msgBox.className = 'text-red-600 block mt-2 text-sm font-bold';
+                return;
+            }
+
+            msgBox.innerText = 'جاري إرجاع التكليف للموظف...';
+            msgBox.className = 'text-blue-600 block mt-2 text-sm font-bold';
+            btn.disabled = true;
+
+            const payload = {
+                action: 'submitReply',
+                taskId: taskId,
+                status: 'مرتجع للتعديل',
+                replyText: '🔴 ملاحظة من الإدارة (يحتاج تعديل): ' + note
+            };
+
+            fetch(scriptURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    msgBox.innerText = '✅ تم إرجاع التكليف للموظف بنجاح!';
+                    msgBox.className = 'text-green-600 block mt-2 text-sm font-bold';
+                    document.getElementById('mngRejectNote').value = '';
+                    
+                    setTimeout(() => {
+                        closeManagerTaskDetails();
+                        loadDashboard(); // تحديث الجدول ليعكس الحالة الجديدة
+                    }, 1500);
+                } else {
+                    msgBox.innerText = 'خطأ: ' + data.message;
+                    msgBox.className = 'text-red-600 block mt-2 text-sm font-bold';
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                msgBox.innerText = 'فشل الاتصال بالخادم.';
+                msgBox.className = 'text-red-600 block mt-2 text-sm font-bold';
+                btn.disabled = false;
+            });
+        }
+
+        function cancelManagerTask() {
+            const taskId = document.getElementById('mngTaskId').innerText;
+            if(!confirm('هل أنت متأكد من إلغاء هذا التكليف نهائياً؟\nسيتم إغلاق التكليف ولن يتم احتسابه في إحصائيات تقييم الموظف.')) return;
+
+            const btn = document.getElementById('btnCancelTask');
+            btn.disabled = true;
+            btn.innerText = 'جاري الإلغاء...';
+
+            const payload = {
+                action: 'submitReply',
+                taskId: taskId,
+                status: 'ملغي',
+                replyText: '🔴 تم إلغاء التكليف من قبل الإدارة، ولا يتطلب أي إجراء إضافي.'
+            };
+
+            fetch(scriptURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    closeManagerTaskDetails();
+                    loadDashboard(); 
+                } else {
+                    alert('خطأ أثناء الإلغاء: ' + data.message);
+                    btn.disabled = false;
+                    btn.innerText = 'إلغاء التكليف ❌';
+                }
+            })
+            .catch(err => {
+                alert('فشل الاتصال بالخادم.');
+                btn.disabled = false;
+                btn.innerText = 'إلغاء التكليف ❌';
+            });
+        }
+
+        function openStatsModal() {
+            let total = globalTasks.length;
+            let closed = globalTasks.filter(t => t.taskStatus === 'مغلق ومُقيم').length;
+            let working = globalTasks.filter(t => String(t.taskStatus).includes('جاري')).length;
+            let stopped = globalTasks.filter(t => String(t.taskStatus).includes('متوقف')).length;
+
+            let totalScore = 0;
+            let evaluatedCount = 0;
+            globalTasks.forEach(t => {
+                if(t.taskStatus === 'مغلق ومُقيم' && t.managerScore !== undefined && t.speedScore !== undefined) {
+                    let s = parseInt(t.managerScore) + parseInt(t.speedScore);
+                    if(!isNaN(s)) {
+                        totalScore += s;
+                        evaluatedCount++;
+                    }
+                }
+            });
+            let avg = evaluatedCount > 0 ? Math.round(totalScore / evaluatedCount) : 0;
+
+            document.getElementById('statsModal').innerHTML = `
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl relative">
+            <button onclick="closeStatsModal()" class="absolute top-4 left-4 text-gray-400 hover:text-red-500 font-bold text-xl">&times;</button>
+            <h3 class="text-xl font-bold text-primary mb-6 flex items-center gap-2">📊 إحصائيات النظام الحية</h3>
+            
+            <div class="space-y-4">
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <span class="font-bold text-gray-600">إجمالي التكاليف</span>
+                    <span class="text-xl font-extrabold text-primary">${total}</span>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-green-50 rounded-xl border border-green-100">
+                    <span class="font-bold text-green-700">المغلقة والمُقيمة</span>
+                    <span class="text-xl font-extrabold text-green-700">${closed}</span>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-blue-50 rounded-xl border border-blue-100">
+                    <span class="font-bold text-blue-700">قيد العمل</span>
+                    <span class="text-xl font-extrabold text-blue-700">${working}</span>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-red-50 rounded-xl border border-red-100">
+                    <span class="font-bold text-red-700">متوقفة لعائق</span>
+                    <span class="text-xl font-extrabold text-red-700">${stopped}</span>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-yellow-50 rounded-xl border border-yellow-100">
+                    <span class="font-bold text-yellow-700">أداء المنظمة العام</span>
+                    <span class="text-xl font-extrabold text-secondary">${avg}%</span>
+                </div>
+            </div>
+        </div>
+            `;
+            document.getElementById('statsModal').classList.remove('hidden');
+        }
+
+        function closeStatsModal() {
+            document.getElementById('statsModal').classList.add('hidden');
+        }
+
+        function loadEmployeeReport() {
+            const empName = document.getElementById('reportEmployeeSelect').value;
+            const printArea = document.getElementById('reportPrintArea');
+            
+            if (!empName) {
+                printArea.classList.add('hidden');
+                return;
+            }
+
+            const empTasks = globalTasks.filter(t => t.employeeName === empName && t.taskStatus === 'مغلق ومُقيم');
+            
+            document.getElementById('reportEmpName').innerText = empName;
+            const today = new Date();
+            document.getElementById('reportDate').innerText = 'تاريخ التقرير: ' + today.toLocaleDateString('ar-SA');
+            
+            let totalTasks = empTasks.length;
+            const tbody = document.getElementById('reportTableBody');
+            tbody.innerHTML = '';
+
+            if(totalTasks === 0) {
+                document.getElementById('reportAvgScore').innerText = '0%';
+                document.getElementById('reportTotalTasks').innerText = '0';
+                document.getElementById('reportAvgSpeed').innerText = '0/30';
+                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500 font-bold">لا يوجد تكاليف مقيمة حتى الآن.</td></tr>';
+            } else {
+                let sumScores = 0;
+                let sumSpeed = 0;
+                
+                empTasks.forEach(t => {
+                    let spd = parseInt(t.speedScore) || 0;
+                    let mgr = parseInt(t.managerScore) || 0;
+                    let tot = spd + mgr;
+                    sumScores += tot;
+                    sumSpeed += spd;
+                    
+                    let title = String(t.taskDetails || '').split('\n')[0].replace('العنوان: ', '');
+                    
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 border-b">
+                            <td class="p-3 text-sm text-gray-500">${t.taskId}</td>
+                            <td class="p-3 font-medium text-right text-sm truncate max-w-[150px]">${title}</td>
+                            <td class="p-3 text-center text-green-600 font-bold">${spd}</td>
+                            <td class="p-3 text-center text-primary font-bold">${mgr}</td>
+                            <td class="p-3 text-center text-primary font-extrabold">${tot}%</td>
+                        </tr>
+                    `;
+                });
+                
+                document.getElementById('reportAvgScore').innerText = Math.round(sumScores / totalTasks) + '%';
+                document.getElementById('reportTotalTasks').innerText = totalTasks;
+                document.getElementById('reportAvgSpeed').innerText = Math.round(sumSpeed / totalTasks) + '/30';
+            }
+
+            printArea.classList.remove('hidden');
+        }
+
+        function exportToPDF() {
+            const element = document.getElementById('reportPrintArea');
+            if (element.classList.contains('hidden')) {
+                alert('الرجاء اختيار الموظف أولاً لعرض التقرير');
+                return;
+            }
+            const empName = document.getElementById('reportEmployeeSelect').value;
+            const opt = {
+                margin:       0.5,
+                filename:     `تقرير_تقييم_${empName.replace(' ', '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            
+            html2pdf().set(opt).from(element).save();
+        }
+
+        let activeEvalTask = null;
+        let currentSpeedScore = 30; // افتراضي 30
+
+        function openEvalModal(taskId) {
+            activeEvalTask = taskId;
+            const task = globalTasks.find(t => t.taskId === taskId);
+            
+            // الحساب الآلي لسرعة الإنجاز
+            currentSpeedScore = 0;
+            if (task) {
+                let firstReadyDate = null;
+                if (task.replyHistory) {
+                    for (let item of task.replyHistory) {
+                        if (item.status === 'جاهز للمراجعة' || item.status === 'مغلق ومُقيم') {
+                            firstReadyDate = new Date(item.date);
+                            break; 
+                        }
+                    }
+                }
+                
+                if (firstReadyDate && task.dueDate) {
+                    const due = new Date(task.dueDate);
+                    due.setHours(23, 59, 59); // لنهاية يوم التسليم
+                    if (firstReadyDate <= due) {
+                        currentSpeedScore = 30;
+                    }
+                }
+            }
+            
+            const speedDisp = document.getElementById('speedScoreDisplay');
+            const speedText = document.getElementById('speedScoreText');
+            
+            if (currentSpeedScore === 30) {
+                speedDisp.className = 'bg-green-50 border-2 border-green-200 text-green-700 px-4 py-2 rounded-xl text-center';
+                speedText.innerHTML = '30 <span class="text-sm">/ 30</span>';
+            } else {
+                speedDisp.className = 'bg-red-50 border-2 border-red-200 text-red-700 px-4 py-2 rounded-xl text-center';
+                speedText.innerHTML = '0 <span class="text-sm">/ 30</span>';
+            }
+
+            // تصفير الأسئلة إلى 10
+            for(let i=1; i<=7; i++) { document.getElementById('q'+i).value = "10"; }
+            
+            calculateLiveScore();
+            document.getElementById('evalModal').classList.remove('hidden');
+        }
+
+        function calculateLiveScore() {
+            let managerScore = 0;
+            for(let i=1; i<=7; i++) {
+                managerScore += parseInt(document.getElementById('q'+i).value || 0);
+            }
+            const total = managerScore + currentSpeedScore;
+            
+            const totalDisp = document.getElementById('totalScoreDisplay');
+            totalDisp.innerText = total + '%';
+            
+            if(total >= 85) totalDisp.className = 'text-3xl font-extrabold text-green-600';
+            else if(total >= 60) totalDisp.className = 'text-3xl font-extrabold text-yellow-600';
+            else totalDisp.className = 'text-3xl font-extrabold text-red-600';
+        }
+
+        function closeEvalModal() {
+            document.getElementById('evalModal').classList.add('hidden');
+        }
+
+        function submitEvaluation() {
+            let managerScore = 0;
+            for(let i=1; i<=7; i++) {
+                managerScore += parseInt(document.getElementById('q'+i).value || 0);
+            }
+            const total = managerScore + currentSpeedScore;
+            
+            const payload = {
+                action: 'evaluateTask',
+                taskId: activeEvalTask,
+                speedScore: currentSpeedScore,
+                managerScore: managerScore
+            };
+
+            const btn = document.getElementById('btnSubmitEval');
+            const msgBox = document.getElementById('evalMsg');
+            const oldText = btn.innerText;
+            
+            btn.innerText = 'جاري الاعتماد...';
+            btn.disabled = true;
+            
+            msgBox.innerText = 'اشغل الإنتظار بالاستغفار لحين استجابة النظام...';
+            msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-blue-50 text-blue-700 block mt-4 text-center';
+
+            fetch(scriptURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    msgBox.className = 'hidden';
+                    alert('✅ تم التقييم وإغلاق التكليف بنجاح!\nتقييم الإدارة: ' + managerScore + '/70\nسرعة الإنجاز: ' + currentSpeedScore + '/30\nالنسبة المئوية الإجمالية: ' + total + '%');
+                    closeEvalModal();
+                    loadDashboard(); // لتحديث القائمة فورا
+                } else {
+                    msgBox.innerText = '❌ خطأ: ' + data.message;
+                    msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-red-50 text-red-700 block mt-4 text-center';
+                }
+                btn.innerText = oldText;
+                btn.disabled = false;
+            })
+            .catch(err => {
+                msgBox.innerText = '❌ فشل الاتصال بقاعدة البيانات.';
+                msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-red-50 text-red-700 block mt-4 text-center';
+                btn.innerText = oldText;
+                btn.disabled = false;
+            });
+        }
+
+        function generateSecureId() {
+            return 'TSK-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+        }
+
+        function createTask() {
+            const requester = document.getElementById('requesterName').value.trim();
+            const title = document.getElementById('taskTitle').value.trim();
+            const empVal = document.getElementById('employeeSelect').value;
+            const desc = document.getElementById('taskDesc').value.trim();
+            const date = document.getElementById('taskDate').value;
+            const priority = document.getElementById('taskPriority').value;
+            const file = document.getElementById('managerTaskFile').files[0];
+            const msgBox = document.getElementById('createMsg');
+            const btn = document.getElementById('btnCreate');
+
+            if (!requester || !title || !empVal || !desc || !date) {
+                msgBox.innerText = 'يرجى إكمال جميع الحقول الإلزامية';
+                msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-red-50 text-red-700 block';
+                return;
+            }
+            
+            if (file && file.size > 5 * 1024 * 1024) {
+                msgBox.innerText = 'حجم الملف يتجاوز 5 ميجا!';
+                msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-red-50 text-red-700 block';
+                return;
+            }
+
+            const [empPhone, empName] = empVal.split('|');
+            const taskId = generateSecureId();
+            const taskUrl = window.location.origin + window.location.pathname + '?id=' + taskId;
+
+            // WhatsApp Message Format
+            const waText = `🔴 *تكليف جديد*\n\n*جهة التكليف:* ${requester}\n*الموظف:* ${empName}\n*الموضوع:* ${title}\n*الأولوية:* ${priority}\n*التسليم:* ${date}\n\n🔗 *للتفاصيل والبدء بالتنفيذ، اضغط الرابط التالي:*\n${taskUrl}`;
+            msgBox.innerText = 'اشغل الإنتظار بالاستغفار لحين استجابة النظام...';
+            msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-blue-50 text-blue-700 block';
+            btn.disabled = true;
+
+            const combinedDetails = `العنوان: ${title}\nالأولوية: ${priority}\n\nالتفاصيل:\n${desc}`;
+
+            const payload = {
+                action: 'createTask',
+                taskId: taskId,
+                requesterName: requester,
+                employeeName: empName,
+                taskDetails: combinedDetails,
+                dueDate: date,
+                taskLink: taskUrl
+            };
+
+            fetch(scriptURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (file) {
+                        // الحيلة البرمجية: إرسال المرفق كرد أولي للمدير
+                        msgBox.innerText = 'تم إنشاء التكليف.. جاري رفع المرفقات...';
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const filePayload = {
+                                action: 'submitReply',
+                                taskId: taskId,
+                                status: 'تكليف جديد (مرفق)',
+                                replyText: 'مرفقات من الإدارة',
+                                fileBase64: e.target.result,
+                                fileName: file.name,
+                                mimeType: file.type
+                            };
+                            fetch(scriptURL, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                                body: JSON.stringify(filePayload)
+                            }).then(() => {
+                                finalizeTaskCreation(msgBox, empPhone, waText, btn);
+                            });
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        finalizeTaskCreation(msgBox, empPhone, waText, btn);
+                    }
+                } else {
+                    msgBox.innerText = 'حدث خطأ: ' + data.message;
+                    msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-red-50 text-red-700 block mt-4';
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                msgBox.innerText = 'خطأ في الاتصال: تأكد من نشر السكريبت كـ Web App بصلاحية (Anyone)';
+                msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-red-50 text-red-700 block mt-4';
+                btn.disabled = false;
+            });
+        }
+        
+        function finalizeTaskCreation(msgBox, empPhone, waText, btn) {
+            msgBox.innerText = 'تم حفظ التكليف بنجاح! جاري فتح الواتساب...';
+            msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-green-50 text-green-700 block mt-4';
+            
+            // تصفير الحقول
+            document.getElementById('requesterName').value = '';
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('employeeSelect').value = '';
+            document.getElementById('taskDesc').value = '';
+            document.getElementById('taskDate').value = '';
+            document.getElementById('taskPriority').value = 'عادي';
+            document.getElementById('managerTaskFile').value = '';
+            btn.disabled = false;
+            
+            setTimeout(() => {
+                window.open(`https://wa.me/${empPhone}?text=${encodeURIComponent(waText)}`, '_blank');
+                msgBox.classList.add('hidden');
+            }, 1500);
+        }
+
+        // --- Employee Functions ---
+        function loadTaskData(id) {
+            document.getElementById('empTaskId').innerText = id;
+            document.getElementById('empTaskDesc').innerText = 'اشغل الإنتظار بالاستغفار لحين جلب البيانات...';
+            document.getElementById('empTaskTitle').innerText = 'تحميل...';
+            
+            fetch(scriptURL + '?action=getTask&taskId=' + id)
+            .then(res => res.json())
+            .then(data => {
+                if(data.success && data.task) {
+                    const task = data.task;
+                    let title = 'تكليف عمل';
+                    let priority = 'عادي';
+                    let desc = task.taskDetails || '';
+
+                    // محاولة استخراج العنوان والأولوية من التفاصيل المدمجة
+                    if (desc.includes('العنوان:')) {
+                        const lines = desc.split('\n');
+                        title = lines[0].replace('العنوان: ', '');
+                        priority = lines[1].replace('الأولوية: ', '');
+                        // تجاوز الأسطر الأولى لجلب التفاصيل فقط
+                        desc = lines.slice(3).join('\n');
+                    }
+
+                    document.getElementById('empTaskTitle').innerText = title;
+                    document.getElementById('empTaskDesc').innerText = desc;
+                    document.getElementById('empTaskPriority').innerText = priority;
+                    
+                    let dDate = task.dueDate;
+                    try { dDate = new Date(dDate).toISOString().split('T')[0]; } catch(e){}
+                    document.getElementById('empTaskDueDate').innerText = dDate || 'غير محدد';
+                    document.getElementById('empTaskRequester').innerText = task.requesterName || 'غير محدد';
+
+                    // تفعيل زر الحالة الحالي إن وجد
+                    if (task.taskStatus) {
+                        const buttons = document.getElementById('kanbanButtons').children;
+                        for(let b of buttons) {
+                            if (task.taskStatus.includes(b.innerText.trim().split(' ')[0])) {
+                                b.classList.add('ring-4');
+                                selectedStatus = task.taskStatus;
+                            }
+                        }
+                        
+                        // إغلاق الواجهة إذا كانت المهمة منجزة أو ملغية
+                        if (task.taskStatus === 'جاهز للمراجعة' || task.taskStatus === 'مغلق ومُقيم' || task.taskStatus === 'ملغي') {
+                            document.getElementById('empReplyMsg').disabled = true;
+                            document.getElementById('empReplyMsg').placeholder = "تم قفل هذا التكليف ولا يمكن إضافة ردود جديدة.";
+                            document.getElementById('empFile').disabled = true;
+                            for(let b of buttons) {
+                                b.disabled = true;
+                                b.classList.add('opacity-50', 'cursor-not-allowed');
+                            }
+                            const msgBox = document.getElementById('replyMsg');
+                            msgBox.innerText = '🔒 تم قفل هذا التكليف لأن حالته: ' + task.taskStatus;
+                            msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-gray-100 text-gray-700 block mt-4 text-center border';
+                        }
+                    }
+
+                    // عرض السجل الزمني للموظف
+                    const chatHistory = document.getElementById('chatHistory');
+                    chatHistory.innerHTML = '';
+                    if (task.replyHistory && task.replyHistory.length > 0) {
+                        const history = [...task.replyHistory].reverse();
+                        history.forEach(item => {
+                            let dateStr = item.date;
+                            try { dateStr = new Date(item.date).toLocaleString('ar-SA'); } catch(e){}
+                            
+                            let bg = 'bg-gray-50 border-gray-200 text-gray-700';
+                            if (item.status.includes('متوقف') || item.status.includes('اعتذار')) bg = 'bg-red-50 border-red-200 text-red-800';
+                            else if (item.status.includes('جاهز')) bg = 'bg-green-50 border-green-200 text-green-800';
+                            
+                            chatHistory.innerHTML += `
+                                <div class="p-3 rounded-xl text-sm border mb-3 ${bg}">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <div class="font-bold text-xs">${item.status}</div>
+                                        <div class="text-xs opacity-70" dir="ltr">${dateStr}</div>
+                                    </div>
+                                    <div class="whitespace-pre-wrap font-medium">${item.reply || 'بدون تفاصيل'}</div>
+                                    ${item.attachmentUrl ? `<a href="${item.attachmentUrl}" target="_blank" class="inline-block mt-2 px-3 py-1 bg-white/50 rounded text-xs font-bold hover:bg-white/80 transition">📎 تحميل المرفق</a>` : ''}
+                                </div>
+                            `;
+                        });
+                    } else {
+                        chatHistory.innerHTML = '<div class="text-sm text-gray-400 text-center py-4">لم تقم بإرسال أي تحديثات حتى الآن.</div>';
+                    }
+                } else {
+                    document.getElementById('empTaskDesc').innerText = '❌ لم يتم العثور على التكليف أو أن الرابط غير صحيح.';
+                    document.getElementById('empTaskTitle').innerText = 'خطأ';
+                }
+            })
+            .catch(err => {
+                document.getElementById('empTaskDesc').innerText = '❌ خطأ في الاتصال بقاعدة البيانات. الرجاء المحاولة لاحقاً.';
+                document.getElementById('empTaskTitle').innerText = 'خطأ اتصال';
+            });
+        }
+
+        async function setEmpStatusAndSubmit(status) {
+            const replyMsg = document.getElementById('empReplyMsg').value.trim();
+            const file = document.getElementById('empFile').files[0];
+            const msgBox = document.getElementById('replyMsg');
+
+            if (!replyMsg) {
+                msgBox.innerText = 'يرجى كتابة التفاصيل أو سبب الإيقاف في المربع أولاً (إجباري)!';
+                msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-red-50 text-red-700 block mt-4';
+                return;
+            }
+
+            if (file && file.size > 5 * 1024 * 1024) {
+                msgBox.innerText = 'حجم الملف يتجاوز 5 ميجا!';
+                msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-red-50 text-red-700 block mt-4';
+                return;
+            }
+
+            // Disable buttons to prevent spam
+            const buttons = document.getElementById('kanbanButtons').children;
+            for(let b of buttons) { b.disabled = true; b.classList.add('opacity-50'); }
+
+            msgBox.innerText = `اشغل الإنتظار بالاستغفار لحين استجابة النظام...`;
+            msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-blue-50 text-blue-700 block mt-4';
+
+            const payload = {
+                action: 'submitReply',
+                taskId: currentTaskId,
+                status: status,
+                replyText: replyMsg
+            };
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    payload.fileBase64 = e.target.result;
+                    payload.fileName = file.name;
+                    payload.mimeType = file.type;
+                    sendReplyRequest(payload, msgBox, buttons);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                sendReplyRequest(payload, msgBox, buttons);
+            }
+        }
+
+        function sendReplyRequest(payload, msgBox, buttons) {
+            fetch(scriptURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    msgBox.innerText = '✅ تم إرسال الرد وتحديث الحالة بنجاح!';
+                    msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-green-50 text-green-700 block mt-4';
+                    document.getElementById('empReplyMsg').value = '';
+                    document.getElementById('empFile').value = '';
+                    
+                    // Reload to show the new timeline
+                    setTimeout(() => {
+                        loadTaskData(currentTaskId);
+                        msgBox.classList.add('hidden');
+                    }, 1500);
+                } else {
+                    msgBox.innerText = 'خطأ: ' + data.message;
+                    msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-red-50 text-red-700 block mt-4';
+                }
+                for(let b of buttons) { b.disabled = false; b.classList.remove('opacity-50'); }
+            })
+            .catch(err => {
+                msgBox.innerText = 'فشل الاتصال: ' + err.message;
+                msgBox.className = 'p-4 rounded-xl font-bold text-sm bg-red-50 text-red-700 block mt-4';
+                for(let b of buttons) { b.disabled = false; b.classList.remove('opacity-50'); }
+            });
+        }
+
+    </script>
+</body>
+</html>
