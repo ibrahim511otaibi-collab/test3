@@ -1,0 +1,15 @@
+{
+  "name": "نظام إدارة التكاليف",
+  "short_name": "التكاليف",
+  "start_url": "/tasks.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#097834",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/8201/8201103.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
