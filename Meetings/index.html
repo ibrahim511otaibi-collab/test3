@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>منصة إدارة الاجتماعات | جمعية إحياء التراث الإسلامي</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { fontFamily: { sans: ['Calibri','Arial','sans-serif'] } } }</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style type="text/tailwindcss">
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+    body { font-family: 'Tajawal', sans-serif; background-color: #f6faf7; }
+    
+    .mq-input {
+      @apply w-full rounded-xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 transition-colors bg-gray-50;
+    }
+    .btn-primary {
+      @apply bg-[#097834] text-white px-6 py-2.5 rounded-xl font-bold hover:bg-[#075e28] shadow-lg shadow-[#097834]/20 transition-all inline-flex items-center justify-center;
+    }
+    .btn-next-step {
+      @apply bg-gradient-to-l from-[#097834] to-[#0b9040] text-white px-8 py-3.5 rounded-2xl font-bold hover:from-[#075e28] hover:to-[#097834] shadow-lg shadow-[#097834]/30 transition-all inline-flex items-center justify-center gap-3 border border-transparent;
+    }
+    .btn-next-step:hover {
+      transform: translateX(-5px);
+      box-shadow: 0 10px 25px -5px rgba(9, 120, 52, 0.5);
+    }
+    .btn-prev-step {
+      @apply bg-[#f0fdf4] text-[#097834] px-8 py-3.5 rounded-2xl font-bold border border-green-200 hover:border-green-300 hover:bg-[#e6fcf0] shadow-sm transition-all inline-flex items-center justify-center gap-3;
+    }
+    .btn-prev-step:hover {
+      transform: translateX(5px);
+      color: #075e28;
+      box-shadow: 0 4px 6px -1px rgba(9, 120, 52, 0.1);
+    }
+    
+    .wz-step-indicator {
+      @apply flex-1 text-center py-3 text-sm font-bold border-b-2 transition-colors cursor-pointer;
+    }
+    .wz-step-active {
+      @apply border-[#097834] text-[#097834];
+    }
+    .wz-step-inactive {
+      @apply border-gray-200 text-gray-400 hover:text-gray-600;
+    }
+    .wz-panel { display: none; animation: fadeIn 0.4s ease-in-out; }
+    .wz-panel.active { display: block; }
+    .hide { display: none !important; }
+    
+    /* Wizard Steps Overlay Animations */
+    #wizardOverlay {
+      backdrop-filter: blur(8px);
+      transition: opacity 0.3s ease;
+    }
+    
+    /* Dashboard Cards Animations */
+    @keyframes slideUpFade {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .animate-step {
+      animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+    }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.25s; }
+    .delay-3 { animation-delay: 0.4s; }
+    .delay-4 { animation-delay: 0.55s; }
+
+    .step-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px -5px rgba(9, 120, 52, 0.15) !important;
+    }
+    .step-card:hover .icon-wrap {
+      transform: scale(1.15) rotate(-5deg);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Gorgeous Button Animation */
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes shine {
+      0% { left: -100%; }
+      20% { left: 200%; }
+      100% { left: 200%; }
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(9, 120, 52, 0.4); }
+      70% { box-shadow: 0 0 0 20px rgba(9, 120, 52, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(9, 120, 52, 0); }
+    }
+
+    .btn-gorgeous {
+      background: linear-gradient(270deg, #097834, #12a149, #C7AC25, #097834);
+      background-size: 300% 300%;
+      animation: gradientMove 6s ease infinite, pulseGlow 3s infinite;
+      color: white;
+      border: none;
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    .btn-gorgeous:hover {
+      transform: translateY(-5px) scale(1.03);
+      box-shadow: 0 20px 40px -10px rgba(9, 120, 52, 0.6);
+      animation: gradientMove 3s ease infinite;
+    }
+    .btn-gorgeous::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 50%; height: 100%;
+      background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+      transform: skewX(-25deg);
+      animation: shine 4s infinite;
+      z-index: -1;
+    }
+
+    .honeycomb-bg {
+      background-color: #097834;
+      background-image: url("data:image/svg+xml,%3Csvg width='40' height='70' viewBox='0 0 40 70' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 17.3L30 23.1v11.5l10 5.8V17.3zm-20 34.6L10 57.8v11.5l10 5.8V51.9zM0 17.3L-10 23.1v11.5l10 5.8V17.3zM20 5.8L10 11.5v11.5l10 5.8V5.8zM40 51.9L30 57.8v11.5l10 5.8V51.9zM20 40.4L10 46.2v11.5l10 5.8V40.4z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+    }
+    .step-dot { width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:all .4s; }
+    .step-dot.active { background:#097834;color:white;box-shadow:0 0 0 4px rgba(9,120,52,.2); }
+    .step-dot.done { background:#097834;color:white; }
+    .step-dot.idle { background:#e5e7eb;color:#9ca3af; }
+    /* Wizard step panels */
+    .wz-panel { display:none; }
+    .wz-panel.active { display:block; }
+    /* Input styling */
+    .mq-input { width:100%;border:1.5px solid #dfe7e2;border-radius:10px;padding:10px 14px;font-size:15px;outline:none;transition:border .2s;background:#fafffe;font-family:Calibri,Arial,sans-serif; }
+    .mq-input:focus { border-color:#097834;box-shadow:0 0 0 3px rgba(9,120,52,.1); }
+    select.mq-input { cursor:pointer; }
+    /* Task cards from AI */
+    .ai-task-card { background:#f6faf7;border:1.5px solid #dfe7e2;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:10px;transition:all .2s; }
+    .ai-task-card:hover { border-color:#097834;background:#f0faf3; }
+    /* Minutes table */
+    .min-table { width:100%;border-collapse:collapse;font-size:14px; }
+    .min-table th { background:#097834;color:white;padding:10px 14px;text-align:right;font-weight:700; }
+    .min-table td { padding:10px 14px;border:1px solid #dfe7e2;text-align:right; }
+    .min-table tr:nth-child(even) td { background:#f8fffe; }
+    /* Sidebar active */
+    .sidebar-link.active { background:#f0faf3;color:#097834;font-weight:700; }
+    /* Agenda preview card */
+    .agenda-preview { background:white;border-radius:16px;padding:28px;box-shadow:0 4px 24px rgba(9,120,52,.08);border:1.5px solid #dfe7e2; }
+    /* Recording pulse */
+    @keyframes recPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+    .rec-dot { animation:recPulse 1s infinite; }
+    /* Badge */
+    .badge-done { background:#dcfce7;color:#16a34a;border-radius:999px;padding:3px 12px;font-size:12px;font-weight:700; }
+    .badge-pending { background:#dbeafe;color:#2563eb;border-radius:999px;padding:3px 12px;font-size:12px;font-weight:700; }
+    /* Scroll fade for main */
+    .main-scroll { overflow-y:auto;height:100vh; }
+    /* Print only agenda */
+    @media print {
+      body > * { display:none; }
+      #printArea { display:block !important; }
+    }
+    #printArea { display:none; }
+  </style>
+</head>
+<body class="bg-[#f6faf7] text-[#17201b] font-sans m-0">
+
+<!-- ======= LOGIN SCREEN ======= -->
+<div id="loginScreen" class="fixed inset-0 bg-[#f8faf9] z-50 flex flex-col items-center overflow-y-auto">
+  <div class="w-full pt-16 pb-28 text-center text-white relative overflow-hidden honeycomb-bg shadow-md rounded-b-[30px] border-b-4 border-[#076029]">
+    <div class="relative z-10 flex flex-col items-center mt-4">
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">بوابة إدارة الاجتماعات الذكية</h1>
+      <p class="text-base text-green-50 font-bold mb-1">جمعية إحياء التراث الإسلامي - مركز محافظة الفروانية</p>
+    </div>
+  </div>
+  <div class="card p-8 w-[90%] max-w-md text-center bg-white border-2 border-[#097834] rounded-2xl shadow-xl -mt-16 relative z-20">
+    <div class="w-24 h-24 mx-auto mb-4">
+      <img src="https://www.bbimg.org/images/2026/06/28/-.png" class="w-full h-full object-contain" alt="شعار الجمعية" onerror="this.style.display='none'">
+    </div>
+    <h2 class="text-2xl font-extrabold text-[#097834] mb-1">بوابة الموظفين</h2>
+    <p class="text-gray-400 mb-8 text-sm font-medium">أدخل رقمك الوظيفي للوصول للوحة التحكم</p>
+    <div class="mb-6">
+      <input type="text" id="loginIdInput" class="mq-input text-center text-lg tracking-widest font-bold py-3" placeholder="الرقم الوظيفي" autocomplete="off" onkeypress="if(event.key==='Enter') attemptLogin()">
+      <p id="loginError" class="text-red-500 text-xs mt-2 hide font-bold text-center">الرقم الوظيفي غير مسجل، يرجى المحاولة مرة أخرى.</p>
+    </div>
+    <button onclick="attemptLogin()" class="w-full py-3 text-lg font-bold text-white bg-[#097834] hover:bg-[#076029] rounded-xl shadow-md transition-colors">تسجيل الدخول</button>
+  </div>
+  <div class="w-[90%] max-w-2xl mt-8 text-center text-gray-500 text-sm leading-relaxed px-4 mb-12">
+    <p class="text-justify md:text-center leading-loose">تُعد بوابة إدارة الاجتماعات الذكية منصة مؤسسية رائدة تهدف إلى حوكمة ورقمنة إجراءات اللجان الإدارية بالكامل.</p>
+  </div>
+</div>
+
+<!-- ======= MAIN DASHBOARD LAYOUT ======= -->
+<div id="dashboardLayout" class="flex hide" style="min-height:100vh">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white border-l border-[#dfe7e2] flex flex-col shrink-0 sticky top-0 h-screen overflow-y-auto shadow-sm">
+    <div class="p-6 border-b border-[#dfe7e2] text-center">
+      <div class="w-16 h-16 mx-auto mb-3">
+        <img src="https://www.bbimg.org/images/2026/06/28/-.png" class="w-full h-full object-contain" alt="الشعار" onerror="this.style.display='none'">
+      </div>
+      <h2 class="font-bold text-base text-[#097834]">إدارة الاجتماعات</h2>
+      <p class="text-xs text-[#66756d] mt-0.5">جمعية إحياء التراث الإسلامي</p>
+    </div>
+    <nav class="flex-1 p-4 space-y-1 mt-2">
+      <button onclick="navigateTo('dashboard')" id="nav-dashboard" class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-right text-[#17201b] hover:bg-[#f0faf3] transition-colors">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>اللوحة الرئيسية</span>
+      </button>
+      <button onclick="navigateTo('meetings')" id="nav-meetings" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#66756d] font-medium text-right hover:bg-[#f0faf3] transition-colors">
+        <i data-lucide="folder-open" class="w-5 h-5"></i><span>اجتماعاتي</span>
+      </button>
+      <button onclick="navigateTo('members')" id="nav-members" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#66756d] font-medium text-right hover:bg-[#f0faf3] transition-colors">
+        <i data-lucide="users" class="w-5 h-5"></i><span>دليل الأعضاء</span>
+      </button>
+      <div class="my-3 border-b border-[#dfe7e2]"></div>
+      <button onclick="startNewMeeting()" id="nav-wizard" class="w-full btn-gorgeous px-4 py-3 rounded-xl font-bold gap-3 shadow-md">
+        <i data-lucide="plus-circle" class="w-5 h-5"></i><span>بدء اجتماع جديد</span>
+      </button>
+    </nav>
+    <div class="p-5 border-t border-[#dfe7e2] bg-[#f6faf7]/60">
+      <div class="flex items-center gap-3 mb-4">
+        <div id="sidebarUserInitials" class="w-10 h-10 rounded-full bg-[#C7AC25] text-white flex items-center justify-center font-bold text-sm shadow">--</div>
+        <div class="text-right flex-1 min-w-0">
+          <p id="sidebarUserName" class="text-sm font-bold truncate">المستخدم</p>
+          <p class="text-xs text-[#66756d]">السكرتير التنفيذي</p>
+        </div>
+      </div>
+      <button onclick="logout()" class="w-full py-2 text-xs text-red-500 border border-red-200 rounded-lg hover:bg-red-50 font-bold transition-colors">تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 main-scroll bg-[#f6faf7]">
+    <div class="p-8 pb-20 max-w-7xl mx-auto space-y-0">
+
+      <!-- ===== VIEW: DASHBOARD ===== -->
+      <div id="viewDashboard" class="space-y-8">
+        <div class="w-full pt-10 pb-12 px-8 text-center text-white relative overflow-hidden honeycomb-bg shadow-lg rounded-2xl border-b-4 border-[#076029]">
+          <div class="relative z-10">
+            <h2 class="text-3xl font-extrabold mb-2">مرحباً <span id="dashUserName">بكم</span> في بوابة إدارة الاجتماعات</h2>
+            <p class="text-green-100 font-bold text-sm">المنصة المؤسسية لأتمتة وتنظيم جلسات اللجان</p>
+          </div>
+        </div>
+
+        <!-- Concept Cards -->
+        <div class="bg-white rounded-2xl p-10 shadow-sm border border-[#dfe7e2] relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full blur-3xl opacity-50 -z-10 -mr-20 -mt-20"></div>
+          <div class="absolute bottom-0 left-0 w-64 h-64 bg-yellow-50 rounded-full blur-3xl opacity-50 -z-10 -ml-20 -mb-20"></div>
+          
+          <h3 class="font-black text-2xl text-[#17201b] mb-12 text-center flex items-center justify-center gap-2 relative z-10">
+            <i data-lucide="git-merge" class="w-7 h-7 text-[#097834] animate-pulse"></i> آلية عمل المنصة
+          </h3>
+          
+          <div class="relative z-10">
+            <!-- Connecting Line (Desktop Only) -->
+            <div class="hidden xl:block absolute top-[40%] right-0 left-0 h-[2px] bg-gradient-to-l from-green-100 via-yellow-100 to-green-100 -translate-y-1/2 z-0" style="width: 80%; margin: 0 auto;"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 xl:gap-8">
+              
+              <!-- Step 1 -->
+              <div class="step-card animate-step delay-1 bg-white p-6 rounded-2xl border-2 border-transparent hover:border-green-100 transition-all text-center relative z-10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] cursor-default">
+                <div class="icon-wrap w-16 h-16 rounded-2xl bg-green-50 text-[#097834] flex items-center justify-center mx-auto mb-4 transition-transform duration-300 shadow-inner">
+                  <i data-lucide="list-todo" class="w-8 h-8"></i>
+                </div>
+                <div class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-[#097834] text-white font-bold flex items-center justify-center border-4 border-white shadow-sm">١</div>
+                <h4 class="font-bold text-lg text-[#17201b] mb-2">جدول الأعمال</h4>
+                <p class="text-sm text-[#66756d] leading-relaxed">إدخال البيانات الأساسية، ترتيب محاور الاجتماع، وتحديد المدعوين.</p>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="step-card animate-step delay-2 bg-white p-6 rounded-2xl border-2 border-transparent hover:border-yellow-100 transition-all text-center relative z-10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] cursor-default">
+                <div class="icon-wrap w-16 h-16 rounded-2xl bg-yellow-50 text-[#C7AC25] flex items-center justify-center mx-auto mb-4 transition-transform duration-300 shadow-inner">
+                  <i data-lucide="mic" class="w-8 h-8"></i>
+                </div>
+                <div class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-[#C7AC25] text-white font-bold flex items-center justify-center border-4 border-white shadow-sm">٢</div>
+                <h4 class="font-bold text-lg text-[#17201b] mb-2">إدارة وتلخيص</h4>
+                <p class="text-sm text-[#66756d] leading-relaxed">بدء الاجتماع واستخدام الذكاء الاصطناعي لتحليل النقاش واستخلاص القرارات.</p>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="step-card animate-step delay-3 bg-white p-6 rounded-2xl border-2 border-transparent hover:border-blue-100 transition-all text-center relative z-10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] cursor-default">
+                <div class="icon-wrap w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4 transition-transform duration-300 shadow-inner">
+                  <i data-lucide="file-check-2" class="w-8 h-8"></i>
+                </div>
+                <div class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center border-4 border-white shadow-sm">٣</div>
+                <h4 class="font-bold text-lg text-[#17201b] mb-2">المحضر الرسمي</h4>
+                <p class="text-sm text-[#66756d] leading-relaxed">تسجيل الحضور الفعلي وإنشاء محضر احترافي بالقرارات والمستجدات.</p>
+              </div>
+
+              <!-- Step 4 -->
+              <div class="step-card animate-step delay-4 bg-white p-6 rounded-2xl border-2 border-transparent hover:border-green-100 transition-all text-center relative z-10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] cursor-default">
+                <div class="icon-wrap w-16 h-16 rounded-2xl bg-green-50 text-[#097834] flex items-center justify-center mx-auto mb-4 transition-transform duration-300 shadow-inner">
+                  <i data-lucide="share-2" class="w-8 h-8"></i>
+                </div>
+                <div class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-[#097834] text-white font-bold flex items-center justify-center border-4 border-white shadow-sm">٤</div>
+                <h4 class="font-bold text-lg text-[#17201b] mb-2">الحفظ والمشاركة</h4>
+                <p class="text-sm text-[#66756d] leading-relaxed">حفظ في الأرشيف ومشاركة المحضر والقرارات بضغطة زر عبر الواتساب.</p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Start Button -->
+        <div class="text-center py-10 relative z-10">
+          <button onclick="startNewMeeting()" class="btn-gorgeous text-2xl px-14 py-5 rounded-2xl gap-3 mx-auto w-fit font-black tracking-wide">
+            <i data-lucide="plus-circle" class="w-8 h-8"></i> بدء اجتماع جديد
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== VIEW: MEETINGS (اجتماعاتي) ===== -->
+      <div id="viewMeetings" class="hide">
+        <div class="flex items-center justify-between mb-6 bg-white p-5 rounded-2xl border border-[#dfe7e2] shadow-sm">
+          <div>
+            <h2 class="text-xl font-bold text-[#097834] mb-0.5">اجتماعاتي</h2>
+            <p class="text-sm text-[#66756d]">جميع الاجتماعات التي قمت بإعدادها أو المشاركة فيها.</p>
+          </div>
+          <button onclick="startNewMeeting()" class="btn-gorgeous px-5 py-2.5 rounded-xl font-bold shadow-md gap-2"><i data-lucide="plus-circle" class="w-5 h-5"></i> اجتماع جديد</button>
+        </div>
+        <div id="meetingsTableContainer"></div>
+      </div>
+
+      <!-- ===== VIEW: MEMBERS ===== -->
+      <div id="viewMembers" class="hide">
+        <div class="flex items-center justify-between mb-6 bg-white p-5 rounded-2xl border border-[#dfe7e2] shadow-sm">
+          <div>
+            <h2 class="text-xl font-bold text-[#097834] mb-0.5">دليل الأعضاء</h2>
+            <p class="text-sm text-[#66756d]">جميع الموظفين المسجلين في المنظومة.</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-[#dfe7e2] shadow-sm overflow-hidden">
+          <table class="w-full text-right text-sm">
+            <thead class="bg-[#f6faf7] border-b border-[#dfe7e2]">
+              <tr>
+                <th class="p-4 font-bold text-[#17201b] w-12">#</th>
+                <th class="p-4 font-bold text-[#17201b]">الاسم الكامل</th>
+                <th class="p-4 font-bold text-[#17201b]">الرقم الوظيفي</th>
+              </tr>
+            </thead>
+            <tbody id="membersTableBody" class="divide-y divide-[#dfe7e2]"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /main-content -->
+  </main>
+</div>
+
+<!-- ======= WIZARD FULL-SCREEN OVERLAY ======= -->
+<div id="wizardOverlay" class="hide fixed inset-0 bg-[#f6faf7] z-40 overflow-y-auto">
+
+  <!-- Wizard Top Header (sticky) -->
+  <div class="sticky top-0 z-50 bg-white border-b border-[#dfe7e2] shadow-sm px-6 py-4">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <div>
+        <h2 class="text-lg font-bold text-[#097834]" id="wzTitle">إعداد اجتماع جديد</h2>
+        <p class="text-xs text-[#66756d]" id="wzSubtitle">اتبع الخطوات لإعداد الاجتماع</p>
+      </div>
+      <button onclick="closeWizard()" class="flex items-center gap-2 text-sm font-bold text-red-500 border border-red-200 px-4 py-2 rounded-xl hover:bg-red-50 transition-colors">
+        <i data-lucide="x" class="w-4 h-4"></i> إغلاق
+      </button>
+    </div>
+
+    <!-- Stepper -->
+    <div class="max-w-5xl mx-auto mt-4">
+      <div class="flex items-center justify-between relative">
+        <!-- connector -->
+        <div class="absolute right-8 left-8 top-[17px] h-0.5 bg-gray-200 z-0"></div>
+        <div id="stepperProgress" class="absolute right-8 top-[17px] h-0.5 bg-[#097834] z-0 transition-all duration-500" style="width:0%"></div>
+        <!-- dots -->
+        <div id="stepDot1" class="flex flex-col items-center z-10 gap-1">
+          <div class="step-dot active"><i data-lucide="door-open" class="w-4 h-4"></i></div>
+          <span class="text-[10px] font-bold text-[#097834]">حجز القاعة</span>
+        </div>
+        <div id="stepDot2" class="flex flex-col items-center z-10 gap-1">
+          <div class="step-dot idle"><i data-lucide="list" class="w-4 h-4"></i></div>
+          <span class="text-[10px] font-bold text-gray-400">جدول الأعمال</span>
+        </div>
+        <div id="stepDot3" class="flex flex-col items-center z-10 gap-1">
+          <div class="step-dot idle"><i data-lucide="mic" class="w-4 h-4"></i></div>
+          <span class="text-[10px] font-bold text-gray-400">تسجيل الاجتماع</span>
+        </div>
+        <div id="stepDot4" class="flex flex-col items-center z-10 gap-1">
+          <div class="step-dot idle"><i data-lucide="file-text" class="w-4 h-4"></i></div>
+          <span class="text-[10px] font-bold text-gray-400">محضر الاجتماع</span>
+        </div>
+        <div id="stepDot5" class="flex flex-col items-center z-10 gap-1">
+          <div class="step-dot idle"><i data-lucide="save" class="w-4 h-4"></i></div>
+          <span class="text-[10px] font-bold text-gray-400">حفظ في اجتماعاتي</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wizard Body -->
+  <div class="max-w-5xl mx-auto p-6 pb-24">
+
+    <!-- ===== STEP 1: حجز القاعة ===== -->
+    <div id="wzStep1" class="wz-panel active">
+      <div class="bg-white rounded-2xl border border-[#dfe7e2] shadow-sm p-8">
+        <div class="flex items-center gap-4 mb-8 pb-6 border-b border-[#dfe7e2]">
+          <div class="w-14 h-14 bg-green-50 text-[#097834] rounded-2xl flex items-center justify-center shrink-0">
+            <i data-lucide="door-open" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-[#17201b]">الخطوة الأولى: حجز قاعة الاجتماع</h3>
+            <p class="text-sm text-[#66756d] mt-0.5">قم بحجز قاعة الاجتماع ثم أدخل تفاصيل الموعد للمتابعة.</p>
+          </div>
+        </div>
+
+        <!-- Pre-booked Question -->
+        <div class="mb-6">
+          <p class="font-bold text-[#17201b] mb-3">هل تم حجز القاعة؟</p>
+          <div class="flex gap-3 mb-4">
+            <button id="btnYesBooked" onclick="setBookingStatus(true)" class="px-6 py-2.5 rounded-xl border-2 border-[#097834] text-[#097834] font-bold text-sm hover:bg-[#097834] hover:text-white transition-all">نعم</button>
+            <a href="https://booking-turath.vercel.app/" target="_blank" class="px-6 py-2.5 rounded-xl border-2 border-gray-200 text-gray-500 font-bold text-sm hover:border-gray-400 flex items-center gap-2 transition-all">
+              سأقوم بالحجز الآن <i data-lucide="external-link" class="w-4 h-4"></i>
+            </a>
+          </div>
+          <!-- Admin Note -->
+          <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-start gap-3">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-orange-600 shrink-0 mt-0.5"></i>
+            <div>
+              <h5 class="text-sm font-bold text-orange-800 mb-1">تنويه إداري هام</h5>
+              <p class="text-xs text-orange-700 leading-relaxed">
+                لضمان سير عملك باحترافية وانسيابية، يُرجى التأكد التام من إتمام حجز القاعة فعلياً عبر النظام قبل المتابعة. حجزك المسبق يمنع أي تعارض محرج مع اجتماعات الأقسام الأخرى، ويجنبك أي مساءلة إدارية قد تترتب على ذلك.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Booking Details -->
+        <div id="bookingDetails" class="hide">
+          <div class="border-t border-[#dfe7e2] pt-6 mb-4">
+            <h4 class="font-bold text-[#17201b] mb-4 flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4 text-[#097834]"></i> بيانات الحجز</h4>
+          </div>
+
+          <!-- Date Row -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+            <div>
+              <label class="block text-xs font-bold text-[#66756d] mb-2 uppercase tracking-wide">التاريخ الميلادي <span class="text-red-500">*</span></label>
+              <input type="date" id="bookingDate" class="mq-input" onclick="this.showPicker()" onchange="syncDateFromBooking()">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#66756d] mb-2 uppercase tracking-wide">التاريخ الهجري</label>
+              <div id="hijriDateDisplay" class="mq-input bg-[#f6faf7] text-[#097834] font-bold flex items-center" style="cursor:default;min-height:42px">---</div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#66756d] mb-2 uppercase tracking-wide">وقت الاجتماع <span class="text-red-500">*</span></label>
+              <input type="time" id="bookingTime" class="mq-input" onclick="this.showPicker()" onchange="syncTimeFromBooking()">
+            </div>
+          </div>
+
+          <!-- Auto-advance notice -->
+          <div id="autoAdvanceNotice" class="hide bg-green-50 border border-green-200 rounded-xl px-5 py-3 flex items-center gap-3">
+            <i data-lucide="check-circle" class="w-5 h-5 text-[#097834] shrink-0"></i>
+            <p class="text-sm font-bold text-[#097834]">تم تحديد التاريخ والوقت! سيتم الانتقال لجدول الأعمال تلقائياً...</p>
+          </div>
+        </div>
+
+        <!-- Validation Error Notice -->
+        <div id="step1Error" class="hide bg-red-50 border border-red-200 rounded-xl px-5 py-3 mb-4 flex items-center gap-3">
+          <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 shrink-0"></i>
+          <p class="text-sm font-bold text-red-700" id="step1ErrorMsg"></p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex justify-end mt-10 pt-6 border-t border-[#dfe7e2]">
+          <button onclick="validateAndGoToStep2()" class="btn-next-step">
+            التالي: جدول الأعمال <i data-lucide="arrow-left" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 2: جدول الأعمال ===== -->
+    <div id="wzStep2" class="wz-panel">
+      <div class="space-y-5">
+
+        <!-- Meeting Info -->
+        <div class="bg-white rounded-2xl border border-[#dfe7e2] shadow-sm p-6">
+          <div class="flex items-center gap-3 mb-5 pb-4 border-b border-[#dfe7e2]">
+            <div class="w-11 h-11 bg-yellow-50 text-[#C7AC25] rounded-xl flex items-center justify-center shrink-0">
+              <i data-lucide="list" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-[#17201b]">الخطوة الثانية: جدول الأعمال</h3>
+              <p class="text-xs text-[#66756d]">تفاصيل الاجتماع محاور جدول الأعمال والحضور.</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold text-[#66756d] mb-1.5 uppercase tracking-wide">القسم / اللجنة <span class="text-red-500">*</span></label>
+              <select id="agendaDeptSelect" class="mq-input" onchange="handleDeptSelect()">
+                <option value="">-- اختر القسم --</option>
+                <option value="قسم الكلمة الطيبة">قسم الكلمة الطيبة</option>
+                <option value="قسم الإعلامية والتسويق">قسم الإعلامية والتسويق</option>
+                <option value="قسم الريع الوقفي">قسم الريع الوقفي</option>
+                <option value="قسم المشاريع">قسم المشاريع</option>
+                <option value="قسم الرعاية الاجتماعية">قسم الرعاية الاجتماعية</option>
+                <option value="قسم النشء والشباب">قسم النشء والشباب</option>
+                <option value="قسم حلقات تحفيظ القرآن">قسم حلقات تحفيظ القرآن</option>
+                <option value="قسم ضبط الجودة">قسم ضبط الجودة</option>
+                <option value="قسم اللجنة العلمية">قسم اللجنة العلمية</option>
+                <option value="قسم متابعة الأقسام">قسم متابعة الأقسام</option>
+                <option value="قسم تطوير الأنظمة التقنية">قسم تطوير الأنظمة التقنية</option>
+                <option value="قسم الأرشيف الالكتروني">قسم الأرشيف الالكتروني</option>
+                <option value="قسم الاستقطاعات">قسم الاستقطاعات</option>
+                <option value="قسم الدعم الفني">قسم الدعم الفني</option>
+                <option value="قسم الاستقبال">قسم الاستقبال</option>
+                <option value="الهيئة الإدارية">الهيئة الإدارية</option>
+                <option value="__custom__">✏️ كتابة اسم القسم يدوياً...</option>
+              </select>
+              <input type="text" id="agendaDept" class="mq-input mt-2 hide" placeholder="اكتب اسم القسم / اللجنة يدوياً..." oninput="updateAgendaPreview()">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#66756d] mb-1.5 uppercase tracking-wide">موقع الاجتماع</label>
+              <input type="text" id="agendaLocation" class="mq-input" placeholder="قاعة الاجتماعات الرئيسية" oninput="updateAgendaPreview()">
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-[#66756d] mb-1.5 uppercase tracking-wide">التاريخ الميلادي</label>
+              <input type="date" id="agendaDate" class="mq-input" onclick="this.showPicker()" onchange="syncHijriFromAgendaDate(); updateAgendaPreview()">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#66756d] mb-1.5 uppercase tracking-wide">التاريخ الهجري</label>
+              <input type="text" id="agendaHijriDate" class="mq-input text-[#097834] font-bold" oninput="updateAgendaPreview()">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#66756d] mb-1.5 uppercase tracking-wide">الوقت</label>
+              <input type="time" id="agendaTime" class="mq-input" onclick="this.showPicker()" onchange="updateAgendaPreview()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Attendees -->
+        <div class="bg-white rounded-2xl border border-[#dfe7e2] shadow-sm p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-bold text-[#17201b]">الأعضاء المدعوون</h4>
+            <button onclick="addAttendeeRow()" class="text-sm font-bold text-[#097834] hover:underline flex items-center gap-1">
+              <i data-lucide="user-plus" class="w-4 h-4"></i> إضافة عضو
+            </button>
+          </div>
+          <table class="w-full text-right text-sm mb-4">
+            <thead>
+              <tr class="border-b border-[#dfe7e2]">
+                <th class="pb-2 font-bold text-[#66756d] text-xs w-8">#</th>
+                <th class="pb-2 font-bold text-[#66756d] text-xs">الاسم</th>
+                <th class="pb-2 font-bold text-[#66756d] text-xs">المسمى / الصفة</th>
+                <th class="pb-2 w-8"></th>
+              </tr>
+            </thead>
+            <tbody id="attendeeTableBody"></tbody>
+          </table>
+          <p class="text-xs text-[#66756d] flex items-center gap-1.5 mt-2">
+            <i data-lucide="info" class="w-3.5 h-3.5"></i>
+            اختر من القائمة أو اختر "إدخال يدوي" لكتابة اسم غير موجود في القائمة.
+          </p>
+        </div>
+
+        <!-- Agenda Items -->
+        <div class="bg-white rounded-2xl border border-[#dfe7e2] shadow-sm p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-bold text-[#17201b]">بنود جدول الأعمال</h4>
+            <button onclick="addAgendaItem()" class="text-sm font-bold text-[#097834] hover:underline flex items-center gap-1">
+              <i data-lucide="plus" class="w-4 h-4"></i> إضافة بند
+            </button>
+          </div>
+          <div id="agendaItemsList" class="space-y-2 mb-4">
+            <!-- injected by JS -->
+          </div>
+        </div>
+
+        <!-- Agenda Preview Card -->
+        <div class="agenda-preview">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-bold text-[#17201b] flex items-center gap-2"><i data-lucide="eye" class="w-4 h-4 text-[#097834]"></i> معاينة جدول الأعمال الرسمي</h4>
+            <div class="flex gap-2">
+              <button onclick="scheduleMeetingAndClose()" class="flex items-center gap-1.5 text-xs font-bold text-white bg-[#097834] px-3 py-1.5 rounded-lg hover:bg-[#12a149] transition-colors">
+                <i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i> حفظ وجدولة
+              </button>
+              <button onclick="printAgenda()" class="flex items-center gap-1.5 text-xs font-bold text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+                <i data-lucide="printer" class="w-3.5 h-3.5"></i> طباعة PDF
+              </button>
+              <button onclick="shareAgendaWhatsApp()" class="flex items-center gap-1.5 text-xs font-bold text-green-700 border border-green-200 px-3 py-1.5 rounded-lg bg-green-50 hover:bg-green-100 transition-colors">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> مشاركة واتساب
+              </button>
+            </div>
+          </div>
+          <!-- Official Agenda Card (matching the provided image) -->
+          <div id="agendaPreviewCard" class="bg-white overflow-hidden shadow-2xl relative" style="font-family:Calibri, sans-serif;max-width:794px;min-height:1123px;margin:auto;box-shadow:0 10px 30px rgba(0,0,0,0.15); background-image: url('template.png'); background-size: 100% 100%; background-position: center; background-repeat: no-repeat;">
+            <div class="px-12 pt-16 flex justify-between">
+              <div></div>
+              <div class="text-left text-sm text-gray-800 font-bold" style="min-width: 150px;">
+                <p>الرقــم: ( <span id="pvMeetingNum">---</span> )</p>
+                <p>التاريـخ: <span id="pvDateG">---</span></p>
+                <p>الموافـق: <span id="pvDateH">---</span></p>
+              </div>
+            </div>
+            
+            <div class="px-16 pt-8 pb-16 bg-transparent">
+              <h3 class="text-center font-black text-2xl text-[#097834] mb-1">جدول أعمال اجتماع <span id="pvDeptTitle">القسم / اللجنة</span></h3>
+              <h4 class="text-center font-bold text-lg text-[#097834] mb-6">رقم ( <span id="pvMeetingNumTitle">---</span> ) عن شهر <span id="pvMonthTitle">---</span> لعام: <span id="pvYearTitle">---</span>م</h4>
+              <!-- Info row -->
+              <table class="w-full border border-gray-300 mb-6 text-sm" style="border-collapse:collapse">
+                <tr>
+                  <td class="border border-gray-300 px-3 py-2 text-center bg-[#C7AC25] font-bold w-1/4">الموعد</td>
+                  <td class="border border-gray-300 px-3 py-2 text-center font-bold w-1/4" id="pvInfoDay">---</td>
+                  <td class="border border-gray-300 px-3 py-2 text-center bg-[#C7AC25] font-bold w-1/4">التاريخ</td>
+                  <td class="border border-gray-300 px-3 py-2 text-center font-bold w-1/4" id="pvInfoDate">---</td>
+                </tr>
+                <tr>
+                  <td class="border border-gray-300 px-3 py-2 text-center bg-[#C7AC25] font-bold">مكان الانعقاد</td>
+                  <td class="border border-gray-300 px-3 py-2 text-center font-bold" id="pvInfoLocation">---</td>
+                  <td class="border border-gray-300 px-3 py-2 text-center bg-[#C7AC25] font-bold">الوقت</td>
+                  <td class="border border-gray-300 px-3 py-2 text-center font-bold" id="pvInfoTime">---</td>
+                </tr>
+              </table>
+
+              <!-- Attendees -->
+              <p class="font-bold text-sm text-[#097834] mb-2">❖ أسماء الحضور:-</p>
+              <table class="w-full border border-gray-300 mb-4 text-xs" id="pvAttendeesTable" style="border-collapse:collapse">
+                <thead><tr>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-6">م</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">الاسم</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">المسمى</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-6">م</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">الاسم</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">المسمى</th>
+                </tr></thead>
+                <tbody id="pvAttendeesTbody"></tbody>
+              </table>
+              
+              <!-- Agenda Items -->
+              <p class="font-bold text-sm text-[#097834] mb-2 mt-6">❖ بنود الاجتماع:-</p>
+              <table class="w-full border border-gray-300 text-sm mb-6" id="pvItemsTable" style="border-collapse:collapse">
+                <thead><tr>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-8">م</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">البند</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-1/3">ملاحظات</th>
+                </tr></thead>
+                <tbody id="pvItemsTbody"></tbody>
+              </table>
+
+              <!-- AOB Table -->
+              <p class="font-bold text-sm text-[#097834] mb-2 mt-6">ما يستجد من أعمال -:</p>
+              <table class="w-full border border-gray-300 text-sm" style="border-collapse:collapse">
+                <thead><tr>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-8">م</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">البـنــــد</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-1/3">ملاحظـــــات</th>
+                </tr></thead>
+                <tbody id="pvAobTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-10 pt-6 border-t border-[#dfe7e2]">
+          <button onclick="goToStep(1)" class="btn-prev-step w-full sm:w-auto">
+            <i data-lucide="arrow-right" class="w-5 h-5"></i> السابق
+          </button>
+          <button onclick="goToStep(3)" class="btn-next-step w-full sm:w-auto">
+            التالي: تشغيل الاجتماع <i data-lucide="arrow-left" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 3: تسجيل الاجتماع الذكي ===== -->
+    <div id="wzStep3" class="wz-panel">
+      <div class="space-y-5">
+
+        <!-- Recording Header -->
+        <div class="bg-white rounded-2xl border border-[#dfe7e2] shadow-sm p-6">
+          <div class="flex items-start md:items-center justify-between flex-col md:flex-row gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="mic" class="w-5 h-5"></i></div>
+              <div>
+                <h3 class="text-lg font-bold text-[#17201b]">الخطوة الثالثة: تسجيل الاجتماع الذكي</h3>
+                <p class="text-xs text-[#66756d]">سجّل صوت الاجتماع أو اكتب الملاحظات ليقوم الذكاء الاصطناعي بتحليلها.</p>
+              </div>
+            </div>
+            <button onclick="goToStep(4)" class="text-sm font-bold text-gray-500 border border-gray-200 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-1.5">
+              <i data-lucide="skip-forward" class="w-4 h-4"></i> تخطي هذه الخطوة
+            </button>
+          </div>
+        </div>
+
+        <!-- Recording Controls -->
+        <div class="bg-white rounded-2xl border border-[#dfe7e2] shadow-sm p-6 mb-6">
+          <div class="flex items-center justify-between mb-5">
+            <div class="flex flex-wrap gap-3">
+              <button id="btnRecord" onclick="toggleRecording()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-red-200 text-red-600 bg-red-50 font-bold text-sm hover:bg-red-100 transition-all">
+                <i data-lucide="mic" class="w-4 h-4"></i> بدء التسجيل الصوتي
+              </button>
+            </div>
+            <button onclick="analyzeWithAI()" id="btnAI" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#C7AC25] text-white font-bold text-sm hover:bg-[#a68f1f] transition-all shadow-md">
+              <i data-lucide="sparkles" class="w-4 h-4"></i> تحليل واستخراج أبرز البنود
+            </button>
+          </div>
+          <!-- Recording Indicator -->
+          <div id="recordingBadge" class="hide flex items-center gap-2 mb-4 text-red-600 font-bold text-sm">
+            <div class="w-3 h-3 bg-red-500 rounded-full rec-dot"></div> جاري الاستماع والتفريغ المباشر...
+          </div>
+          <!-- Transcript -->
+          <div>
+            <label class="block text-xs font-bold text-[#66756d] mb-2 uppercase tracking-wide">التفريغ الصوتي المباشر (اللهجة الدارجة)</label>
+            <textarea id="transcriptArea" class="mq-input h-48 resize-none text-gray-700" placeholder="سيُكتب هنا التفريغ الصوتي تلقائياً أثناء التسجيل..."></textarea>
+          </div>
+        </div>
+
+        <!-- AI Formal Text Output -->
+        <div id="aiFormalSection" class="hide bg-[#f0faf3] rounded-2xl border border-[#097834]/30 shadow-sm p-6 mb-6">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#097834]/20">
+            <h4 class="font-bold text-[#097834] flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4 text-[#097834]"></i> إعادة الصياغة (باللغة العربية الفصحى)</h4>
+          </div>
+          <textarea id="formalTranscriptArea" class="mq-input h-48 resize-none text-gray-800 bg-white" placeholder="ستظهر هنا الصيغة الرسمية للاجتماع..."></textarea>
+        </div>
+
+        <!-- AI Tasks Output -->
+        <div id="aiTasksSection" class="hide bg-white rounded-2xl border border-[#dfe7e2] shadow-sm p-6">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#dfe7e2]">
+            <h4 class="font-bold text-[#17201b] flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-[#097834]"></i> فرز أبرز البنود والقرارات</h4>
+          </div>
+          <div id="aiTasksList" class="space-y-3"></div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-10 pt-6 border-t border-[#dfe7e2]">
+          <button onclick="goToStep(2)" class="btn-prev-step w-full sm:w-auto">
+            <i data-lucide="arrow-right" class="w-5 h-5"></i> السابق
+          </button>
+          <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <button onclick="printAgenda()" class="flex items-center justify-center gap-2 text-sm font-bold text-gray-600 border border-gray-200 px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-colors">
+              <i data-lucide="printer" class="w-4 h-4"></i> تصدير جدول الأعمال PDF
+            </button>
+            <button onclick="shareAgendaWhatsApp()" class="flex items-center justify-center gap-2 text-sm font-bold text-green-700 border border-green-200 bg-green-50 px-4 py-2.5 rounded-xl hover:bg-green-100 transition-colors">
+              <i data-lucide="message-circle" class="w-4 h-4"></i> تصدير الواتساب
+            </button>
+            <button onclick="goToStep(4)" class="btn-next-step">
+              التالي: المحضر <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 4: محضر الاجتماع ===== -->
+    <div id="wzStep4" class="wz-panel">
+      <div class="space-y-5">
+
+        <div class="bg-white rounded-2xl border border-[#dfe7e2] shadow-sm p-6">
+          <div class="flex items-center gap-3 mb-5 pb-4 border-b border-[#dfe7e2]">
+            <div class="w-11 h-11 bg-green-50 text-[#097834] rounded-xl flex items-center justify-center shrink-0"><i data-lucide="file-text" class="w-5 h-5"></i></div>
+            <div>
+              <h3 class="text-lg font-bold text-[#17201b]">الخطوة الرابعة: محضر الاجتماع</h3>
+              <p class="text-xs text-[#66756d]">تفاصيل المحضر الرسمي تُملأ تلقائياً من البيانات المدخلة سابقاً.</p>
+            </div>
+          </div>
+
+          <!-- Minutes Form -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label class="block text-xs font-bold text-[#66756d] mb-1.5">رقم الاجتماع</label>
+              <input type="text" id="minNum" class="mq-input" placeholder="مثال: 03" oninput="updateMinutesPreview()">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#66756d] mb-1.5">مكان الانعقاد</label>
+              <input type="text" id="minLocation" class="mq-input" placeholder="قاعة الاجتماعات" oninput="updateMinutesPreview()">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#66756d] mb-1.5">التاريخ</label>
+              <input type="date" id="minDate" class="mq-input" oninput="updateMinutesPreview()">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#66756d] mb-1.5">الوقت</label>
+              <input type="time" id="minTime" class="mq-input" oninput="updateMinutesPreview()">
+            </div>
+          </div>
+
+          <!-- Attendance Checklist -->
+          <div class="mb-6">
+            <h4 class="font-bold text-sm text-[#17201b] mb-3">من قام بحضور الاجتماع؟</h4>
+            <div id="minutesAttendanceChecklist" class="flex flex-col gap-2 p-4 bg-gray-50 border border-gray-200 rounded-xl max-h-48 overflow-y-auto">
+              <!-- Checkboxes will be injected here via JS -->
+            </div>
+          </div>
+
+          <!-- Decisions Table in Minutes -->
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-bold text-sm text-[#17201b]">بنود المحضر والقرارات</h4>
+              <button onclick="addMinuteItem()" class="text-xs font-bold text-[#097834] hover:underline flex items-center gap-1">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> إضافة بند
+              </button>
+            </div>
+            <table class="min-table" id="minutesItemsTable">
+              <thead>
+                <tr>
+                  <th class="w-8 text-center">م</th>
+                  <th>البند</th>
+                  <th>القرار / الملاحظة</th>
+                  <th class="w-8 text-center">حذف</th>
+                </tr>
+              </thead>
+              <tbody id="minutesItemsTbody"></tbody>
+            </table>
+          </div>
+
+          <!-- What Next / Action Items -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-bold text-sm text-[#17201b]">ما يستجد من أعمال</h4>
+              <button onclick="addActionItem()" class="text-xs font-bold text-[#C7AC25] hover:underline flex items-center gap-1">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> إضافة
+              </button>
+            </div>
+            <table class="min-table" id="actionItemsTable">
+              <thead>
+                <tr>
+                  <th class="w-8 text-center">م</th>
+                  <th>البند</th>
+                  <th>القرار / الإجراء</th>
+                  <th class="w-8 text-center">حذف</th>
+                </tr>
+              </thead>
+              <tbody id="actionItemsTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Minutes Preview -->
+        <div class="agenda-preview">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-bold text-[#17201b] flex items-center gap-2"><i data-lucide="eye" class="w-4 h-4 text-[#097834]"></i> معاينة محضر الاجتماع الرسمي</h4>
+            <div class="flex gap-2">
+              <button onclick="printMinutes()" class="flex items-center gap-1.5 text-xs font-bold text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+                <i data-lucide="printer" class="w-3.5 h-3.5"></i> تحميل PDF
+              </button>
+              <button onclick="shareMinutesWhatsApp()" class="flex items-center gap-1.5 text-xs font-bold text-green-700 border border-green-200 px-3 py-1.5 rounded-lg bg-green-50 hover:bg-green-100 transition-colors">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> مشاركة واتساب
+              </button>
+            </div>
+          </div>
+          <!-- Official Minutes Card -->
+          <div id="minutesPreviewCard" class="bg-white overflow-hidden shadow-2xl relative" style="font-family:Calibri, sans-serif;max-width:794px;min-height:1123px;margin:auto;box-shadow:0 10px 30px rgba(0,0,0,0.15); background-image: url('template.png'); background-size: 100% 100%; background-position: center; background-repeat: no-repeat;">
+            <div class="px-12 pt-16 flex justify-between">
+              <div></div>
+              <div class="text-left text-sm text-gray-800 font-bold" style="min-width: 150px;">
+                <p>الرقــم: ( <span id="minPvNum">---</span> )</p>
+                <p>التاريـخ: <span id="minPvDate">---</span></p>
+                <p>الموافـق: <span id="minPvHijri">---</span></p>
+              </div>
+            </div>
+            <div class="px-16 pt-2 pb-16 bg-transparent">
+              <h3 class="text-center font-black text-2xl text-[#17201b] mb-2">محضر اجتماع</h3>
+              <h4 class="text-center font-bold text-lg text-[#097834] mb-6" id="minPvDept">القسم / اللجنة</h4>
+              <table class="w-full border border-gray-300 mb-4 text-xs" style="border-collapse:collapse">
+                <tr>
+                  <td class="border border-gray-300 px-3 py-2 bg-[#C7AC25] text-white font-bold text-center w-1/4">التاريخ</td>
+                  <td class="border border-gray-300 px-3 py-2 text-center font-bold" id="minPvDateInfo">---</td>
+                  <td class="border border-gray-300 px-3 py-2 bg-[#C7AC25] text-white font-bold text-center w-1/4">الوقت</td>
+                  <td class="border border-gray-300 px-3 py-2 text-center font-bold" id="minPvTimeInfo">---</td>
+                </tr>
+                <tr>
+                  <td class="border border-gray-300 px-3 py-2 bg-[#C7AC25] text-white font-bold text-center">مكان الانعقاد</td>
+                  <td class="border border-gray-300 px-3 py-2 text-center font-bold" colspan="3" id="minPvLocationInfo">---</td>
+                </tr>
+              </table>
+              <!-- Attendees -->
+              <p class="font-bold text-xs text-[#097834] mb-1.5">❖ أسماء الحضور:</p>
+              <table class="w-full border border-gray-300 mb-4 text-xs" style="border-collapse:collapse">
+                <thead><tr>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-6">م</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">الاسم</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">المسمى</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-6">م</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">الاسم</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">المسمى</th>
+                </tr></thead>
+                <tbody id="minPvAttendeesTbody"></tbody>
+              </table>
+              <!-- Minutes Items -->
+              <p class="font-bold text-xs text-[#097834] mb-1.5">❖ بنود الاجتماع:</p>
+              <table class="w-full border border-gray-300 mb-4 text-xs" style="border-collapse:collapse">
+                <thead><tr>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-8">م</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">البند</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-1/3">القرار</th>
+                </tr></thead>
+                <tbody id="minPvItemsTbody"></tbody>
+              </table>
+              <!-- Action Items -->
+              <p class="font-bold text-xs text-[#097834] mb-1.5">❖ ما يستجد من أعمال:</p>
+              <table class="w-full border border-gray-300 text-xs" style="border-collapse:collapse">
+                <thead><tr>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-8">م</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">البند</th>
+                  <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-1/3">القرار</th>
+                </tr></thead>
+                <tbody id="minPvActionTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-10 pt-6 border-t border-[#dfe7e2]">
+          <button onclick="goToStep(3)" class="btn-prev-step w-full sm:w-auto">
+            <i data-lucide="arrow-right" class="w-5 h-5"></i> السابق
+          </button>
+          <button onclick="goToStep(5)" class="btn-next-step w-full sm:w-auto">
+            حفظ في اجتماعاتي <i data-lucide="check-circle" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 5: حفظ في اجتماعاتي ===== -->
+    <div id="wzStep5" class="wz-panel">
+      <div class="bg-white rounded-2xl border border-[#dfe7e2] shadow-sm p-12 text-center max-w-2xl mx-auto">
+        <div class="w-24 h-24 bg-green-50 text-[#097834] rounded-full flex items-center justify-center mx-auto mb-6">
+          <i data-lucide="check-circle" class="w-14 h-14"></i>
+        </div>
+        <h3 class="text-2xl font-black text-[#17201b] mb-3">اكتمل إعداد الاجتماع! 🎉</h3>
+        <p class="text-[#66756d] mb-8 leading-relaxed">تم حفظ الاجتماع بنجاح في قائمة <strong>اجتماعاتي</strong>. يمكنك مراجعته وتعديله في أي وقت.</p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <button onclick="saveMeetingAndClose()" class="btn-primary px-8 py-3 rounded-xl gap-2">
+            <i data-lucide="save" class="w-5 h-5"></i> حفظ وإغلاق
+          </button>
+          <button onclick="navigateTo('meetings');closeWizard();" class="flex items-center gap-2 justify-center px-8 py-3 rounded-xl border border-[#097834] text-[#097834] font-bold hover:bg-[#f0faf3] transition-colors">
+            <i data-lucide="folder-open" class="w-5 h-5"></i> الانتقال لاجتماعاتي
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /wizard body -->
+</div><!-- /wizardOverlay -->
+
+<!-- ===== PRINT AREA ===== -->
+<div id="printArea" style="display:none;padding:20px;font-family:Arial,sans-serif"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

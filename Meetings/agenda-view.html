@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>معاينة جدول الأعمال</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #f3f4f6;
+      font-family: Calibri, sans-serif;
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+    }
+    .a4-paper {
+      background-color: white;
+      width: 100%;
+      max-width: 794px;
+      min-height: 1123px;
+      padding: 0;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      border: 1px solid #e5e7eb;
+      position: relative;
+      background-image: url('template.png');
+      background-size: 100% 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="a4-paper" id="paper">
+    <div class="px-12 pt-16 flex justify-between">
+      <div></div>
+      <div class="text-left text-sm text-gray-800 font-bold" style="min-width: 150px;">
+        <p>الرقم: ( <span id="vNum">---</span> )</p>
+        <p>التاريخ: <span id="vDateG">---</span></p>
+        <p>الموافق: <span id="vDateH">---</span></p>
+      </div>
+    </div>
+    
+    <div class="px-16 pt-8 pb-16 bg-transparent">
+      <h3 class="text-center font-black text-2xl text-[#097834] mb-1">جدول أعمال اجتماع <span id="vDeptTitle">القسم / اللجنة</span></h3>
+      <h4 class="text-center font-bold text-lg text-[#097834] mb-6">رقم ( <span id="vMeetingNumTitle">---</span> ) في شهر <span id="vMonthTitle">---</span> لعام: <span id="vYearTitle">---</span>م</h4>
+      
+      <!-- Info row -->
+      <table class="w-full border border-gray-300 mb-6 text-sm" style="border-collapse:collapse">
+        <tr>
+          <td class="border border-gray-300 px-3 py-2 text-center bg-[#C7AC25] font-bold w-1/4">اليوم</td>
+          <td class="border border-gray-300 px-3 py-2 text-center font-bold w-1/4" id="vInfoDay">---</td>
+          <td class="border border-gray-300 px-3 py-2 text-center bg-[#C7AC25] font-bold w-1/4">التاريخ</td>
+          <td class="border border-gray-300 px-3 py-2 text-center font-bold w-1/4" id="vInfoDate">---</td>
+        </tr>
+        <tr>
+          <td class="border border-gray-300 px-3 py-2 text-center bg-[#C7AC25] font-bold">مقر الاجتماع</td>
+          <td class="border border-gray-300 px-3 py-2 text-center font-bold" id="vInfoLoc">---</td>
+          <td class="border border-gray-300 px-3 py-2 text-center bg-[#C7AC25] font-bold">الوقت</td>
+          <td class="border border-gray-300 px-3 py-2 text-center font-bold" id="vInfoTime">---</td>
+        </tr>
+      </table>
+
+      <!-- Attendees -->
+      <p class="font-bold text-sm text-[#097834] mb-2">١. حضور الاجتماع:-</p>
+      <table class="w-full border border-gray-300 mb-4 text-xs" style="border-collapse:collapse">
+        <thead><tr>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-6">م</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">الاسم</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">المسمى</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-6">م</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">الاسم</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">المسمى</th>
+        </tr></thead>
+        <tbody id="vAttendeesTbody"></tbody>
+      </table>
+
+      <!-- Agenda Items -->
+      <p class="font-bold text-sm text-[#097834] mb-2 mt-6">٢. بنود الاجتماع:-</p>
+      <table class="w-full border border-gray-300 text-sm mb-6" style="border-collapse:collapse">
+        <thead><tr>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-8">م</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">البند</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-1/3">ملاحظات</th>
+        </tr></thead>
+        <tbody id="vItems"></tbody>
+      </table>
+
+      <!-- AOB Table -->
+      <p class="font-bold text-sm text-[#097834] mb-2 mt-6">ما يستجد من أعمال :-</p>
+      <table class="w-full border border-gray-300 text-sm mb-6" style="border-collapse:collapse">
+        <thead><tr>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-8">م</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">البند</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-1/3">ملاحظات</th>
+        </tr></thead>
+        <tbody id="vAobTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxRGrZwpI5z5ZGDBzvpfywF9w7ZQf_4SDdK8cJkmCIbf8G6h3atw7CiQufaBdRdEq8a/exec";
+    const params = new URLSearchParams(window.location.search);
+    
+    async function loadData() {
+      let m = null;
+      const meetingId = params.get('id');
+      
+      if (meetingId) {
+        try {
+          const res = await fetch(SCRIPT_URL + '?action=getMeetings');
+          const data = await res.json();
+          if (data.success && data.meetings) {
+            m = data.meetings.find(x => String(x.id) === String(meetingId));
+          }
+        } catch(e) { console.error('Cloud fetch error', e); }
+      }
+
+      if (m) {
+        // Render from Cloud Object
+        document.getElementById('vNum').innerText = m.minNum || m.id || '---';
+        document.getElementById('vMeetingNumTitle').innerText = m.minNum || m.id || '---';
+        
+        const dObj = m.date ? new Date(m.date + 'T00:00:00') : null;
+        let dateG = '---', yearStr = '---', monthStr = '---', dayStr = '---';
+        if (dObj) {
+          dateG = `${dObj.getFullYear()} - ${dObj.getMonth()+1} - ${dObj.getDate()} م`;
+          yearStr = dObj.getFullYear();
+          monthStr = dObj.toLocaleDateString('ar-KW',{month:'long'});
+          dayStr = dObj.toLocaleDateString('ar-KW',{weekday:'long'});
+        }
+        
+        document.getElementById('vMonthTitle').innerText = monthStr;
+        document.getElementById('vYearTitle').innerText = yearStr;
+        document.getElementById('vDateG').innerText = dateG;
+        document.getElementById('vDateH').innerText = '---'; 
+        document.getElementById('vInfoDate').innerText = dateG;
+        document.getElementById('vInfoDay').innerText = dayStr;
+        
+        let tForm = m.time || '---';
+        if (m.time) {
+          const [hh, mm] = m.time.split(':');
+          let h = parseInt(hh, 10);
+          const ampm = h >= 12 ? 'م' : 'ص';
+          h = h % 12 || 12;
+          tForm = `${h}:${mm} ${ampm}`;
+        }
+        document.getElementById('vInfoTime').innerText = tForm;
+        document.getElementById('vInfoLoc').innerText = m.location || '---';
+        document.getElementById('vDeptTitle').innerText = m.department || 'القسم / اللجنة';
+
+        renderAttendees(m.attendees || []);
+        renderAgendaItems(m.items || []);
+        renderAOB();
+      } else {
+        // Fallback to URL Params
+        document.getElementById('vNum').innerText = params.get('num') || '---';
+        document.getElementById('vMeetingNumTitle').innerText = params.get('num') || '---';
+        document.getElementById('vMonthTitle').innerText = params.get('month') || '---';
+        document.getElementById('vYearTitle').innerText = params.get('year') || '---';
+        document.getElementById('vDateG').innerText = params.get('dateG') || '---';
+        document.getElementById('vDateH').innerText = params.get('dateH') || '---';
+        document.getElementById('vInfoDate').innerText = params.get('dateG') || '---';
+        document.getElementById('vInfoDay').innerText = params.get('day') || '---';
+        document.getElementById('vInfoTime').innerText = params.get('time') || '---';
+        document.getElementById('vInfoLoc').innerText = params.get('loc') || '---';
+        document.getElementById('vDeptTitle').innerText = params.get('dept') || 'القسم / اللجنة';
+
+        try { renderAttendees(JSON.parse(decodeURIComponent(params.get('att')||'[]'))); } catch(e){ renderAttendees([]); }
+        try { renderAgendaItems(JSON.parse(decodeURIComponent(params.get('items')||'[]'))); } catch(e){ renderAgendaItems([]); }
+        renderAOB();
+      }
+    }
+
+    function renderAttendees(ats) {
+      const atBody = document.getElementById('vAttendeesTbody');
+      atBody.innerHTML = '';
+      if (ats && ats.length > 0) {
+        const half = Math.ceil(ats.length / 2);
+        for (let i = 0; i < half; i++) {
+          const left = ats[i];
+          const right = ats[i + half];
+          const tr = document.createElement('tr');
+          let html = `
+            <td class="border border-gray-300 px-2 py-1.5 text-center font-bold text-xs bg-[#f6faf7]">${i + 1}</td>
+            <td class="border border-gray-300 px-2 py-1.5 font-bold text-xs">${left.name || '---'}</td>
+            <td class="border border-gray-300 px-2 py-1.5 text-xs text-center">${left.role || '---'}</td>
+          `;
+          if (right) {
+            html += `
+              <td class="border border-gray-300 px-2 py-1.5 text-center font-bold text-xs bg-[#f6faf7]">${i + half + 1}</td>
+              <td class="border border-gray-300 px-2 py-1.5 font-bold text-xs">${right.name || '---'}</td>
+              <td class="border border-gray-300 px-2 py-1.5 text-xs text-center">${right.role || '---'}</td>
+            `;
+          } else {
+            html += `
+              <td class="border border-gray-300 px-2 py-1.5 bg-gray-50"></td>
+              <td class="border border-gray-300 px-2 py-1.5 bg-gray-50"></td>
+              <td class="border border-gray-300 px-2 py-1.5 bg-gray-50"></td>
+            `;
+          }
+          tr.innerHTML = html;
+          atBody.appendChild(tr);
+        }
+      } else {
+        atBody.innerHTML = `<tr><td colspan="6" class="text-center p-2 text-gray-400 text-xs">لا يوجد مدعوين مسجلين</td></tr>`;
+      }
+    }
+
+    function renderAgendaItems(items) {
+      const tbody = document.getElementById('vItems');
+      tbody.innerHTML = '';
+      if (items && items.length > 0) {
+        items.forEach((item, i) => {
+          const text = typeof item === 'object' ? item.text : item;
+          const note = typeof item === 'object' ? (item.note || '') : '';
+          tbody.innerHTML += `<tr>
+            <td class="border border-gray-300 px-2 py-2 text-center font-bold bg-[#f6faf7]">${i+1}</td>
+            <td class="border border-gray-300 px-2 py-2 font-bold">${text}</td>
+            <td class="border border-gray-300 px-2 py-2 text-gray-500 text-xs">${note}</td>
+          </tr>`;
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center p-4 text-gray-400 text-sm">لا توجد بنود لعرضها</td></tr>';
+      }
+    }
+
+    function renderAOB() {
+      const aobBody = document.getElementById('vAobTbody');
+      aobBody.innerHTML = '';
+      for(let j=1; j<=2; j++) {
+        aobBody.innerHTML += `<tr>
+          <td class="border border-gray-300 px-2 py-2 text-center text-gray-400 font-bold">${j}</td>
+          <td class="border border-gray-300 px-2 py-2">&nbsp;</td>
+          <td class="border border-gray-300 px-2 py-2">&nbsp;</td>
+        </tr>`;
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

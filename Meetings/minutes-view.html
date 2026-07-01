@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>معاينة محضر الاجتماع</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+    body { font-family: 'Tajawal', sans-serif; background-color: #f3f4f6; }
+    .a4-paper {
+      background-color: white;
+      overflow: hidden;
+      position: relative;
+      font-family: Calibri, sans-serif;
+      max-width: 794px;
+      min-height: 1123px;
+      margin: 20px auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      background-image: url('template.png');
+      background-size: 100% 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    @media print {
+      body { background-color: white; margin: 0; padding: 0; }
+      .a4-paper { margin: 0; box-shadow: none; border: none; max-width: none; }
+      @page { size: A4; margin: 0; }
+      #printBtn { display: none; }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="flex justify-center p-4">
+    <button id="printBtn" onclick="window.print()" class="bg-[#097834] text-white px-6 py-2 rounded-xl font-bold hover:bg-[#075e28] shadow-lg transition-colors flex items-center gap-2">
+      طباعة المحضر كـ PDF
+    </button>
+  </div>
+
+  <div class="a4-paper" id="paper">
+    <div class="px-12 pt-16 flex justify-between">
+      <div></div>
+      <div class="text-left text-sm text-gray-800 font-bold" style="min-width: 150px;">
+        <p>الرقــم: ( <span id="vNum">---</span> )</p>
+        <p>التاريـخ: <span id="vDateG">---</span></p>
+        <p>الموافـق: <span id="vDateH">---</span></p>
+      </div>
+    </div>
+    <div class="px-16 pt-2 pb-16 bg-transparent">
+      <h3 class="text-center font-black text-2xl text-[#17201b] mb-2">محضر اجتماع</h3>
+      <h4 class="text-center font-bold text-lg text-[#097834] mb-6" id="vDeptTitle">القسم / اللجنة</h4>
+      
+      <table class="w-full border border-gray-300 mb-4 text-xs" style="border-collapse:collapse">
+        <tr>
+          <td class="border border-gray-300 px-3 py-2 bg-[#C7AC25] text-white font-bold text-center w-1/4">التاريخ</td>
+          <td class="border border-gray-300 px-3 py-2 text-center font-bold" id="vInfoDate">---</td>
+          <td class="border border-gray-300 px-3 py-2 bg-[#C7AC25] text-white font-bold text-center w-1/4">الوقت</td>
+          <td class="border border-gray-300 px-3 py-2 text-center font-bold" id="vInfoTime">---</td>
+        </tr>
+        <tr>
+          <td class="border border-gray-300 px-3 py-2 bg-[#C7AC25] text-white font-bold text-center">مكان الانعقاد</td>
+          <td class="border border-gray-300 px-3 py-2 text-center font-bold" colspan="3" id="vInfoLoc">---</td>
+        </tr>
+      </table>
+
+      <!-- Attendees -->
+      <p class="font-bold text-xs text-[#097834] mb-1.5">❖ أسماء الحضور:</p>
+      <table class="w-full border border-gray-300 mb-4 text-xs" style="border-collapse:collapse">
+        <thead><tr>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-6">م</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">الاسم</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">المسمى</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-6">م</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">الاسم</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">المسمى</th>
+        </tr></thead>
+        <tbody id="vAttendeesTbody"></tbody>
+      </table>
+
+      <!-- Minutes Items -->
+      <p class="font-bold text-xs text-[#097834] mb-1.5">❖ بنود الاجتماع:</p>
+      <table class="w-full border border-gray-300 mb-4 text-xs" style="border-collapse:collapse">
+        <thead><tr>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-8">م</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">البند</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-1/3">القرار</th>
+        </tr></thead>
+        <tbody id="vItemsTbody"></tbody>
+      </table>
+
+      <!-- Action Items -->
+      <p class="font-bold text-xs text-[#097834] mb-1.5">❖ ما يستجد من أعمال:</p>
+      <table class="w-full border border-gray-300 text-xs" style="border-collapse:collapse">
+        <thead><tr>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-8">م</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white">البند</th>
+          <th class="border border-gray-300 px-2 py-1.5 bg-[#097834] text-white w-1/3">القرار</th>
+        </tr></thead>
+        <tbody id="vActionTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxRGrZwpI5z5ZGDBzvpfywF9w7ZQf_4SDdK8cJkmCIbf8G6h3atw7CiQufaBdRdEq8a/exec";
+    const params = new URLSearchParams(window.location.search);
+    
+    async function loadData() {
+      let m = null;
+      const meetingId = params.get('id');
+      
+      if (meetingId) {
+        try {
+          const res = await fetch(SCRIPT_URL + '?action=getMeetings');
+          const data = await res.json();
+          if (data.success && data.meetings) {
+            m = data.meetings.find(x => String(x.id) === String(meetingId));
+          }
+        } catch(e) { console.error('Cloud fetch error', e); }
+      }
+
+      if (m) {
+        // Render from Cloud Object
+        document.getElementById('vNum').innerText = m.minNum || m.id || '---';
+        const dObj = m.date ? new Date(m.date + 'T00:00:00') : null;
+        let dateG = '---', yearStr = '---';
+        if (dObj) {
+          dateG = `${dObj.getFullYear()} - ${dObj.getMonth()+1} - ${dObj.getDate()} م`;
+        }
+        document.getElementById('vDateG').innerText = dateG;
+        // Hijri helper roughly if we had it, but we can just use the DB one if we saved it. 
+        // For now, fallback to a placeholder or fetch from another field. 
+        document.getElementById('vDateH').innerText = '---'; // Can't compute easily without toHijri func, but it's ok
+        
+        document.getElementById('vInfoDate').innerText = dateG;
+        
+        let tForm = m.time || '---';
+        if (m.time) {
+          const [hh, mm] = m.time.split(':');
+          let h = parseInt(hh, 10);
+          const ampm = h >= 12 ? 'م' : 'ص';
+          h = h % 12 || 12;
+          tForm = `${h}:${mm} ${ampm}`;
+        }
+        document.getElementById('vInfoTime').innerText = tForm;
+        document.getElementById('vInfoLoc').innerText = m.location || '---';
+        document.getElementById('vDeptTitle').innerText = m.department || 'القسم / اللجنة';
+
+        renderAttendees(m.actualAttendees || []);
+        renderTable('vItemsTbody', m.minutesItems || []);
+        renderTable('vActionTbody', m.actionItems || []);
+
+      } else {
+        // Fallback to URL Params
+        document.getElementById('vNum').innerText = params.get('num') || '---';
+        document.getElementById('vDateG').innerText = params.get('dateG') || '---';
+        document.getElementById('vDateH').innerText = params.get('dateH') || '---';
+        document.getElementById('vInfoDate').innerText = params.get('dateG') || '---';
+        document.getElementById('vInfoTime').innerText = params.get('time') || '---';
+        document.getElementById('vInfoLoc').innerText = params.get('loc') || '---';
+        document.getElementById('vDeptTitle').innerText = params.get('dept') || 'القسم / اللجنة';
+
+        try { renderAttendees(JSON.parse(decodeURIComponent(params.get('att')||'[]'))); } catch(e){ renderAttendees([]); }
+        try { renderTable('vItemsTbody', JSON.parse(decodeURIComponent(params.get('items')||'[]'))); } catch(e){ renderTable('vItemsTbody', []); }
+        try { renderTable('vActionTbody', JSON.parse(decodeURIComponent(params.get('actions')||'[]'))); } catch(e){ renderTable('vActionTbody', []); }
+      }
+    }
+
+    function renderAttendees(ats) {
+      const atBody = document.getElementById('vAttendeesTbody');
+      atBody.innerHTML = '';
+      if (ats && ats.length > 0) {
+        const half = Math.ceil(ats.length / 2);
+        for (let i = 0; i < half; i++) {
+          const left = ats[i];
+          const right = ats[i + half];
+          const tr = document.createElement('tr');
+          let html = `
+            <td class="border border-gray-300 px-2 py-1 text-center font-bold text-xs bg-[#f6faf7]">${i + 1}</td>
+            <td class="border border-gray-300 px-2 py-1 text-xs">${left.name || '---'}</td>
+            <td class="border border-gray-300 px-2 py-1 text-xs">${left.role || '---'}</td>
+          `;
+          if (right) {
+            html += `
+              <td class="border border-gray-300 px-2 py-1 text-center font-bold text-xs bg-[#f6faf7]">${i + half + 1}</td>
+              <td class="border border-gray-300 px-2 py-1 text-xs">${right.name || '---'}</td>
+              <td class="border border-gray-300 px-2 py-1 text-xs">${right.role || '---'}</td>
+            `;
+          } else {
+            html += `
+              <td class="border border-gray-300 px-2 py-1 bg-gray-50"></td>
+              <td class="border border-gray-300 px-2 py-1 bg-gray-50"></td>
+              <td class="border border-gray-300 px-2 py-1 bg-gray-50"></td>
+            `;
+          }
+          tr.innerHTML = html;
+          atBody.appendChild(tr);
+        }
+      } else {
+        atBody.innerHTML = '<tr><td colspan="6" class="text-center p-2 text-gray-400 text-xs">لا يوجد حضور مسجل</td></tr>';
+      }
+    }
+
+    function renderTable(tbodyId, items) {
+      const tbody = document.getElementById(tbodyId);
+      tbody.innerHTML = '';
+      if (items && items.length > 0) {
+        items.forEach((item, i) => {
+          tbody.innerHTML += `<tr>
+            <td class="border border-gray-300 px-2 py-1.5 text-center font-bold text-xs bg-[#f6faf7]">${i+1}</td>
+            <td class="border border-gray-300 px-2 py-1.5 text-xs">${item.text || ''}</td>
+            <td class="border border-gray-300 px-2 py-1.5 text-gray-800 font-bold text-xs">${item.dec || ''}</td>
+          </tr>`;
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center p-2 text-gray-400 text-xs">لا توجد بيانات</td></tr>';
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

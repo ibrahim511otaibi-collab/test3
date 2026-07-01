@@ -1,0 +1,367 @@
+/* 
+  Esteqtaa Public UI Style Package
+  Includes basic variables, typography, and utility-based component structures.
+*/
+
+:root {
+  /* Colors */
+  --color-ink: #17201b;
+  --color-muted: #66756d;
+  --color-line: #dfe7e2;
+  --color-surface: #f6faf7;
+  --color-primary: #097834;
+  --color-primary-hover: #075e28;
+  --color-accent: #C7AC25;
+
+  /* Background setup */
+  --bg-main: #f6faf7;
+  --bg-gradient: linear-gradient(180deg, rgba(9, 120, 52, 0.04), rgba(9, 120, 52, 0) 220px);
+  
+  /* Shadows */
+  --shadow-soft: 0 10px 30px rgba(9, 120, 52, 0.06);
+  --shadow-card: 0 1px 2px rgba(23, 32, 27, 0.06);
+
+  /* Transitions */
+  --transition-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-exit: cubic-bezier(0.7, 0, 0.84, 0);
+
+  /* Durations */
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 220ms;
+
+  /* Typography */
+  --font-family-sans: "Calibri", "Arial", sans-serif;
+}
+
+/* Global resets for RTL context */
+html[dir="rtl"] {
+  text-align: right;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--color-ink);
+  background: var(--bg-gradient), var(--bg-main);
+  font-family: var(--font-family-sans);
+  font-feature-settings: "kern";
+}
+
+.hide { display: none !important; }
+
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--color-primary);
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(9, 120, 52, 0.2), 0 2px 4px -2px rgba(9, 120, 52, 0.2);
+  transition: all var(--duration-base) var(--transition-standard);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  transform: translateY(-0.125rem);
+  background-color: var(--color-primary-hover);
+  box-shadow: 0 10px 15px -3px rgba(9, 120, 52, 0.3), 0 4px 6px -4px rgba(9, 120, 52, 0.3);
+}
+
+.card {
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-line);
+  background-color: #ffffff;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+/* Forms */
+.form-field {
+  display: grid;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-ink);
+  margin-bottom: 1rem;
+}
+.form-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+.form-input {
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-line);
+  background-color: #ffffff;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition-property: all;
+  transition-duration: 150ms;
+  padding: 0.5rem 0.75rem;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  width: 100%;
+}
+.form-input:focus {
+  border-color: var(--color-primary);
+  --tw-ring-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--tw-ring-color);
+}
+
+.sidebar-link {
+  transition: all 0.2s ease-in-out;
+}
+.sidebar-link:hover {
+  background-color: rgba(9, 120, 52, 0.05);
+  transform: translateX(-4px);
+}
+.sidebar-link.active {
+  background-color: rgba(9, 120, 52, 0.1);
+  color: #097834;
+  font-weight: 700;
+  border-right: 4px solid #097834;
+}
+
+/* ========================================================
+   OFFICIAL LETTERHEAD PREVIEW (Unified Design)
+   ======================================================== */
+.official-letterhead {
+  background-color: #ffffff;
+  color: #17201b;
+  position: relative;
+  overflow: hidden;
+  min-height: 297mm; /* True A4 Aspect */
+  width: 210mm; 
+  padding: 20mm 20mm; /* Added more vertical padding */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  font-family: "Calibri", "Arial", sans-serif; /* Explicit Calibri */
+}
+
+/* Golden Vertical Borders */
+.official-letterhead::before,
+.official-letterhead::after {
+  content: "";
+  position: absolute;
+  top: 15mm;
+  bottom: 15mm;
+  width: 2px;
+  background-color: #C7AC25; /* Gold */
+  z-index: 2;
+}
+.official-letterhead::before {
+  right: 12mm; /* RTL right edge */
+}
+.official-letterhead::after {
+  left: 12mm; /* RTL left edge */
+}
+
+/* Watermark */
+.watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.05;
+  pointer-events: none;
+  text-align: center;
+  z-index: 1;
+  width: 70%; /* Better scaling for image watermark */
+}
+.watermark img {
+  width: 100%;
+  height: auto;
+  opacity: 0.15;
+}
+
+.letterhead-content {
+  position: relative;
+  z-index: 5;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Decorative border elements */
+.border-decoration {
+  position: absolute;
+  z-index: 4;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #C7AC25;
+  font-weight: 900;
+  letter-spacing: -2px;
+}
+.border-decoration-right,
+.border-decoration-left {
+  flex-direction: column;
+  padding: 20px 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+}
+.border-decoration-right { right: 8px; }
+.border-decoration-left { left: 8px; }
+.border-decoration-bottom {
+  bottom: 10mm;
+  left: 50%;
+  transform: translateX(-50%);
+  flex-direction: row;
+  padding: 0 20px;
+  font-size: 1.5rem;
+  letter-spacing: -1px;
+}
+.diamond-green {
+  color: #097834;
+  font-size: 1.8rem;
+  margin: 8px 0;
+  line-height: 0.8;
+}
+.border-decoration-bottom .diamond-green { margin: 0 10px; }
+
+/* Tables in the Official Letterhead (Based on PDF) */
+
+.unified-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+  background-color: #ffffff;
+  font-size: 0.95rem; /* Better readability */
+}
+.unified-table th,
+.unified-table td {
+  border: 1px solid #000000; /* Solid black/dark lines as per PDF */
+  padding: 0.4rem 0.5rem;
+  text-align: center;
+  color: #17201b;
+}
+
+/* Green Header Table (Attendees/Basic) */
+.table-green th {
+  background-color: #097834;
+  color: #ffffff;
+  font-weight: bold;
+}
+.table-green td.table-green-col {
+  background-color: #097834;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+/* Yellow Header Table (Axes/Info) */
+.table-yellow th {
+  background-color: #D4AF37; /* Gold/Yellow matching PDF */
+  color: #17201b;
+  font-weight: bold;
+}
+.table-yellow td.table-yellow-col {
+  background-color: #D4AF37;
+  color: #17201b;
+  font-weight: bold;
+}
+
+/* Print CSS - Total Overhaul for perfect A4 */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0 !important; 
+  }
+  
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    -webkit-print-color-adjust: exact !important; 
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide the UI elements we don't want printed */
+  aside, .header-actions, .input-column, #viewDashboard, #viewBooking, #viewMinutes, #viewReports {
+    display: none !important;
+  }
+
+  /* Reset all structural parents to basic block elements without paddings/margins/flex */
+  #dashboardLayout, main, main > div, #viewAgenda, .grid, .sticky {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  /* Force the print area to take up exactly one A4 page without absolute positioning */
+  #printArea {
+    position: relative !important;
+    width: 210mm !important; 
+    min-height: 297mm !important; 
+    margin: 0 !important;
+    padding: 20mm 15mm !important; 
+    box-shadow: none !important;
+    border: none !important;
+    transform: none !important;
+    overflow: hidden !important;
+    background-color: white !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Ensure golden borders span the entire height */
+  .official-letterhead::before,
+  .official-letterhead::after {
+    top: 15mm !important;
+    bottom: 15mm !important;
+    background-color: #C7AC25 !important;
+  }
+
+  /* Force background colors on tables */
+  .table-green th,
+  .table-green td.table-green-col {
+    background-color: #097834 !important;
+    color: #ffffff !important;
+  }
+
+  .table-yellow th,
+  .table-yellow td.table-yellow-col {
+    background-color: #D4AF37 !important;
+    color: #17201b !important;
+  }
+  
+  .watermark img {
+    opacity: 0.15 !important;
+  }
+
+  table { page-break-inside: auto !important; }
+  tr    { page-break-inside: avoid !important; page-break-after: auto !important; }
+}
+
+/* Sequential Workflow Animation */
+@keyframes workflowHighlight {
+  0%, 100% { transform: scale(1); box-shadow: 0 1px 2px rgba(0,0,0,0.05); border-color: #f3f4f6; }
+  10%, 25% { transform: scale(1.05); box-shadow: 0 20px 25px -5px rgba(9, 120, 52, 0.2); border-color: #86efac; z-index: 20; }
+  30% { transform: scale(1); box-shadow: 0 1px 2px rgba(0,0,0,0.05); border-color: #f3f4f6; z-index: 10; }
+}
+
+.workflow-anim-1 { animation: workflowHighlight 10s infinite 0s; }
+.workflow-anim-2 { animation: workflowHighlight 10s infinite 2s; }
+.workflow-anim-3 { animation: workflowHighlight 10s infinite 4s; }
+.workflow-anim-4 { animation: workflowHighlight 10s infinite 6s; }
+.workflow-anim-5 { animation: workflowHighlight 10s infinite 8s; }
