@@ -31,11 +31,15 @@ async function checkAndSendReminders() {
         tomorrow.setDate(tomorrow.getDate() + 1);
         const tomorrowStr = getLocalDateString(tomorrow);
 
-        const snapshot = await db.collection('Tasks').where('dueDate', '==', tomorrowStr).get();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = getLocalDateString(yesterday);
+
+        const snapshot = await db.collection('Tasks').where('dueDate', 'in', [tomorrowStr, yesterdayStr]).get();
         let count = 0;
         snapshot.forEach(doc => {
             const t = doc.data();
-            if (t.taskStatus !== 'مغلق ومُقيم' && t.taskStatus !== 'ملغي') {
+            if (t.taskStatus !== 'مغلق ومُقيم' && t.taskStatus !== 'ملغي' && t.taskStatus !== 'جاهز للمراجعة') {
                 let empPhone = t.employeePhone;
                 if (!empPhone) {
                     // Try to find in employeesData if not saved in task
@@ -49,9 +53,18 @@ async function checkAndSendReminders() {
                     if (!title) title = 'تكليف: ' + t.taskId;
                     const taskUrl = window.location.origin + window.location.pathname + '?id=' + t.taskId;
                     const requester = t.requesterName || 'الإدارة';
-                    const msg = `تذكير !\nيوجد لديك تكليف لم تقم بإنجازة\nمن / ${requester}\nللقيام بالتكليف التالي :-\n(${title})\n\nللتفاصيل يرجى الدخول على الرابط التالي:-\n${taskUrl}`;
-                    sendSmsDirect(empPhone, msg);
-                    count++;
+                    
+                    let msg = '';
+                    if (t.dueDate === tomorrowStr) {
+                        msg = `تذكير !\nيوجد لديك تكليف يجب تسليمه غداً\nمن / ${requester}\nالتكليف :-\n(${title})\n\nللتفاصيل يرجى الدخول على الرابط التالي:-\n${taskUrl}`;
+                    } else if (t.dueDate === yesterdayStr) {
+                        msg = `تنبيه عاجل !\nانتهت مدة التكليف البارحة ولم تقم بإنجازه\nمن / ${requester}\nالتكليف :-\n(${title})\nيرجى إنجازه فوراً لتجنب الخصم.\n\nالرابط:-\n${taskUrl}`;
+                    }
+
+                    if (msg !== '') {
+                        sendSmsDirect(empPhone, msg);
+                        count++;
+                    }
                 }
             }
         });
