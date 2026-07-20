@@ -85,32 +85,45 @@ function dailySMSReminder() {
     String(tomorrow.getMonth() + 1).padStart(2, '0') + "-" +
     String(tomorrow.getDate()).padStart(2, '0');
 
+  var yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  var yesterdayStr = yesterday.getFullYear() + "-" +
+    String(yesterday.getMonth() + 1).padStart(2, '0') + "-" +
+    String(yesterday.getDate()).padStart(2, '0');
+
   for (var i = 0; i < data.documents.length; i++) {
     var doc = data.documents[i];
     var fields = doc.fields;
 
     var status = fields.taskStatus ? fields.taskStatus.stringValue : "";
-    if (status === "مغلق ومُقيم" || status === "ملغي") continue;
+    if (status === "مغلق ومُقيم" || status === "ملغي" || status === "جاهز للمراجعة") continue;
 
     var dueDate = fields.dueDate ? fields.dueDate.stringValue : "";
-    if (dueDate === tomorrowStr) {
-      var empPhone = fields.employeePhone ? fields.employeePhone.stringValue : "";
-      var details = fields.taskDetails ? fields.taskDetails.stringValue : "";
-      var title = "تكليف عمل";
-      if (details) {
-        title = details.split('\n')[0].replace('العنوان: ', '');
+    if (!dueDate) continue;
+
+    var empPhone = fields.employeePhone ? fields.employeePhone.stringValue : "";
+    var details = fields.taskDetails ? fields.taskDetails.stringValue : "";
+    var title = "تكليف عمل";
+    if (details) {
+      title = details.split('\n')[0].replace('العنوان: ', '');
+    }
+
+    if (empPhone) {
+      var message = "";
+      if (dueDate === tomorrowStr) {
+        message = "تذكير: التكليف [" + title + "] يجب تسليمه غداً. يرجى إنجازه لتجنب الخصم من التقييم.";
+      } else if (dueDate === yesterdayStr) {
+        message = "تنبيه: التكليف [" + title + "] انتهت مدة تسليمه البارحة. يرجى إنجازه فوراً لتجنب الخصم.";
       }
 
-      if (empPhone) {
-        var message = "تذكير: التكليف [" + title + "] يجب تسليمه غداً. يرجى إنجازه لتجنب الخصم من التقييم.";
-
+      if (message !== "") {
         var smsUrl = "https://www.kwtsms.com/API/send/?username=alturath&password=nPjKfNvZQjQ97E@&sender=TrathFrwnya&mobile=" + empPhone + "&message=" + encodeURIComponent(message) + "&lang=3&test=0";
 
         UrlFetchApp.fetch(smsUrl, {
           "method": "get",
           "muteHttpExceptions": true
         });
-        Logger.log("Sent reminder to " + empPhone + " for task: " + title);
+        Logger.log("Sent reminder/alert to " + empPhone + " for task: " + title);
       }
     }
   }
