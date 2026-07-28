@@ -424,9 +424,9 @@
                             <span class="text-blue-800 text-sm font-bold mb-1 z-10">نشطة (جاري العمل)</span>
                             <span id="kpiActive" class="text-4xl font-black text-blue-600 z-10">0</span>
                         </div>
-                        <div
-                            class="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-3xl border-2 border-red-200 shadow-sm flex flex-col justify-center items-center relative overflow-hidden">
-                            <span class="text-3xl mb-2 opacity-80">⏰</span>
+                        <div onclick="openManagerFolder('late')"
+                            class="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-3xl border-2 border-red-300 shadow-lg flex flex-col justify-center items-center relative overflow-hidden cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-300 animate-pulse">
+                            <span class="text-3xl mb-2 animate-bounce">⏰</span>
                             <span class="text-red-800 text-sm font-bold mb-1 z-10">متأخرة</span>
                             <span id="kpiLate" class="text-4xl font-black text-red-600 z-10">0</span>
                         </div>
@@ -554,6 +554,9 @@
                                             class="text-primary text-2xl font-extrabold">العنوان</span>
                                     </h2>
                                     <div class="inline-flex items-center gap-2">
+                                        <button id="pageReminderBtn" class="hidden bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-sm transform transition hover:scale-105 flex items-center gap-1 animate-pulse">
+                                            🔔 تذكير
+                                        </button>
                                         <span id="mgrTaskStatusBadge"
                                             class="text-[11px] px-3 py-1 rounded-full font-bold shadow-sm border border-gray-100 hidden"></span>
                                         <span id="mgrTaskTimeBadge"
@@ -1083,7 +1086,12 @@
             <button onclick="closeManagerTaskDetails()"
                 class="absolute top-4 left-4 text-gray-400 hover:text-red-500 font-bold text-xl">&times;</button>
 
-            <h2 class="text-2xl font-bold text-primary mb-2 border-b pb-4">تفاصيل التكليف</h2>
+            <div class="flex justify-between items-center mb-2 border-b pb-4 pr-10">
+                <h2 class="text-2xl font-bold text-primary">تفاصيل التكليف</h2>
+                <button id="modalReminderBtn" class="hidden bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-white px-5 py-2 rounded-xl text-sm md:text-base font-bold shadow-lg transform transition hover:scale-105 flex items-center gap-2 animate-pulse">
+                    🔔 تذكير
+                </button>
+            </div>
 
             <div
                 class="bg-white p-4 md:p-6 rounded-2xl mb-6 shadow-[0_0_20px_rgba(9,120,52,0.08)] border-r-4 border-primary relative">

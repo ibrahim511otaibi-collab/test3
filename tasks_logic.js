@@ -31,15 +31,11 @@ async function checkAndSendReminders() {
         tomorrow.setDate(tomorrow.getDate() + 1);
         const tomorrowStr = getLocalDateString(tomorrow);
 
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = getLocalDateString(yesterday);
-
-        const snapshot = await db.collection('Tasks').where('dueDate', 'in', [tomorrowStr, yesterdayStr]).get();
+        const snapshot = await db.collection('Tasks').where('dueDate', '==', tomorrowStr).get();
         let count = 0;
         snapshot.forEach(doc => {
             const t = doc.data();
-            if (t.taskStatus !== 'مغلق ومُقيم' && t.taskStatus !== 'ملغي' && t.taskStatus !== 'جاهز للمراجعة') {
+            if (t.taskStatus !== 'مغلق ومُقيم' && t.taskStatus !== 'ملغي') {
                 let empPhone = t.employeePhone;
                 if (!empPhone) {
                     // Try to find in employeesData if not saved in task
@@ -53,18 +49,9 @@ async function checkAndSendReminders() {
                     if (!title) title = 'تكليف: ' + t.taskId;
                     const taskUrl = window.location.origin + window.location.pathname + '?id=' + t.taskId;
                     const requester = t.requesterName || 'الإدارة';
-                    
-                    let msg = '';
-                    if (t.dueDate === tomorrowStr) {
-                        msg = `تذكير !\nيوجد لديك تكليف يجب تسليمه غداً\nمن / ${requester}\nالتكليف :-\n(${title})\n\nللتفاصيل يرجى الدخول على الرابط التالي:-\n${taskUrl}`;
-                    } else if (t.dueDate === yesterdayStr) {
-                        msg = `تنبيه عاجل !\nانتهت مدة التكليف البارحة ولم تقم بإنجازه\nمن / ${requester}\nالتكليف :-\n(${title})\nيرجى إنجازه فوراً لتجنب الخصم.\n\nالرابط:-\n${taskUrl}`;
-                    }
-
-                    if (msg !== '') {
-                        sendSmsDirect(empPhone, msg);
-                        count++;
-                    }
+                    const msg = `تذكير !\nيوجد لديك تكليف لم تقم بإنجازة\nمن / ${requester}\nللقيام بالتكليف التالي :-\n(${title})\n\nللتفاصيل يرجى الدخول على الرابط التالي:-\n${taskUrl}`;
+                    // sendSmsDirect(empPhone, msg); // تم الإيقاف بناء على طلب الإدارة
+                    count++;
                 }
             }
         });
@@ -820,7 +807,7 @@ function sendReminder(taskId) {
     let title = String(task.taskDetails || '').split('\n')[0].replace('العنوان: ', '');
     if (!title) title = 'تكليف: ' + task.taskId;
 
-    const message = `السلام عليكم\nتذكير !\nعنوان التكليف: ${title}\nانقر لمشاهدة تفاصيل التكليف:\n${task.taskLink}`;
+    const message = `تذكير !\nعنوان التكليف: ${title}\nانقر لمشاهدة تفاصيل التكليف:\n${task.taskLink}`;
     const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
 }
@@ -846,6 +833,14 @@ function openManagerTaskDetails(taskId) {
     document.getElementById('mngTaskEmployee').innerText = task.employeeName || 'غير محدد';
     document.getElementById('mngTaskDueDate').innerText = dDate || 'غير محدد';
     document.getElementById('mngTaskPriority').innerText = priority;
+
+    const reminderBtn = document.getElementById('modalReminderBtn');
+    if (task.taskStatus !== 'مغلق ومُقيم' && task.taskStatus !== 'ملغي' && task.taskStatus !== 'جاهز للمراجعة') {
+        reminderBtn.classList.remove('hidden');
+        reminderBtn.onclick = () => sendReminder(taskId);
+    } else {
+        reminderBtn.classList.add('hidden');
+    }
     document.getElementById('mngTaskTitle').innerText = title;
     document.getElementById('mngTaskDesc').innerText = desc || 'لا يوجد تفاصيل إضافية.';
     document.getElementById('mngTaskId').innerText = taskId;
@@ -997,7 +992,7 @@ async function submitManagerRejection() {
                 if (!title) title = 'تكليف: ' + task.taskId;
                 const taskUrl = window.location.origin + window.location.pathname + '?id=' + task.taskId;
                 const smsMessage = `تم إرجاع تكليفك للتعديل: (${title}) يرجى مراجعة ملاحظات الإدارة.\n\nللتفاصيل اضغط الرابط:-\n${taskUrl}`;
-                sendSmsDirect(phone, smsMessage);
+                // sendSmsDirect(phone, smsMessage); // تم الإيقاف بناء على طلب الإدارة
             }
         }
 
@@ -1181,7 +1176,6 @@ function openEvalModal(taskId) {
         speedDisp.className = 'bg-green-50 border-2 border-green-200 text-green-700 px-4 py-2 rounded-xl text-center';
         speedText.innerHTML = '30 <span class="text-sm">/ 30</span>';
     } else {
-        speedDisp.className = 'bg-red-50 border-2 border-red-200 text-red-700 px-4 py-2 rounded-xl text-center';
         speedText.innerHTML = '0 <span class="text-sm">/ 30</span>';
     }
 
@@ -1247,7 +1241,7 @@ async function submitEvaluation() {
                 const taskUrl = window.location.origin + window.location.pathname + '?id=' + task.taskId;
                 const requester = task.requesterName || 'الإدارة';
                 const smsMessage = `تكليفك الخاص من قسم / ${requester}\nللقيام بـ ... ${title}\nتم الإنتهاء منه واغلاقه\n\nجزاكم الله خير\n\nللتفاصيل يرجى الدخول على الرابط التالي:-\n${taskUrl}`;
-                sendSmsDirect(phone, smsMessage);
+                // sendSmsDirect(phone, smsMessage); // تم الإيقاف بناء على طلب الإدارة
             }
         }
 
@@ -1392,7 +1386,7 @@ async function createTask() {
 
             // Send automatic SMS via Direct Fetch
             const smsLink = window.location.origin + window.location.pathname + '?id=' + empTaskId;
-            const smsMessage = `تكليف عمل جديد !\nمن / ${requester}\nللقيام بالتكليف التالي :-\n(${title})\n\nللتفاصيل يرجى الدخول على الرابط التالي:-\n${smsLink}`;
+            const smsMessage = `تكليف: ${smsLink}`;
             sendSmsDirect(emp.phone, smsMessage);
 
             if (i === 0 && document.getElementById('sendWhatsAppCb').checked) {
@@ -1764,7 +1758,8 @@ function openManagerFolder(type) {
         'new': '🆕 التكاليف الجديدة',
         'working': '⏳ جاري العمل عليها',
         'ready': '👁️ جاهزة للمراجعة والتقييم',
-        'archived': '🗄️ الأرشيف والمنجزة'
+        'archived': '🗄️ الأرشيف والمنجزة',
+        'late': '⏰ التكاليف المتأخرة'
     };
     document.getElementById('mgrCurrentFolderTitle').innerText = titles[type];
     handleManagerSearch();
@@ -1778,9 +1773,31 @@ function closeManagerFolder() {
 }
 
 function handleManagerSearch() {
-    if (!currentManagerFolder) return;
     const search = document.getElementById('mgrSearchInput').value.toLowerCase();
     const emp = document.getElementById('mgrFilterEmp').value;
+
+    // إذا لم يكن هناك مجلد مفتوح، لكن تم اختيار موظف أو كتابة بحث
+    if (!currentManagerFolder) {
+        if (emp || search) {
+            currentManagerFolder = 'all';
+            document.getElementById('mgrFoldersGrid').classList.add('hidden');
+            document.getElementById('mgrFolderViewSection').classList.remove('hidden');
+            document.getElementById('managerTaskActionSection').classList.add('hidden');
+            document.getElementById('mgrCurrentFolderTitle').innerText = emp ? '👤 جميع تكاليف: ' + emp : '🔍 نتائج البحث';
+        } else {
+            return;
+        }
+    }
+
+    // إذا كنا في عرض "الكل" وتم مسح الفلتر، نرجع للوحة الرئيسية
+    if (currentManagerFolder === 'all' && !emp && !search) {
+        closeManagerFolder();
+        return;
+    }
+    // تحديث العنوان ديناميكياً عند تغيير الموظف المختار
+    if (currentManagerFolder === 'all') {
+        document.getElementById('mgrCurrentFolderTitle').innerText = emp ? '👤 جميع تكاليف: ' + emp : '🔍 نتائج البحث';
+    }
 
     let filtered = globalTasks.filter(t => {
         const titleStr = String(t.taskDetails || '').toLowerCase();
@@ -1798,7 +1815,16 @@ function handleManagerSearch() {
         filtered = filtered.filter(t => t.taskStatus === 'جاهز للمراجعة');
     } else if (currentManagerFolder === 'archived') {
         filtered = filtered.filter(t => String(t.taskStatus).includes('مغلق') || String(t.taskStatus).includes('ملغي'));
+    } else if (currentManagerFolder === 'late') {
+        const todayStr = getLocalDateString();
+        filtered = filtered.filter(t => {
+            if (!t.dueDate) return false;
+            const isNotClosed = !String(t.taskStatus).includes('مغلق') && !String(t.taskStatus).includes('ملغي');
+            const isPastDue = t.dueDate < todayStr;
+            return isNotClosed && isPastDue;
+        });
     }
+    // 'all' = عرض جميع التكاليف بدون فلترة حالة
 
     renderManagerDashboardTable(filtered);
 }
@@ -1898,6 +1924,16 @@ function openManagerTaskDetails(taskId) {
     document.getElementById('mgrTaskEmpName').innerText = task.employeeName || 'غير محدد';
     document.getElementById('mgrTaskDueDate').innerText = task.dueDate || 'غير محدد';
     document.getElementById('mgrTaskPriority').innerText = priority;
+
+    const pageReminderBtn = document.getElementById('pageReminderBtn');
+    if (pageReminderBtn) {
+        if (task.taskStatus !== 'مغلق ومُقيم' && task.taskStatus !== 'ملغي' && task.taskStatus !== 'جاهز للمراجعة') {
+            pageReminderBtn.classList.remove('hidden');
+            pageReminderBtn.onclick = () => sendReminder(taskId);
+        } else {
+            pageReminderBtn.classList.add('hidden');
+        }
+    }
     document.getElementById('mgrTaskId').innerText = taskId;
     document.getElementById('mgrTaskDesc').innerText = cleanDesc ? 'تفاصيل التكليف: -\n' + cleanDesc : 'لا يوجد تفاصيل إضافية.';
     const banner = document.getElementById('mgrUrgencyBanner');
@@ -2166,7 +2202,7 @@ async function managerActionEval(actionType) {
             if (!title) title = 'تكليف: ' + task.taskId;
             const taskUrl = window.location.origin + window.location.pathname + '?id=' + task.taskId;
             let smsMessage = `تم تحديث حالة تكليفك: (${title})\nالإجراء: ${actionType}\nالملاحظات: ${note}\nللتفاصيل: ${taskUrl}`;
-            sendSmsDirect(phone, smsMessage);
+            // sendSmsDirect(phone, smsMessage); // تم الإيقاف بناء على طلب الإدارة
         }
 
         closeManagerTaskAction();
@@ -2246,7 +2282,7 @@ async function managerRejectExtension() {
             let title = String(task.taskDetails || '').split('\n')[0].replace('العنوان: ', '');
             if (!title) title = 'تكليف: ' + task.taskId;
             const taskUrl = window.location.origin + window.location.pathname + '?id=' + task.taskId;
-            sendSmsDirect(phone, `تم رفض طلب تمديد التكليف: (${title})\nالسبب: ${note}\nللتفاصيل: ${taskUrl}`);
+            // sendSmsDirect(phone, `تم رفض طلب تمديد التكليف: (${title})\nالسبب: ${note}\nللتفاصيل: ${taskUrl}`); // تم الإيقاف بناء على طلب الإدارة
         }
 
         closeManagerTaskAction();
