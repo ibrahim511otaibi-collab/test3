@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة إدارة التكاليف والمراسلات | جمعية إحياء التراث الإسلامي</title>
+    <link rel="icon" type="image/png" href="logo.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@100..900&family=IBM+Plex+Sans+Arabic:wght@300..700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#097834',
+                        'primary-dark': '#065323',
+                        'primary-hover': '#075e28',
+                        secondary: '#c7ac25',
+                        accent: '#c7ac25',
+                        'accent-light': '#f9f5e3',
+                        ink: '#17201b',
+                        muted: '#66756d',
+                        line: '#dfe7e2',
+                        surface: '#f6faf7',
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Kufi Arabic"', '"IBM Plex Sans Arabic"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 12px 35px rgba(9, 120, 52, 0.08)',
+                        'card': '0 2px 10px rgba(23, 32, 27, 0.05)',
+                        'gold': '0 8px 25px rgba(199, 172, 37, 0.2)',
+                        'btn': '0 4px 6px -1px rgba(9, 120, 52, 0.2), 0 2px 4px -2px rgba(9, 120, 52, 0.2)',
+                        'btn-hover': '0 10px 15px -3px rgba(9, 120, 52, 0.3), 0 4px 6px -4px rgba(9, 120, 52, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Kufi Arabic', 'IBM Plex Sans Arabic', sans-serif;
+            background-color: #fafcfa;
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(199, 172, 37, 0.10), transparent 600px),
+                radial-gradient(circle at 50% 100%, rgba(9, 120, 52, 0.05), transparent 600px),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cpath d='M0 20L20 0M60 0L80 20M80 60L60 80M20 80L0 60M40 0v10M40 70v10M0 40h10M70 40h10' stroke='%23097834' stroke-width='1.2' stroke-opacity='0.10'/%3E%3Crect x='23' y='23' width='34' height='34' stroke='%23c7ac25' stroke-width='1.2' stroke-opacity='0.22'/%3E%3Crect x='23' y='23' width='34' height='34' transform='rotate(45 40 40)' stroke='%23097834' stroke-width='1.2' stroke-opacity='0.13'/%3E%3Cpolygon points='40,10 47,29 70,29 51,40 70,51 47,51 40,70 33,51 10,51 29,40 10,29 33,29' stroke='%23097834' stroke-width='1' stroke-opacity='0.08'/%3E%3Ccircle cx='40' cy='40' r='5.5' stroke='%23c7ac25' stroke-width='1.2' stroke-opacity='0.24'/%3E%3Cpath d='M0 12h12V0M68 0v12h12M0 68h12v12M68 80V68h12' stroke='%23c7ac25' stroke-width='1.1' stroke-opacity='0.18'/%3E%3C/g%3E%3C/svg%3E");
+            color: #17201b;
+            min-height: 100vh;
+        }
+
+        .heritage-header {
+            background: linear-gradient(135deg, #065323 0%, #097834 55%, #0a8a3c 100%);
+            border-bottom: 4px solid #c7ac25;
+        }
+
+        .heritage-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cpath d='M0 20L20 0M60 0L80 20M80 60L60 80M20 80L0 60M40 0v10M40 70v10M0 40h10M70 40h10' stroke='%23c7ac25' stroke-width='1.2'/%3E%3Crect x='23' y='23' width='34' height='34' stroke='%23c7ac25' stroke-width='1.2'/%3E%3Crect x='23' y='23' width='34' height='34' transform='rotate(45 40 40)' stroke='%23ffffff' stroke-width='1.1'/%3E%3Ccircle cx='40' cy='40' r='5.5' stroke='%23c7ac25' stroke-width='1.2'/%3E%3Cpath d='M0 12h12V0M68 0v12h12M0 68h12v12M68 80V68h12' stroke='%23c7ac25' stroke-width='1.1'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: 80px 80px;
+            opacity: 0.14;
+        }
+
+        .gold-border-card {
+            border: 1.5px solid rgba(199, 172, 37, 0.45);
+            box-shadow: 0 22px 55px rgba(9, 120, 52, 0.13), 0 6px 18px rgba(199, 172, 37, 0.10);
+        }
+
+        /* Ultra-Modern Animated Login Box Effects */
+        @keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes spinReverse {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+        @keyframes floatGentle {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-7px) scale(1.05); }
+        }
+        @keyframes pulseAura {
+            0%, 100% { transform: scale(0.9); opacity: 0.35; }
+            50% { transform: scale(1.22); opacity: 0.75; }
+        }
+        @keyframes wavePulse {
+            0%, 100% { transform: scaleY(0.35); opacity: 0.5; }
+            50% { transform: scaleY(1.15); opacity: 1; }
+        }
+        @keyframes particleFloatUp {
+            0% { transform: translateY(20px) scale(0.6); opacity: 0; }
+            50% { opacity: 0.85; }
+            100% { transform: translateY(-35px) scale(1.1); opacity: 0; }
+        }
+        @keyframes arrowSlideLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-6px); }
+        }
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        @keyframes shimmerSweep {
+            0% { transform: translateX(150%) skewX(-20deg); }
+            100% { transform: translateX(-250%) skewX(-20deg); }
+        }
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .anim-spin-slow { animation: spinSlow 10s linear infinite; }
+        .anim-spin-fast { animation: spinSlow 4.5s linear infinite; }
+        .anim-spin-reverse { animation: spinReverse 8s linear infinite; }
+        .anim-float { animation: floatGentle 2.8s ease-in-out infinite; }
+        .anim-aura { animation: pulseAura 2.8s ease-in-out infinite; }
+        .anim-arrow-left { animation: arrowSlideLeft 1.4s ease-in-out infinite; }
+        .login-shake { animation: shakeError 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+        .wave-bar-1 { animation: wavePulse 1.1s ease-in-out infinite 0.0s; }
+        .wave-bar-2 { animation: wavePulse 1.1s ease-in-out infinite 0.2s; }
+        .wave-bar-3 { animation: wavePulse 1.1s ease-in-out infinite 0.4s; }
+        .wave-bar-4 { animation: wavePulse 1.1s ease-in-out infinite 0.15s; }
+        .wave-bar-5 { animation: wavePulse 1.1s ease-in-out infinite 0.35s; }
+        .particle-1 { animation: particleFloatUp 3.2s ease-in-out infinite 0s; }
+        .particle-2 { animation: particleFloatUp 3.8s ease-in-out infinite 1.1s; }
+        .particle-3 { animation: particleFloatUp 2.9s ease-in-out infinite 0.6s; }
+        .particle-4 { animation: particleFloatUp 3.5s ease-in-out infinite 1.7s; }
+
+        .anim-gradient-bar {
+            background: linear-gradient(90deg, #065323, #c7ac25, #097834, #e5c846, #065323);
+            background-size: 250% 250%;
+            animation: gradientFlow 3.5s ease infinite;
+        }
+        .btn-shimmer-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-shimmer-effect::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 45%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.32), transparent);
+            animation: shimmerSweep 2.6s infinite;
+            pointer-events: none;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c7ac25;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #097834;
+        }
+    </style>
+</head>
+
+<body class="antialiased min-h-screen flex flex-col">
+
+    <div class="w-full min-h-screen flex flex-col">
+
+        <!-- Full-Width Unified Header (Visual Identity of Islamic Heritage Society) -->
+        <div class="w-full heritage-header text-white py-5 px-3 sm:px-6 md:py-8 flex flex-col items-center justify-center relative overflow-hidden text-center shadow-lg">
+            <div class="absolute inset-0 heritage-pattern pointer-events-none"></div>
+            <div class="absolute -top-20 -right-20 w-56 h-56 bg-secondary/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-20 -left-20 w-56 h-56 bg-secondary/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 max-w-6xl mx-auto w-full flex justify-between items-start gap-2">
+                <div class="w-20 sm:w-28 flex justify-start">
+                    <button onclick="globalGoBack()" id="globalBackBtn"
+                        class="hidden bg-white/15 hover:bg-white/25 border border-white/25 transition px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs md:text-sm font-bold backdrop-blur-md flex items-center gap-1.5 shadow-sm">
+                        <span>➔</span> <span>رجوع</span>
+                    </button>
+                </div>
+
+                <div class="flex flex-col items-center justify-center flex-1">
+                    <!-- Official Emblem / Logo -->
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl bg-white p-1.5 border-2 border-secondary flex items-center justify-center mb-3 shadow-gold overflow-hidden">
+                        <img src="logo.png"
+                            onerror="this.onerror=null;this.src='https://xkvxticrvhhehfigjlnt.supabase.co/storage/v1/object/public/attachments/branding/turath_logo.png';"
+                            alt="شعار جمعية إحياء التراث الإسلامي - محافظة الفروانية"
+                            class="w-full h-full object-contain">
+                    </div>
+                    <div class="inline-flex items-center gap-1.5 sm:gap-2 bg-secondary/20 border border-secondary/50 text-amber-200 px-3 sm:px-4 py-1 rounded-full text-[11px] sm:text-xs md:text-sm font-bold mb-2">
+                        <span>جمعية إحياء التراث الإسلامي</span>
+                        <span>•</span>
+                        <span>مركز محافظة الفروانية</span>
+                    </div>
+                    <h1 class="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white flex items-center justify-center gap-2 mt-1">
+                        منصة إدارة التكاليف والمراسلات
+                    </h1>
+                    <p class="text-[11px] sm:text-xs md:text-sm font-bold text-amber-300/95 mt-2 bg-black/15 px-3 py-1 rounded-lg">
+                        إشراف وتطوير / قسم تطوير الأنظمة التقنية
+                    </p>
+                </div>
+
+                <div class="w-20 sm:w-28 flex justify-end">
+                    <button onclick="logout()" id="logoutBtn"
+                        class="hidden bg-red-500/20 hover:bg-red-500/40 border border-red-300/30 text-white transition px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs md:text-sm font-bold backdrop-blur-md shadow-sm">
+                        خروج 🔒
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-6xl w-full mx-auto px-3 sm:px-6 md:px-8 py-6 md:py-10 flex-1">
+
+            <!-- Loading Indicator -->
+            <div id="globalLoading" class="hidden py-12 text-center text-primary font-bold animate-pulse">
+                ⏳ جاري العمل، اشغل انتظارك بإستغفارك...
+            </div>
+
+            <!-- LOGIN SECTION (ULTRA-MODERN INTERACTIVE & ANIMATED - NO MIHRAB) -->
+            <div id="loginSection" class="max-w-lg mx-auto py-4 md:py-8 hidden">
+                <div id="loginCardBox" class="bg-white/95 backdrop-blur-xl p-5 sm:p-7 md:p-8 rounded-[2.25rem] gold-border-card relative overflow-hidden transition-all duration-300">
+                    <!-- Animated Flowing Top Ribbon -->
+                    <div class="absolute top-0 right-0 w-full h-2 anim-gradient-bar"></div>
+
+                    <!-- Modern Panoramic Animated Stage (Zero Mihrab - Pure Modern Tech-Islamic Motion) -->
+                    <div class="relative rounded-3xl bg-gradient-to-br from-primary-dark via-primary to-[#0b8a3c] p-6 mb-7 border border-secondary/60 shadow-lg overflow-hidden text-center">
+                        <!-- Subtle Islamic Geometric Grid Overlay -->
+                        <div class="absolute inset-0 heritage-pattern pointer-events-none"></div>
+
+                        <!-- Rising Luminous Gold Particles -->
+                        <span class="absolute bottom-3 right-10 w-2 h-2 rounded-full bg-amber-300/80 blur-[0.5px] particle-1 pointer-events-none"></span>
+                        <span class="absolute bottom-2 right-1/4 w-2.5 h-2.5 rounded-full bg-secondary/90 blur-[0.5px] particle-2 pointer-events-none"></span>
+                        <span class="absolute bottom-4 left-1/4 w-2 h-2 rounded-full bg-amber-200/80 blur-[0.5px] particle-3 pointer-events-none"></span>
+                        <span class="absolute bottom-2 left-10 w-2.5 h-2.5 rounded-full bg-secondary/90 blur-[0.5px] particle-4 pointer-events-none"></span>
+
+                        <!-- Interactive Rotating Gyroscope & Equalizer Stage -->
+                        <div class="relative z-10 flex items-center justify-center gap-4 sm:gap-7 my-1">
+                            <!-- Right Animated Pulse Wave Bars -->
+                            <div class="flex items-center gap-1.5 h-12">
+                                <span class="w-1.5 h-5 rounded-full bg-secondary/60 wave-bar-1"></span>
+                                <span class="w-1.5 h-8 rounded-full bg-amber-300/80 wave-bar-2"></span>
+                                <span class="w-1.5 h-11 rounded-full bg-secondary wave-bar-3"></span>
+                                <span class="w-1.5 h-7 rounded-full bg-amber-200/75 wave-bar-4"></span>
+                            </div>
+
+                            <!-- Central 3-Layer Animated Islamic Octagram & Radar Gyroscope -->
+                            <div class="relative w-28 h-28 flex items-center justify-center flex-shrink-0">
+                                <!-- Pulsing Golden Glow Halo -->
+                                <div id="loginEmblemAura" class="absolute inset-1 rounded-full bg-secondary/35 blur-md anim-aura"></div>
+
+                                <!-- Layer 1: Outer Rotating Orbital Ring with Glowing Nodes -->
+                                <svg class="absolute inset-0 w-full h-full anim-spin-slow" viewBox="0 0 100 100" fill="none">
+                                    <circle cx="50" cy="50" r="46" stroke="#c7ac25" stroke-width="1.6" stroke-dasharray="7 5" stroke-opacity="0.8"/>
+                                    <circle cx="50" cy="4" r="3.5" fill="#fde68a"/>
+                                    <circle cx="50" cy="96" r="3.5" fill="#fde68a"/>
+                                    <circle cx="4" cy="50" r="3.5" fill="#c7ac25"/>
+                                    <circle cx="96" cy="50" r="3.5" fill="#c7ac25"/>
+                                </svg>
+
+                                <!-- Layer 2: Counter-Rotating 8-Pointed Islamic Geometric Star -->
+                                <svg class="absolute inset-2.5 w-[calc(100%-20px)] h-[calc(100%-20px)] anim-spin-reverse" viewBox="0 0 100 100" fill="none">
+                                    <rect x="16" y="16" width="68" height="68" rx="10" stroke="#fde68a" stroke-width="2" stroke-opacity="0.75"/>
+                                    <rect x="16" y="16" width="68" height="68" rx="10" transform="rotate(45 50 50)" stroke="#c7ac25" stroke-width="2" stroke-opacity="0.9"/>
+                                </svg>
+
+                                <!-- Layer 3: Fast Rotating Luminous Radar Arc -->
+                                <svg class="absolute inset-4 w-[calc(100%-32px)] h-[calc(100%-32px)] anim-spin-fast" viewBox="0 0 100 100" fill="none">
+                                    <path d="M50 6 A44 44 0 0 1 94 50" stroke="#fef08a" stroke-width="2.5" stroke-linecap="round"/>
+                                </svg>
+
+                                <!-- Layer 4: Levitating 3D Shield & Key Centerpiece -->
+                                <div id="loginCenterShield" class="relative w-14 h-14 rounded-2xl bg-gradient-to-b from-white/25 to-black/25 backdrop-blur-md border-2 border-amber-300 shadow-gold flex items-center justify-center anim-float transition-transform duration-200">
+                                    <svg class="w-7 h-7 text-amber-200 drop-shadow" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Left Animated Pulse Wave Bars -->
+                            <div class="flex items-center gap-1.5 h-12">
+                                <span class="w-1.5 h-7 rounded-full bg-amber-200/75 wave-bar-4"></span>
+                                <span class="w-1.5 h-11 rounded-full bg-secondary wave-bar-3"></span>
+                                <span class="w-1.5 h-8 rounded-full bg-amber-300/80 wave-bar-2"></span>
+                                <span class="w-1.5 h-5 rounded-full bg-secondary/60 wave-bar-1"></span>
+                            </div>
+                        </div>
+
+                        <h2 class="relative z-10 text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-3">تسجيل الدخول</h2>
+                        <p class="relative z-10 text-amber-200/95 text-xs sm:text-sm font-bold mt-1">يرجى إدخال الرقم الوظيفي للمتابعة</p>
+                    </div>
+
+                    <div id="loginRedirectNotice" class="hidden mb-5 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold text-center">
+                        يرجى إدخال رقمك الوظيفي لفتح الرابط المخصص لك مباشرة
+                    </div>
+
+                    <!-- Interactive Input Section -->
+                    <div class="space-y-5 relative z-10">
+                        <div>
+                            <label class="block text-xs font-extrabold text-primary-dark/80 mb-2 text-center">الرقم الوظيفي</label>
+
+                            <!-- Deep Glassmorphic Input Field with Integrated Gold Badge & Eye Toggle -->
+                            <div class="relative flex items-center">
+                                <!-- Right Gold ID Card Icon -->
+                                <div class="absolute right-3.5 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100/80 border border-secondary/40 flex items-center justify-center text-secondary shadow-sm pointer-events-none">
+                                    <svg class="w-5 h-5 text-amber-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                                    </svg>
+                                </div>
+
+                                <input type="password" id="unifiedLoginInput" inputmode="numeric"
+                                    oninput="updateLoginInteractiveDots(this.value)"
+                                    onkeypress="if(event.key === 'Enter') handleUnifiedLogin()"
+                                    class="w-full rounded-2xl border-2 border-gray-200 bg-surface/80 shadow-inner transition-all duration-300 py-4 pr-16 pl-14 focus:outline-none focus:border-primary focus:bg-white focus:ring-4 focus:ring-secondary/25 text-center text-2xl tracking-[0.28em] font-extrabold text-ink placeholder:text-gray-300 placeholder:tracking-normal placeholder:text-base"
+                                    placeholder="أدخل الرقم الوظيفي...">
+
+                                <!-- Left Interactive Eye Button Inside Field -->
+                                <button type="button" onclick="toggleLoginPasswordVisibility()" id="btnToggleLoginEye"
+                                    title="إظهار / إخفاء الرقم"
+                                    class="absolute left-3.5 w-10 h-10 rounded-xl bg-gray-100/90 hover:bg-primary/10 text-gray-500 hover:text-primary border border-gray-200/80 flex items-center justify-center transition">
+                                    <svg id="loginEyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Live Interactive Glowing Indicator Capsules Below Input -->
+                            <div id="loginLiveDots" class="flex items-center justify-center gap-2 mt-3.5 h-3">
+                                <span class="login-dot w-2.5 h-2.5 rounded-full bg-gray-200 transition-all duration-300"></span>
+                                <span class="login-dot w-2.5 h-2.5 rounded-full bg-gray-200 transition-all duration-300"></span>
+                                <span class="login-dot w-2.5 h-2.5 rounded-full bg-gray-200 transition-all duration-300"></span>
+                                <span class="login-dot w-2.5 h-2.5 rounded-full bg-gray-200 transition-all duration-300"></span>
+                                <span class="login-dot w-2.5 h-2.5 rounded-full bg-gray-200 transition-all duration-300"></span>
+                                <span class="login-dot w-2.5 h-2.5 rounded-full bg-gray-200 transition-all duration-300"></span>
+                            </div>
+                        </div>
+
+                        <button onclick="handleUnifiedLogin()" id="btnUnifiedLogin"
+                            class="w-full btn-shimmer-effect bg-gradient-to-l from-primary-dark via-primary to-green-600 hover:from-primary hover:to-primary-dark text-white font-extrabold rounded-2xl py-4 transition-all duration-300 shadow-lg shadow-green-900/20 text-lg flex items-center justify-center gap-3 transform hover:-translate-y-0.5 active:translate-y-0 border-2 border-secondary/60">
+                            <span>تسجيل الدخول</span>
+                            <span class="text-amber-200 text-xl anim-arrow-left inline-block">⬅</span>
+                        </button>
+
+                        <p id="unifiedLoginError" class="text-red-600 bg-red-50 border border-red-200 p-3.5 rounded-xl text-center text-xs sm:text-sm font-extrabold hidden">
+                            الرقم الوظيفي المدخل غير صحيح! يرجى التأكد والمحاولة مرة أخرى.
+                        </p>
+                    </div>
+
+                    <div class="mt-7 pt-4 border-t border-gray-100 flex items-center justify-between text-[11px] font-bold text-gray-400 relative z-10">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+                            <span>نظام معتمد ومشفر</span>
+                        </span>
+                        <span>قسم تطوير الأنظمة التقنية</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EMPLOYEE DASHBOARD SECTION -->
+            <div id="employeeDashboardSection" class="hidden space-y-6">
+                <!-- Employee Executive Heritage Welcome Header -->
+                <div class="bg-gradient-to-l from-primary-dark via-primary to-green-700 text-white p-6 rounded-3xl shadow-md border-b-4 border-secondary relative overflow-hidden flex justify-between items-center flex-wrap gap-4">
+                    <div class="absolute inset-0 heritage-pattern pointer-events-none"></div>
+                    <div class="relative z-10 flex items-center gap-3.5">
+                        <div class="w-14 h-14 rounded-2xl bg-white/15 border-2 border-secondary/70 text-amber-200 flex items-center justify-center text-2xl font-bold shadow-gold backdrop-blur-sm">
+                            👤
+                        </div>
+                        <div>
+                            <h2 class="text-xl md:text-2xl font-extrabold text-white">حياك الله، <span id="empWelcomeName" class="text-amber-300"></span> 👋</h2>
+                            <p class="text-amber-100/90 text-xs md:text-sm font-bold mt-0.5">بوابة التكاليف الرسمية والمراسلات الداخلية للموظفين</p>
+                        </div>
+                    </div>
+                    <div class="relative z-10 flex flex-wrap gap-2.5 w-full sm:w-auto">
+                        <button onclick="openSendMessageModal()"
+                            class="flex-1 sm:flex-none bg-secondary hover:bg-amber-500 text-ink px-5 py-3 rounded-xl font-extrabold text-xs md:text-sm transition shadow-md flex items-center justify-center gap-2">
+                            <span>✉️</span>
+                            <span>إرسال رسالة لموظف</span>
+                        </button>
+                        <button onclick="loadEmployeeDashboardData(); loadEmployeeMessagesData(); showHeritageToast('تم تحديث بيانات لوحتك بنجاح!');"
+                            class="bg-white/15 hover:bg-white/25 border border-white/25 text-white px-4 py-3 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-1.5">
+                            <span>🔄</span>
+                            <span>تحديث</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Employee Mode Switcher: Tasks vs Internal Messages -->
+                <div class="flex bg-white/95 border border-secondary/35 p-1.5 rounded-2xl w-full max-w-md mx-auto shadow-md backdrop-blur-sm">
+                    <button onclick="switchEmployeeSectionTab('tasks')" id="empTabTasksBtn"
+                        class="flex-1 font-extrabold text-sm py-3 px-4 rounded-xl transition-all duration-300 bg-primary text-white shadow-md flex items-center justify-center gap-2">
+                        <span>📋</span>
+                        <span>التكاليف الرسمية</span>
+                    </button>
+                    <button onclick="switchEmployeeSectionTab('messages')" id="empTabMessagesBtn"
+                        class="flex-1 font-extrabold text-sm py-3 px-4 rounded-xl transition-all duration-300 text-gray-500 hover:text-primary flex items-center justify-center gap-2">
+                        <span>✉️</span>
+                        <span>المراسلات الداخلية</span>
+                        <span id="empUnreadMsgBadge" class="hidden bg-red-500 text-white text-[11px] px-2 py-0.5 rounded-full animate-pulse">0</span>
+                    </button>
+                </div>
+
+                <!-- EMPLOYEE SUB-VIEW 1: OFFICIAL TASKS -->
+                <div id="empTasksSubView" class="space-y-6">
+                    <!-- Employee Progress Bar (Heritage Style) -->
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border-2 border-secondary/30 relative overflow-hidden">
+                        <div class="flex flex-wrap justify-between items-center gap-2 mb-2.5">
+                            <span class="font-extrabold text-primary-dark text-sm flex items-center gap-1.5">
+                                <span>🚀</span>
+                                <span>مؤشر الإنجاز المعتمد للتكاليف</span>
+                            </span>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span id="empStatReturnedSubBadge" class="hidden text-[11px] font-extrabold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full animate-pulse"></span>
+                                <span id="empStatReadySubBadge" class="hidden text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full"></span>
+                                <span id="empStatProgressText" class="font-black text-primary bg-primary/10 px-3 py-0.5 rounded-full text-sm">0%</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-3.5 overflow-hidden border border-gray-200/60">
+                            <div id="empProgressBar" class="bg-gradient-to-l from-primary-dark via-primary to-secondary h-full rounded-full transition-all duration-1000 w-0"></div>
+                        </div>
+                    </div>
+
+                    <!-- Employee Stats Cards -->
+                    <div class="grid grid-cols-3 gap-2.5 sm:gap-4">
+                        <div class="bg-white p-3.5 sm:p-4 rounded-2xl shadow-sm border-2 border-gray-100 hover:border-primary/40 transition text-center relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-full h-1 bg-primary"></div>
+                            <div class="text-2xl md:text-3xl font-black text-primary mb-1" id="empStatTotal">0</div>
+                            <div class="text-[11px] sm:text-xs font-extrabold text-gray-500">إجمالي التكاليف 📁</div>
+                        </div>
+                        <div class="bg-white p-3.5 sm:p-4 rounded-2xl shadow-sm border-2 border-green-100 hover:border-green-400 transition text-center relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-full h-1 bg-green-600"></div>
+                            <div class="text-2xl md:text-3xl font-black text-green-700 mb-1" id="empStatCompleted">0</div>
+                            <div class="text-[11px] sm:text-xs font-extrabold text-green-700">المعتمدة والمنجزة ✅</div>
+                        </div>
+                        <div class="bg-white p-3.5 sm:p-4 rounded-2xl shadow-sm border-2 border-amber-100 hover:border-secondary transition text-center relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-full h-1 bg-secondary"></div>
+                            <div class="text-2xl md:text-3xl font-black text-amber-700 mb-1" id="empStatPending">0</div>
+                            <div class="text-[11px] sm:text-xs font-extrabold text-amber-800">قيد العمل والمراجعة ⏳</div>
+                        </div>
+                    </div>
+
+                    <!-- Search and Folders View Toggle -->
+                    <div id="empDashboardFoldersView">
+                        <div class="relative mb-6">
+                            <input type="search" id="empSearchInput" oninput="handleEmployeeSearch()"
+                                class="w-full rounded-2xl border-2 border-gray-200 bg-white shadow-sm transition duration-150 py-3.5 px-6 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm md:text-base font-bold text-gray-700 pr-12"
+                                placeholder="البحث السريع برقم التكليف أو العنوان...">
+                            <span class="absolute right-4 top-3.5 text-xl opacity-50">🔍</span>
+                        </div>
+
+                        <!-- Folders Grid (Heritage Executive Cards) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="empFoldersGrid">
+                            <div onclick="openFolder('new')"
+                                class="bg-white hover:bg-surface/80 p-6 rounded-3xl shadow-sm border-2 border-gray-100 hover:border-primary transition-all cursor-pointer flex flex-col justify-between min-h-[145px] group relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-2 h-full bg-primary"></div>
+                                <div class="flex justify-between items-start">
+                                    <span class="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-2xl">🆕</span>
+                                    <span id="folderCountNew" class="bg-primary text-white font-black px-4 py-1 rounded-full text-lg shadow-sm">0</span>
+                                </div>
+                                <div class="mt-3">
+                                    <h3 class="text-xl font-extrabold text-primary-dark group-hover:text-primary transition">التكاليف الجديدة</h3>
+                                    <p class="text-xs font-bold text-gray-400 mt-0.5">تكاليف واردة حديثاً بانتظار المباشرة</p>
+                                </div>
+                            </div>
+
+                            <div onclick="openFolder('working')"
+                                class="bg-white hover:bg-amber-50/40 p-6 rounded-3xl shadow-sm border-2 border-gray-100 hover:border-amber-400 transition-all cursor-pointer flex flex-col justify-between min-h-[145px] group relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-2 h-full bg-amber-500"></div>
+                                <div class="flex justify-between items-start">
+                                    <span class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-2xl">⏳</span>
+                                    <span id="folderCountWorking" class="bg-amber-500 text-white font-black px-4 py-1 rounded-full text-lg shadow-sm">0</span>
+                                </div>
+                                <div class="mt-3">
+                                    <h3 class="text-xl font-extrabold text-amber-900 group-hover:text-amber-700 transition">جاري العمل عليها</h3>
+                                    <p class="text-xs font-bold text-gray-400 mt-0.5">تكاليف قيد التنفيذ أو بطلب تمديد</p>
+                                </div>
+                            </div>
+
+                            <div onclick="openFolder('ready')"
+                                class="bg-white hover:bg-emerald-50/40 p-6 rounded-3xl shadow-sm border-2 border-gray-100 hover:border-emerald-500 transition-all cursor-pointer flex flex-col justify-between min-h-[145px] group relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-2 h-full bg-emerald-600"></div>
+                                <div class="flex justify-between items-start">
+                                    <span class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-2xl">👁️</span>
+                                    <span id="folderCountReady" class="bg-emerald-600 text-white font-black px-4 py-1 rounded-full text-lg shadow-sm">0</span>
+                                </div>
+                                <div class="mt-3">
+                                    <h3 class="text-xl font-extrabold text-emerald-900 group-hover:text-emerald-700 transition">جاهزة للمراجعة</h3>
+                                    <p class="text-xs font-bold text-gray-400 mt-0.5">تم تسليمها وبانتظار اعتماد وتقييم الإدارة</p>
+                                </div>
+                            </div>
+
+                            <div onclick="openFolder('archived')"
+                                class="bg-white hover:bg-gray-50 p-6 rounded-3xl shadow-sm border-2 border-gray-100 hover:border-secondary transition-all cursor-pointer flex flex-col justify-between min-h-[145px] group relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-2 h-full bg-secondary"></div>
+                                <div class="flex justify-between items-start">
+                                    <span class="w-12 h-12 rounded-2xl bg-amber-50/60 border border-secondary/40 flex items-center justify-center text-2xl">🗄️</span>
+                                    <span id="folderCountArchived" class="bg-gray-700 text-white font-black px-4 py-1 rounded-full text-lg shadow-sm">0</span>
+                                </div>
+                                <div class="mt-3">
+                                    <h3 class="text-xl font-extrabold text-gray-800 group-hover:text-primary transition">الأرشيف والمنجزة</h3>
+                                    <p class="text-xs font-bold text-gray-400 mt-0.5">التكاليف المعتمدة والمغلقة سابقاً</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Specific Folder Task List -->
+                    <div id="empFolderViewSection" class="hidden bg-white p-5 md:p-6 rounded-3xl border border-line shadow-sm">
+                        <div class="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+                            <div class="flex items-center gap-3">
+                                <button onclick="closeFolder()"
+                                    class="bg-surface border-2 border-gray-200 text-gray-700 hover:text-primary hover:border-primary px-4 py-2 rounded-xl transition shadow-sm font-extrabold text-xs md:text-sm">
+                                    ➔ رجوع للمجلدات
+                                </button>
+                                <h3 id="currentFolderTitle" class="text-lg md:text-xl font-extrabold text-primary-dark flex items-center gap-2">المجلد</h3>
+                            </div>
+                        </div>
+                        <div id="empDashboardTableBody" class="flex flex-col gap-4"></div>
+                    </div>
+                </div>
+
+                <!-- EMPLOYEE SUB-VIEW 2: INTERNAL MESSAGES (NO EVALUATION) -->
+                <div id="empMessagesSubView" class="hidden space-y-6">
+                    <div class="bg-amber-50/70 border border-amber-200/80 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div>
+                            <h3 class="font-extrabold text-amber-900 text-base flex items-center gap-2">
+                                <span>📨</span>
+                                <span>قسم المراسلات الداخلية بين الموظفين</span>
+                            </h3>
+                            <p class="text-xs text-amber-800/80 mt-0.5 font-medium">مراسلات مباشرة لتبادل الملفات والملاحظات بين الزملاء (لا تدخل في التقييم إطلاقاً)</p>
+                        </div>
+                        <button onclick="openSendMessageModal()"
+                            class="w-full sm:w-auto bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2">
+                            <span>➕</span>
+                            <span>كتابة رسالة جديدة</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Incoming Messages -->
+                        <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+                            <h4 class="font-extrabold text-primary text-lg mb-4 pb-2 border-b border-gray-100 flex items-center justify-between">
+                                <span>📥 الرسائل الواردة إليك</span>
+                                <span id="empInboxCount" class="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full">0</span>
+                            </h4>
+                            <div id="empInboxList" class="space-y-3 max-h-[420px] overflow-y-auto pr-1"></div>
+                        </div>
+
+                        <!-- Sent Messages -->
+                        <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+                            <h4 class="font-extrabold text-gray-700 text-lg mb-4 pb-2 border-b border-gray-100 flex items-center justify-between">
+                                <span>📤 الرسائل المرسلة منك</span>
+                                <span id="empSentCount" class="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">0</span>
+                            </h4>
+                            <div id="empSentList" class="space-y-3 max-h-[420px] overflow-y-auto pr-1"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INTERNAL MESSAGE DETAILS VIEW (When opening a message link or clicking a message) -->
+            <div id="messageViewSection" class="hidden space-y-6">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
+                    <button onclick="closeMessageDetailsView()"
+                        class="bg-white border-2 border-gray-200 text-gray-600 hover:text-primary hover:border-primary px-5 py-2.5 rounded-xl transition font-bold text-sm flex items-center gap-2">
+                        <span>➔</span>
+                        <span>رجوع للوحة الرئيسية</span>
+                    </button>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button id="btnConvertMsgToTask" onclick="convertCurrentMessageToTask()"
+                            class="hidden bg-gradient-to-l from-primary-dark to-primary hover:from-primary hover:to-green-700 text-white border border-secondary/60 px-4 py-2 rounded-xl text-xs font-extrabold shadow-sm transition flex items-center gap-1.5">
+                            <span>📋</span>
+                            <span>تحويل إلى تكليف رسمي</span>
+                        </button>
+                        <span class="bg-amber-100 text-amber-800 border border-amber-200 px-3 py-1.5 rounded-full text-xs font-extrabold">
+                            ✉️ رسالة داخلية بين الموظفين (بدون تقييم)
+                        </span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <!-- 1. Message Info Card (Top on Mobile, Right Top on Desktop) -->
+                    <div class="order-1 lg:col-span-7">
+                        <div class="bg-white border-2 border-amber-200/70 p-6 rounded-3xl shadow-sm">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-gray-100">
+                                <h2 id="viewMsgTitle" class="text-xl md:text-2xl font-extrabold text-primary">عنوان الرسالة</h2>
+                                <span id="viewMsgId" class="text-xs font-mono text-gray-400 bg-gray-50 px-2.5 py-1 rounded-lg">#MSG</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-surface p-3.5 rounded-2xl border border-line text-xs md:text-sm font-bold mb-4">
+                                <div><span class="text-gray-400 block text-[11px]">من الموظف:</span> <span id="viewMsgSender" class="text-primary">...</span></div>
+                                <div><span class="text-gray-400 block text-[11px]">إلى الموظف:</span> <span id="viewMsgReceiver" class="text-gray-800">...</span></div>
+                                <div><span class="text-gray-400 block text-[11px]">تاريخ الإرسال:</span> <span id="viewMsgDate" class="text-gray-600" dir="ltr">...</span></div>
+                            </div>
+
+                            <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 min-h-[120px] whitespace-pre-wrap text-gray-800 font-medium leading-relaxed" id="viewMsgContent"></div>
+
+                            <div id="viewMsgAttachmentBox" class="hidden mt-4 pt-4 border-t border-gray-100">
+                                <a id="viewMsgAttachmentLink" href="#" target="_blank"
+                                    class="inline-flex items-center gap-2 bg-primary/10 hover:bg-primary hover:text-white text-primary border border-primary/20 px-5 py-3 rounded-xl text-sm font-extrabold transition shadow-sm">
+                                    <span>📎</span>
+                                    <span>فتح / تحميل المرفق الأساسي للرسالة</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Message Chat History (Middle on Mobile above Reply Box, Left Column on Desktop) -->
+                    <div class="order-2 lg:col-span-5 lg:row-span-2 flex flex-col h-[420px] lg:h-[560px]">
+                        <div class="bg-white border border-gray-100 rounded-3xl shadow-sm flex flex-col h-full overflow-hidden">
+                            <div class="bg-primary p-4 text-white font-bold flex items-center gap-2">
+                                <span>💬</span>
+                                <span>سجل الردود والمرفقات</span>
+                            </div>
+                            <div id="msgChatTimeline" class="flex-1 p-4 space-y-3 overflow-y-auto bg-[#efeae2]"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Reply to Internal Message (Bottom on Mobile right under Chat, Right Bottom on Desktop) -->
+                    <div class="order-3 lg:col-span-7">
+                        <div class="bg-white border border-gray-200 p-6 rounded-3xl shadow-sm space-y-4">
+                            <h3 class="font-extrabold text-primary text-base flex items-center gap-2">
+                                <span>💬</span>
+                                <span>إضافة رد على هذه الرسالة</span>
+                            </h3>
+                            <textarea id="msgReplyInput" rows="3"
+                                class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm font-medium focus:outline-none focus:border-primary focus:bg-white"
+                                placeholder="اكتب ردك هنا..."></textarea>
+                            <div class="flex flex-col sm:flex-row items-center gap-3">
+                                <div class="w-full sm:flex-1">
+                                    <input type="file" id="msgReplyFile"
+                                        class="w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer bg-gray-50 rounded-xl border border-gray-200">
+                                </div>
+                                <button onclick="submitMessageReply()" id="btnSubmitMsgReply"
+                                    class="w-full sm:w-auto bg-primary hover:bg-primary-hover text-white font-extrabold px-6 py-3 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2">
+                                    <span>إرسال الرد وإشعار واتساب</span>
+                                    <span>📱</span>
+                                </button>
+                            </div>
+                            <div id="msgReplyAlert" class="hidden p-3 rounded-xl text-xs font-bold text-center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MANAGER SECTION -->
+            <div id="managerSection" class="hidden space-y-8">
+
+                <!-- Manager Tab Navigation (4 Tabs) -->
+                <div class="grid grid-cols-2 md:grid-cols-4 bg-white/95 border border-secondary/35 p-1.5 rounded-2xl w-full max-w-3xl mx-auto mb-8 shadow-md backdrop-blur-sm gap-1">
+                    <button onclick="switchManagerTab('create')" id="tabCreate"
+                        class="font-extrabold text-xs sm:text-sm md:text-base py-3 px-3 rounded-xl transition-all duration-300 bg-primary text-white shadow-md flex items-center justify-center gap-1.5">
+                        <span>➕ إنشاء تكليف</span>
+                    </button>
+                    <button onclick="switchManagerTab('dashboard')" id="tabDashboard"
+                        class="font-extrabold text-xs sm:text-sm md:text-base py-3 px-3 rounded-xl transition-all duration-300 text-gray-500 hover:text-primary flex items-center justify-center gap-1.5 relative">
+                        <span>📊 لوحة المتابعة</span>
+                        <span id="mgrTabAlertBadge" class="hidden bg-red-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full animate-pulse shadow-sm">0</span>
+                    </button>
+                    <button onclick="switchManagerTab('report')" id="tabReport"
+                        class="font-extrabold text-xs sm:text-sm md:text-base py-3 px-3 rounded-xl transition-all duration-300 text-gray-500 hover:text-primary flex items-center justify-center gap-1.5">
+                        <span>📈 التقارير</span>
+                    </button>
+                    <button onclick="switchManagerTab('settings')" id="tabSettings"
+                        class="font-extrabold text-xs sm:text-sm md:text-base py-3 px-3 rounded-xl transition-all duration-300 text-gray-500 hover:text-primary flex items-center justify-center gap-1.5">
+                        <span>⚙️ لوحة التحكم</span>
+                    </button>
+                </div>
+
+                <!-- TAB 1: CREATE TASK (Heritage Executive Design) -->
+                <div id="tabContentCreate" class="space-y-6">
+                    <!-- Executive Create Task Banner -->
+                    <div class="bg-gradient-to-l from-primary-dark via-primary to-green-700 text-white p-6 rounded-3xl shadow-md relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b-4 border-secondary">
+                        <div class="absolute inset-0 heritage-pattern pointer-events-none"></div>
+                        <div class="relative z-10">
+                            <h2 class="text-2xl font-extrabold flex items-center gap-2.5">
+                                <span class="bg-white/15 p-2 rounded-xl text-2xl border border-secondary/40">📝</span>
+                                <span>إصدار وتوجيه تكليف عمل جديد</span>
+                            </h2>
+                            <p class="text-amber-200/95 text-xs md:text-sm font-bold mt-1 mr-12">
+                                اختر الموظف أو مجموعة الموظفين وسيقوم النظام بتوليد الروابط الذكية وتجهيز إشعار الواتساب تلقائياً
+                            </p>
+                        </div>
+                        <span class="relative z-10 inline-flex items-center gap-1.5 bg-white/15 border border-secondary/40 text-amber-200 px-3.5 py-2 rounded-xl text-xs font-extrabold">
+                            <span>📌</span>
+                            <span>الجهة الطالبة تُحفظ تلقائياً</span>
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-line space-y-6">
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">الجهة الطالبة للتكليف <span class="text-red-500">*</span></label>
+                            <select id="requesterNameSelect" onchange="toggleRequesterOther()"
+                                class="w-full rounded-2xl border-2 border-gray-100 bg-white text-base font-bold text-ink shadow-sm transition-all duration-300 py-3 px-4 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10">
+                                <option value="" disabled selected>اختر الجهة الطالبة</option>
+                            </select>
+                            <input id="requesterNameOther" type="text"
+                                class="w-full mt-2 hidden rounded-2xl border-2 border-gray-100 bg-white text-base text-ink shadow-sm transition-all duration-300 py-3 px-4 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+                                placeholder="اكتب اسم الجهة هنا...">
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">عنوان التكليف <span class="text-red-500">*</span></label>
+                            <input id="taskTitle" type="text"
+                                class="w-full rounded-2xl border-2 border-gray-100 bg-white text-base text-ink shadow-sm transition-all duration-300 py-3 px-4 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+                                placeholder="مثال: إعداد التقرير المالي">
+                        </div>
+
+                        <div class="relative" id="taskEmpMultiSelectWrapper">
+                            <label class="block font-bold text-gray-700 mb-2">الموظفين المكلفين <span class="text-red-500">*</span></label>
+                            <div id="multiSelectToggle" onclick="openTaskEmployeeDropdownAndFocus(event)"
+                                class="w-full rounded-2xl border-2 border-gray-100 bg-white shadow-sm transition-all duration-300 py-2 px-3 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 cursor-text flex flex-wrap items-center gap-1.5 min-h-[52px] hover:border-primary/50">
+                                <div id="taskSelectedEmpChips" class="flex flex-wrap items-center gap-1.5"></div>
+                                <input type="text" id="taskEmpSearchInput"
+                                    onfocus="openTaskEmployeeDropdown()"
+                                    oninput="filterTaskEmployeesList(this.value)"
+                                    onkeydown="handleTaskEmpSearchKeydown(event)"
+                                    placeholder="اكتب اسم الموظف أو اختر من القائمة..."
+                                    autocomplete="off"
+                                    class="flex-1 min-w-[150px] bg-transparent border-0 outline-none text-sm font-bold text-ink placeholder:text-gray-400 py-1 px-1">
+                                <span id="multiSelectLabel" class="hidden">اختر الموظفين...</span>
+                                <button type="button" onclick="event.stopPropagation(); toggleCheckboxDropdown()"
+                                    class="text-gray-400 hover:text-primary px-1.5 py-1 text-xs transition-transform duration-300 flex-shrink-0" id="multiSelectIcon" title="فتح / إغلاق القائمة">▼</button>
+                            </div>
+                            <div id="checkboxDropdown"
+                                class="hidden absolute z-50 w-full mt-2 bg-white border-2 border-primary/20 rounded-2xl shadow-2xl max-h-72 overflow-y-auto p-3">
+                                <div class="flex flex-wrap justify-between items-center gap-2 border-b border-gray-100 pb-2.5 mb-2.5 sticky top-0 bg-white z-10">
+                                    <div class="flex items-center gap-1.5">
+                                        <button type="button" onclick="selectAllCheckboxes(true)"
+                                            class="text-xs bg-primary/10 text-primary font-extrabold px-3 py-1.5 rounded-lg hover:bg-primary/20 transition">تحديد الكل</button>
+                                        <button type="button" onclick="selectAllCheckboxes(false)"
+                                            class="text-xs bg-red-50 text-red-600 font-extrabold px-3 py-1.5 rounded-lg hover:bg-red-100 transition">إلغاء الكل</button>
+                                    </div>
+                                    <span id="taskEmpSelectedCountBadge" class="text-[11px] font-extrabold text-primary bg-surface px-2.5 py-1 rounded-full border border-line">0 محدد</span>
+                                </div>
+                                <div id="checkboxesContainer" class="flex flex-col gap-1.5"></div>
+                                <div id="taskEmpCustomAddBox" class="hidden mt-2 pt-2 border-t border-dashed border-gray-200"></div>
+                            </div>
+                        </div>
+
+                        <div class="cursor-pointer" onclick="safeShowDatePicker('taskDate')">
+                            <label class="block font-bold text-gray-700 mb-2 cursor-pointer">آخر موعد للتسليم <span class="text-red-500">*</span></label>
+                            <input id="taskDate" type="date" onclick="event.stopPropagation(); safeShowDatePicker(this)"
+                                class="w-full rounded-2xl border-2 border-gray-100 bg-white text-base text-ink shadow-sm transition-all duration-300 py-3 px-4 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 cursor-pointer">
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">الأولوية</label>
+                            <select id="taskPriority"
+                                class="w-full rounded-2xl border-2 border-gray-100 bg-white text-base font-bold text-ink shadow-sm transition-all duration-300 py-3 px-4 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 cursor-pointer">
+                                <option value="عادي">🟢 عادي</option>
+                                <option value="هام">🟡 هام</option>
+                                <option value="عاجل">🔴 عاجل</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">إرفاق ملف (اختياري)</label>
+                            <input type="file" id="managerTaskFile"
+                                class="w-full text-sm text-gray-500 file:mr-3 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition cursor-pointer bg-surface rounded-2xl border border-gray-100 p-1">
+                            <div id="convertedMsgAttachmentBanner" class="hidden mt-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-extrabold flex items-center justify-between gap-2">
+                                <span class="truncate">📎 تم ربط مرفق الرسالة المحولة تلقائياً</span>
+                                <button type="button" onclick="clearConvertedMsgAttachment()" class="text-red-600 hover:underline flex-shrink-0">إلغاء المرفق ✕</button>
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label class="block font-bold text-gray-700 mb-2">تفاصيل التكليف <span class="text-red-500">*</span></label>
+                            <textarea id="taskDesc" rows="4"
+                                class="w-full rounded-2xl border-2 border-gray-100 bg-white text-base text-ink shadow-sm transition-all duration-300 py-3 px-4 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+                                placeholder="اكتب المطلوب بدقة..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row items-center gap-4 mt-8 pt-6 border-t border-gray-100">
+                        <button onclick="createTask()" id="btnCreate"
+                            class="w-full md:w-1/2 bg-gradient-to-l from-primary-dark via-primary to-green-600 hover:from-green-700 hover:to-primary text-white font-extrabold rounded-2xl px-6 py-4 transition-all duration-300 shadow-lg shadow-green-900/25 text-lg flex justify-center items-center gap-2 transform hover:-translate-y-0.5">
+                            <span>اعتماد وإرسال التكليف عبر واتساب</span>
+                            <span>🚀</span>
+                        </button>
+                        <label
+                            class="flex items-center justify-center gap-3 cursor-pointer bg-green-50 border-2 border-green-200 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-green-100 shadow-sm w-full md:w-auto">
+                            <input type="checkbox" id="sendWhatsAppCb" checked
+                                class="w-5 h-5 text-green-600 bg-white border-gray-300 rounded focus:ring-green-500 cursor-pointer">
+                            <span class="font-bold text-green-800 text-sm md:text-base">فتح الواتساب تلقائياً بعد الاعتماد 📱</span>
+                        </label>
+                    </div>
+                    <div id="createMsg" class="hidden p-4 rounded-2xl font-bold text-sm mt-4"></div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: DASHBOARD (Heritage Visual Identity + Tasks & Internal Messages Supervision) -->
+                <div id="tabContentDashboard" class="hidden space-y-6">
+
+                    <!-- Executive Dashboard Banner -->
+                    <div class="bg-gradient-to-l from-primary-dark via-primary to-green-700 text-white p-6 rounded-3xl shadow-md relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b-4 border-secondary">
+                        <div class="absolute inset-0 heritage-pattern pointer-events-none"></div>
+                        <div class="relative z-10">
+                            <h2 class="text-2xl font-extrabold flex items-center gap-2.5">
+                                <span class="bg-white/15 p-2 rounded-xl text-2xl border border-secondary/40">📊</span>
+                                <span>لوحة المتابعة والإشراف العام</span>
+                            </h2>
+                            <p class="text-amber-200/95 text-xs md:text-sm font-bold mt-1 mr-12">
+                                متابعة فورية لحركة التكاليف الرسمية وسجل المراسلات الداخلية المتبادلة بين موظفي المركز
+                            </p>
+                        </div>
+                        <div class="relative z-10 flex flex-wrap gap-2 w-full md:w-auto">
+                            <button onclick="openManagerFolder('all')"
+                                class="flex-1 md:flex-none bg-white/15 hover:bg-white/25 border border-white/30 text-white font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl transition flex items-center justify-center gap-1.5">
+                                <span>📋 كل التكاليف</span>
+                            </button>
+                            <button onclick="openManagerFolder('messages')"
+                                class="flex-1 md:flex-none bg-secondary hover:bg-amber-500 text-ink font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl shadow-sm transition flex items-center justify-center gap-1.5">
+                                <span>📨 مراسلات الموظفين</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Manager KPIs (5 Cards in Heritage Style) -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-6">
+                        <div onclick="openManagerFolder('working')"
+                            class="bg-white p-5 rounded-3xl border-2 border-primary/20 hover:border-primary shadow-sm hover:shadow-md flex flex-col justify-between items-center relative overflow-hidden cursor-pointer transition-all group">
+                            <div class="absolute top-0 right-0 w-full h-1.5 bg-primary"></div>
+                            <span class="text-2xl mb-1 bg-primary/10 w-11 h-11 rounded-2xl flex items-center justify-center">⏳</span>
+                            <span class="text-gray-600 text-xs font-extrabold mt-2 text-center">نشطة (جاري العمل)</span>
+                            <span id="kpiActive" class="text-3xl font-black text-primary mt-1">0</span>
+                        </div>
+
+                        <div onclick="openManagerFolder('late')"
+                            class="bg-gradient-to-b from-red-50/70 to-white p-5 rounded-3xl border-2 border-red-200 hover:border-red-500 shadow-sm hover:shadow-md flex flex-col justify-between items-center relative overflow-hidden cursor-pointer transition-all group">
+                            <div class="absolute top-0 right-0 w-full h-1.5 bg-red-500"></div>
+                            <span class="text-2xl mb-1 bg-red-100 w-11 h-11 rounded-2xl flex items-center justify-center">⏰</span>
+                            <span class="text-red-800 text-xs font-extrabold mt-2 text-center">تكاليف متأخرة</span>
+                            <span id="kpiLate" class="text-3xl font-black text-red-600 mt-1">0</span>
+                        </div>
+
+                        <div onclick="openManagerFolder('ready')"
+                            class="bg-gradient-to-b from-amber-50/70 to-white p-5 rounded-3xl border-2 border-secondary/40 hover:border-secondary shadow-sm hover:shadow-md flex flex-col justify-between items-center relative overflow-hidden cursor-pointer transition-all group">
+                            <div class="absolute top-0 right-0 w-full h-1.5 bg-secondary"></div>
+                            <span class="text-2xl mb-1 bg-amber-100 w-11 h-11 rounded-2xl flex items-center justify-center">👁️</span>
+                            <span class="text-amber-900 text-xs font-extrabold mt-2 text-center">بانتظار المراجعة</span>
+                            <span id="kpiReview" class="text-3xl font-black text-amber-600 mt-1">0</span>
+                        </div>
+
+                        <div onclick="openManagerFolder('archived')"
+                            class="bg-gradient-to-b from-emerald-50/70 to-white p-5 rounded-3xl border-2 border-emerald-200 hover:border-primary shadow-sm hover:shadow-md flex flex-col justify-between items-center relative overflow-hidden cursor-pointer transition-all group">
+                            <div class="absolute top-0 right-0 w-full h-1.5 bg-emerald-600"></div>
+                            <span class="text-2xl mb-1 bg-emerald-100 w-11 h-11 rounded-2xl flex items-center justify-center">✅</span>
+                            <span class="text-emerald-900 text-xs font-extrabold mt-2 text-center">منجزة ومُقيمة</span>
+                            <span id="kpiDone" class="text-3xl font-black text-emerald-700 mt-1">0</span>
+                        </div>
+
+                        <div onclick="openManagerFolder('messages')"
+                            class="col-span-2 sm:col-span-1 bg-gradient-to-b from-surface to-white p-5 rounded-3xl border-2 border-primary/30 hover:border-primary shadow-sm hover:shadow-md flex flex-col justify-between items-center relative overflow-hidden cursor-pointer transition-all group">
+                            <div class="absolute top-0 right-0 w-full h-1.5 bg-gradient-to-l from-primary to-secondary"></div>
+                            <span class="text-2xl mb-1 bg-primary/10 w-11 h-11 rounded-2xl flex items-center justify-center">📨</span>
+                            <span class="text-primary-dark text-xs font-extrabold mt-2 text-center">مراسلات الموظفين</span>
+                            <span id="kpiMessages" class="text-3xl font-black text-primary-dark mt-1">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Manager Dashboard Search & Filter Bar -->
+                    <div class="flex flex-wrap gap-3 items-center mb-6 bg-white p-4 rounded-3xl border-2 border-line shadow-sm">
+                        <div class="flex-1 min-w-[220px] relative">
+                            <input type="search" id="mgrSearchInput" oninput="handleManagerSearch()"
+                                class="w-full min-w-0 rounded-2xl border-2 border-gray-100 bg-surface/60 shadow-inner transition-all duration-300 py-3 px-5 pr-11 focus:outline-none focus:border-primary focus:bg-white text-sm md:text-base font-bold text-gray-700"
+                                placeholder="ابحث بعنوان التكليف، الرسالة، الرقم، أو اسم الموظف...">
+                            <span class="absolute right-4 top-3 text-lg opacity-50">🔍</span>
+                        </div>
+                        <div class="w-full sm:w-64">
+                            <select id="mgrFilterEmp" onchange="handleManagerSearch()"
+                                class="w-full rounded-2xl border-2 border-gray-100 bg-surface/60 shadow-sm transition-all duration-300 py-3 px-4 focus:outline-none focus:border-primary focus:bg-white text-sm md:text-base font-extrabold text-primary-dark cursor-pointer">
+                                <option value="">👤 تصفية حسب الموظف (الكل)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Manager Dashboard Folders View -->
+                    <div id="mgrDashboardFoldersView" class="space-y-5">
+                        <!-- Main 4 Task Folders Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="mgrFoldersGrid">
+                            <!-- Folder 1: New -->
+                            <div onclick="openManagerFolder('new')"
+                                class="bg-white hover:bg-surface/70 p-6 rounded-3xl shadow-sm border-2 border-line hover:border-primary transition-all duration-300 cursor-pointer flex items-center justify-between gap-4 relative overflow-hidden group">
+                                <div class="absolute top-0 right-0 w-2 h-full bg-primary"></div>
+                                <div class="flex items-center gap-4 pr-2">
+                                    <div class="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-3xl group-hover:scale-110 transition">
+                                        🆕
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg md:text-xl font-extrabold text-ink group-hover:text-primary transition">تكاليف مرسلة (جديدة)</h3>
+                                        <p class="text-xs text-gray-500 font-bold mt-1">تكاليف تم إرسالها وبانتظار مباشرة الموظف</p>
+                                    </div>
+                                </div>
+                                <span id="mgrFolderCountNew" class="bg-primary text-white font-black px-4 py-2 rounded-2xl text-xl shadow-sm">0</span>
+                            </div>
+
+                            <!-- Folder 2: Working -->
+                            <div onclick="openManagerFolder('working')"
+                                class="bg-white hover:bg-surface/70 p-6 rounded-3xl shadow-sm border-2 border-line hover:border-secondary transition-all duration-300 cursor-pointer flex items-center justify-between gap-4 relative overflow-hidden group">
+                                <div class="absolute top-0 right-0 w-2 h-full bg-secondary"></div>
+                                <div class="flex items-center gap-4 pr-2">
+                                    <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-secondary/30 flex items-center justify-center text-3xl group-hover:scale-110 transition">
+                                        ⏳
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg md:text-xl font-extrabold text-ink group-hover:text-amber-700 transition">جاري العمل عليها</h3>
+                                        <p class="text-xs text-gray-500 font-bold mt-1">تكاليف قيد التنفيذ أو طلبات التمديد والمتابعة</p>
+                                    </div>
+                                </div>
+                                <span id="mgrFolderCountWorking" class="bg-secondary text-ink font-black px-4 py-2 rounded-2xl text-xl shadow-sm">0</span>
+                            </div>
+
+                            <!-- Folder 3: Ready for Review -->
+                            <div onclick="openManagerFolder('ready')"
+                                class="bg-white hover:bg-surface/70 p-6 rounded-3xl shadow-sm border-2 border-line hover:border-emerald-600 transition-all duration-300 cursor-pointer flex items-center justify-between gap-4 relative overflow-hidden group">
+                                <div class="absolute top-0 right-0 w-2 h-full bg-emerald-600"></div>
+                                <div class="flex items-center gap-4 pr-2">
+                                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-3xl group-hover:scale-110 transition">
+                                        👁️
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg md:text-xl font-extrabold text-ink group-hover:text-emerald-700 transition">جاهزة للمراجعة والتقييم</h3>
+                                        <p class="text-xs text-gray-500 font-bold mt-1">تكاليف أنجزها الموظفون وبانتظار اعتماد الإدارة</p>
+                                    </div>
+                                </div>
+                                <span id="mgrFolderCountReady" class="bg-emerald-600 text-white font-black px-4 py-2 rounded-2xl text-xl shadow-sm">0</span>
+                            </div>
+
+                            <!-- Folder 4: Archived -->
+                            <div onclick="openManagerFolder('archived')"
+                                class="bg-white hover:bg-surface/70 p-6 rounded-3xl shadow-sm border-2 border-line hover:border-gray-400 transition-all duration-300 cursor-pointer flex items-center justify-between gap-4 relative overflow-hidden group">
+                                <div class="absolute top-0 right-0 w-2 h-full bg-gray-400"></div>
+                                <div class="flex items-center gap-4 pr-2">
+                                    <div class="w-14 h-14 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center text-3xl group-hover:scale-110 transition">
+                                        🗄️
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg md:text-xl font-extrabold text-ink group-hover:text-gray-700 transition">الأرشيف والتكاليف المنجزة</h3>
+                                        <p class="text-xs text-gray-500 font-bold mt-1">جميع التكاليف المغلقة والمُقيمة سابقاً</p>
+                                    </div>
+                                </div>
+                                <span id="mgrFolderCountArchived" class="bg-gray-700 text-white font-black px-4 py-2 rounded-2xl text-xl shadow-sm">0</span>
+                            </div>
+
+                            <!-- Folder 5 (Full Width): Employee Internal Messages Supervision -->
+                            <div onclick="openManagerFolder('messages')"
+                                class="md:col-span-2 bg-gradient-to-l from-surface via-white to-amber-50/40 hover:from-primary/5 p-6 rounded-3xl shadow-sm border-2 border-secondary/50 hover:border-primary transition-all duration-300 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
+                                <div class="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-primary via-secondary to-primary"></div>
+                                <div class="flex items-center gap-4 pr-2">
+                                    <div class="w-14 h-14 rounded-2xl bg-primary text-white border-2 border-secondary flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition">
+                                        📨
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h3 class="text-lg md:text-xl font-extrabold text-primary-dark">سجل المراسلات الداخلية بين الموظفين</h3>
+                                            <span class="bg-amber-100 text-amber-800 border border-amber-300 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full">إشراف الإدارة</span>
+                                        </div>
+                                        <p class="text-xs text-gray-600 font-bold mt-1">الاطلاع على كافة الرسائل والملفات والردود المتبادلة بين موظفي المركز (بدون تقييم)</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 self-end sm:self-center">
+                                    <span class="text-xs font-extrabold text-primary group-hover:underline">فتح سجل المراسلات »</span>
+                                    <span id="mgrFolderCountMessages" class="bg-gradient-to-l from-primary-dark to-primary text-white border border-secondary/50 font-black px-5 py-2 rounded-2xl text-xl shadow-sm">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Manager Specific Folder Task / Message List -->
+                    <div id="mgrFolderViewSection" class="hidden">
+                        <div class="flex flex-wrap justify-between items-center gap-3 mb-6 bg-white p-4 rounded-3xl border-2 border-line shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <button onclick="closeManagerFolder()"
+                                    class="bg-surface border-2 border-line text-primary-dark hover:bg-primary hover:text-white hover:border-primary px-5 py-2.5 rounded-xl transition-all shadow-sm font-extrabold text-sm flex items-center gap-2">
+                                    <span>➔</span> رجوع للوحة المتابعة
+                                </button>
+                                <h3 id="mgrCurrentFolderTitle" class="text-lg md:text-2xl font-extrabold text-primary-dark flex items-center gap-2">المجلد</h3>
+                            </div>
+                        </div>
+                        <div id="mgrDashboardTableBody" class="flex flex-col gap-4"></div>
+                    </div>
+                </div>
+
+                <!-- Manager Task Action View -->
+                <div id="managerTaskActionSection" class="hidden">
+                    <div class="flex items-center gap-4 mb-6">
+                        <button onclick="closeManagerTaskAction()"
+                            class="bg-white border-2 border-gray-200 text-gray-600 hover:text-primary hover:border-primary px-5 py-2.5 rounded-xl transition-all shadow-sm font-bold text-sm flex items-center gap-2">
+                            <span>➔</span> العودة للقائمة
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        <!-- 1. Task Info Card (Top on Mobile, Right Top on Desktop) -->
+                        <div class="order-1 lg:col-span-8">
+                            <div class="bg-white border border-gray-100 p-5 md:p-6 rounded-3xl shadow-sm">
+                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                                    <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                        🎯 <span id="mgrTaskTitle" class="text-primary text-2xl font-extrabold">العنوان</span>
+                                    </h2>
+                                    <div class="inline-flex flex-wrap items-center gap-2">
+                                        <button id="pageReminderBtn"
+                                            class="hidden bg-gradient-to-r from-green-600 to-primary hover:from-green-700 hover:to-primary-dark text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-sm transition flex items-center gap-1">
+                                            📱 تذكير واتساب
+                                        </button>
+                                        <span id="mgrTaskStatusBadge" class="text-[11px] px-3 py-1 rounded-full font-bold shadow-sm border border-gray-100 hidden"></span>
+                                        <span id="mgrTaskTimeBadge" class="text-[11px] px-3 py-1 rounded-full font-bold shadow-sm border border-gray-100 hidden"></span>
+                                    </div>
+                                </div>
+
+                                <div id="mgrUrgencyBanner" class="hidden mb-4 p-3 rounded-xl font-bold text-center border"></div>
+
+                                <!-- Info Bar -->
+                                <div class="flex flex-wrap items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-700 mb-4">
+                                    <div class="flex items-center gap-1"><span>👤</span> الموظف: <span id="mgrTaskEmpName" class="text-primary">...</span></div>
+                                    <span class="text-gray-300 hidden md:inline">|</span>
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span>📅</span> التسليم: <span id="mgrTaskDueDate" class="text-red-600">...</span>
+                                        <span id="mgrOriginalDueDateBadge" class="hidden text-[11px] bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-lg font-extrabold"></span>
+                                    </div>
+                                    <span class="text-gray-300 hidden md:inline">|</span>
+                                    <div class="flex items-center gap-1"><span>⚡</span> الأولوية: <span id="mgrTaskPriority" class="text-yellow-600">...</span></div>
+                                </div>
+
+                                <p id="mgrTaskDesc" class="text-gray-700 leading-relaxed whitespace-pre-wrap bg-white p-4 rounded-xl border border-gray-100 min-h-[100px]"></p>
+
+                                <div id="mgrAttachmentContainer" class="hidden mt-4"></div>
+                                <p class="text-xs text-gray-400 mt-4 text-left font-mono">ID: <span id="mgrTaskId">TASK-12345</span></p>
+                            </div>
+                        </div>
+
+                        <!-- 2. Chat History (Middle on Mobile above Decision Box, Left Sticky Column on Desktop) -->
+                        <div class="order-2 lg:col-span-4 lg:row-span-2 flex flex-col h-[460px] lg:h-[calc(100vh-100px)] lg:sticky lg:top-6">
+                            <div class="bg-white border border-gray-100 rounded-3xl shadow-sm flex flex-col h-full overflow-hidden">
+                                <div class="bg-primary p-4 text-white">
+                                    <h3 class="font-bold text-lg flex items-center gap-2">
+                                        <span class="text-2xl">💬</span> السجل الزمني للتكليف
+                                    </h3>
+                                </div>
+                                <div id="mgrChatHistory" class="flex-1 p-4 space-y-4 overflow-y-auto bg-[#efeae2]"></div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Smart Manager Action Card (Bottom on Mobile right under Chat, Right Bottom on Desktop) -->
+                        <div class="order-3 lg:col-span-8">
+                            <div class="bg-white border-2 border-primary/20 p-6 rounded-3xl shadow-md relative overflow-hidden space-y-5">
+                                <div class="absolute top-0 right-0 w-full h-1.5 bg-gradient-to-r from-primary via-secondary to-primary"></div>
+                                <h3 class="font-extrabold text-xl text-primary flex items-center gap-2">👑 إجراءات وقرارات الإدارة</h3>
+
+                                <!-- DIRECT EXTENSION / DUE DATE UPDATE (Available anytime for active tasks even without employee request!) -->
+                                <div id="mgrDirectExtendBox" class="bg-amber-50/80 p-4 rounded-2xl border border-amber-200 space-y-2.5">
+                                    <label class="block font-extrabold text-amber-900 text-sm flex items-center gap-1.5">
+                                        <span>📅</span>
+                                        <span>تمديد / تعديل صلاحية وموعد التسليم (متاح للإدارة بأي وقت):</span>
+                                    </label>
+                                    <div id="mgrExtRequestNotice" class="hidden p-2.5 rounded-xl bg-amber-100/90 border border-amber-300 text-amber-950 text-xs font-extrabold"></div>
+                                    <div class="flex flex-col sm:flex-row gap-2">
+                                        <input type="date" id="mgrNewDueDate" onclick="safeShowDatePicker(this)"
+                                            class="flex-1 rounded-xl border-2 border-amber-300 bg-white text-center text-sm font-bold text-gray-800 py-2.5 px-4 focus:outline-none focus:border-primary cursor-pointer">
+                                        <button onclick="managerUpdateDate()"
+                                            class="bg-primary hover:bg-primary-hover text-white font-extrabold rounded-xl px-5 py-2.5 text-sm shadow-sm transition flex items-center justify-center gap-1.5">
+                                            <span>✅</span>
+                                            <span>اعتماد الموعد الجديد</span>
+                                        </button>
+                                        <button id="mgrRejectExtBtn" onclick="managerRejectExtension()"
+                                            class="hidden bg-white border-2 border-red-500 text-red-600 hover:bg-red-50 font-bold rounded-xl px-4 py-2.5 text-sm transition">
+                                            <span>❌ رفض طلب التمديد</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Common Message Input -->
+                                <div id="mgrCommonNoteWrapper">
+                                    <label class="block font-bold text-gray-700 mb-2 text-sm" id="mgrNoteLabel">رسالة للموظف / ملاحظة التوجيه</label>
+                                    <textarea id="mgrTaskNote" rows="2" placeholder="اكتب رسالتك أو توجيهك للموظف هنا..."
+                                        class="w-full rounded-2xl border-2 border-gray-200 bg-white text-base text-ink shadow-sm transition-all duration-300 py-3 px-4 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"></textarea>
+                                </div>
+
+                                <!-- STATE 1: Default (In Progress, Returned, New, etc) -->
+                                <div id="mgrStateDefault" class="hidden flex-col gap-2 pt-2 border-t border-gray-100">
+                                    <button onclick="managerActionEval('تحديث من الإدارة')"
+                                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl py-3 transition-all duration-300 shadow-sm text-sm flex items-center justify-center gap-2">
+                                        <span>💬 إرسال الرسالة / التوجيه للموظف</span>
+                                    </button>
+                                    <div class="mt-3 text-center">
+                                        <button onclick="managerActionEval('ملغي')"
+                                            class="text-red-500 hover:text-red-700 font-bold text-xs underline transition-colors">
+                                            إلغاء التكليف نهائياً ❌
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- STATE 3: Ready for Review -->
+                                <div id="mgrStateReview" class="hidden flex-col gap-3.5 pt-2 border-t border-gray-100">
+                                    <!-- Quality Score & Compact Speed Badge -->
+                                    <div class="bg-primary/5 p-4 rounded-xl border border-primary/20 space-y-3">
+                                        <div class="flex flex-wrap justify-between items-center gap-2">
+                                            <label class="block font-extrabold text-primary text-xs sm:text-sm">تقييم جودة المخرجات (من 70):</label>
+                                            <div class="flex flex-wrap items-center gap-1.5">
+                                                <span class="text-[11px] bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-1 rounded-full font-extrabold inline-flex items-center gap-1" title="تُحسب آلياً حسب تاريخ التسليم الأول للموظف">
+                                                    <span>⚡ السرعة:</span>
+                                                    <span class="bg-white text-blue-700 px-1.5 py-0.2 rounded font-black"><span id="mgrSpeedDisplay">30</span>/30</span>
+                                                </span>
+                                                <span class="text-[11px] bg-primary text-white px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1">
+                                                    <span>النسبة النهائية:</span>
+                                                    <span id="mgrLiveTotalScore" class="bg-white text-primary px-1.5 py-0.2 rounded font-black">100%</span>
+                                                </span>
+                                            </div>
+                                            <input type="hidden" id="mgrSpeedHiddenValue" value="30">
+                                        </div>
+                                        <div id="mgrSpeedFairnessNote" class="hidden text-[11px] text-emerald-800 bg-emerald-50/90 border border-emerald-200 px-2.5 py-1.5 rounded-lg font-bold"></div>
+
+                                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                            <label class="cursor-pointer">
+                                                <input type="radio" name="mgrQualityScore" value="70" class="peer hidden" checked onchange="selectQualityPreset(70)">
+                                                <div class="peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-md bg-white border border-gray-200 text-gray-700 rounded-xl py-2 text-center text-xs sm:text-sm font-extrabold transition-all hover:bg-gray-50">
+                                                    ممتاز (70)
+                                                </div>
+                                            </label>
+                                            <label class="cursor-pointer">
+                                                <input type="radio" name="mgrQualityScore" value="55" class="peer hidden" onchange="selectQualityPreset(55)">
+                                                <div class="peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 peer-checked:shadow-md bg-white border border-gray-200 text-gray-700 rounded-xl py-2 text-center text-xs sm:text-sm font-extrabold transition-all hover:bg-gray-50">
+                                                    جيد جداً (55)
+                                                </div>
+                                            </label>
+                                            <label class="cursor-pointer">
+                                                <input type="radio" name="mgrQualityScore" value="40" class="peer hidden" onchange="selectQualityPreset(40)">
+                                                <div class="peer-checked:bg-amber-500 peer-checked:text-white peer-checked:border-amber-500 peer-checked:shadow-md bg-white border border-gray-200 text-gray-700 rounded-xl py-2 text-center text-xs sm:text-sm font-extrabold transition-all hover:bg-gray-50">
+                                                    جيد (40)
+                                                </div>
+                                            </label>
+                                            <label class="cursor-pointer">
+                                                <input type="radio" name="mgrQualityScore" value="20" class="peer hidden" onchange="selectQualityPreset(20)">
+                                                <div class="peer-checked:bg-orange-500 peer-checked:text-white peer-checked:border-orange-500 peer-checked:shadow-md bg-white border border-gray-200 text-gray-700 rounded-xl py-2 text-center text-xs sm:text-sm font-extrabold transition-all hover:bg-gray-50">
+                                                    مقبول (20)
+                                                </div>
+                                            </label>
+                                        </div>
+
+                                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2 border-t border-primary/10">
+                                            <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-gray-200">
+                                                <span class="text-xs font-extrabold text-gray-600">درجة مخصصة (0 - 70):</span>
+                                                <input type="number" id="mgrCustomQualityInput" min="0" max="70" value="70"
+                                                    oninput="onCustomQualityInputChange(this.value)"
+                                                    class="w-20 text-center font-black text-primary bg-surface border border-gray-200 rounded-lg py-1 px-2 text-sm focus:outline-none focus:border-primary">
+                                            </div>
+                                            <button type="button" onclick="openEvalModal(document.getElementById('mgrTaskId').innerText)"
+                                                class="bg-white hover:bg-amber-50 text-primary-dark border-2 border-secondary/60 font-extrabold px-4 py-2 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5">
+                                                <span>📋</span>
+                                                <span>استمارة التقييم التفصيلي (7 معايير)</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <button onclick="managerActionEval('مغلق ومُقيم')"
+                                            class="w-full bg-gradient-to-r from-green-600 to-primary hover:from-green-700 hover:to-green-900 text-white font-extrabold rounded-xl py-4 shadow-lg text-lg flex items-center justify-center gap-2">
+                                            <span>🌟 اعتماد التقييم وإغلاق التكليف</span>
+                                        </button>
+                                        <button onclick="managerActionEval('مرتجع للتعديل')"
+                                            class="w-full bg-white border-2 border-orange-400 text-orange-600 hover:bg-orange-50 font-extrabold rounded-xl py-3 transition-all text-base flex items-center justify-center gap-2">
+                                            <span>↩️ إرجاع للموظف للتعديل</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- STATE 4: Closed / Cancelled -->
+                                <div id="mgrStateClosed" class="hidden text-center py-6 space-y-3">
+                                    <span class="text-4xl block mb-1">🔒</span>
+                                    <p class="font-bold text-gray-500">التكليف مغلق حالياً. لا يمكن اتخاذ إجراء روتيني.</p>
+                                    <button type="button" onclick="managerReopenTask()"
+                                        class="inline-flex items-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border-2 border-amber-300 font-extrabold px-5 py-2.5 rounded-xl text-xs transition shadow-sm">
+                                        <span>🔓</span>
+                                        <span>إعادة فتح التكليف وتنشيطه للعمل</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: REPORTS (EXECUTIVE BI & COMPREHENSIVE ANALYTICS) -->
+                <div id="tabContentReport" class="hidden space-y-6">
+                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                            <div class="md:col-span-4">
+                                <label class="block font-extrabold text-gray-700 text-xs mb-1.5">👤 اختر نوع التقرير أو الموظف:</label>
+                                <select id="reportEmployeeSelect" onchange="loadEmployeeReport()"
+                                    class="w-full bg-surface/60 border-2 border-gray-100 focus:border-primary focus:bg-white rounded-2xl py-3 px-4 outline-none font-extrabold text-gray-800 text-sm shadow-sm transition cursor-pointer">
+                                    <option value="">👤 اضغط لاختيار موظف أو التقرير الشامل...</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="block font-extrabold text-gray-700 text-xs mb-1.5">🏢 تصفية حسب الجهة / القسم:</label>
+                                <select id="reportDeptFilter" onchange="loadEmployeeReport()"
+                                    class="w-full bg-surface/60 border-2 border-gray-100 focus:border-primary focus:bg-white rounded-2xl py-3 px-4 outline-none font-bold text-gray-700 text-sm shadow-sm transition cursor-pointer">
+                                    <option value="">كل الجهات والأقسام</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2" onclick="safeShowDatePicker('reportDateFrom')">
+                                <label class="block font-extrabold text-gray-700 text-xs mb-1.5 cursor-pointer">📅 من تاريخ:</label>
+                                <input type="date" id="reportDateFrom" onchange="loadEmployeeReport()" onclick="event.stopPropagation(); safeShowDatePicker(this)"
+                                    class="w-full bg-surface/60 border-2 border-gray-100 focus:border-primary focus:bg-white rounded-2xl py-2.5 px-3 outline-none font-bold text-gray-700 text-xs shadow-sm cursor-pointer">
+                            </div>
+                            <div class="md:col-span-2" onclick="safeShowDatePicker('reportDateTo')">
+                                <label class="block font-extrabold text-gray-700 text-xs mb-1.5 cursor-pointer">📅 إلى تاريخ:</label>
+                                <input type="date" id="reportDateTo" onchange="loadEmployeeReport()" onclick="event.stopPropagation(); safeShowDatePicker(this)"
+                                    class="w-full bg-surface/60 border-2 border-gray-100 focus:border-primary focus:bg-white rounded-2xl py-2.5 px-3 outline-none font-bold text-gray-700 text-xs shadow-sm cursor-pointer">
+                            </div>
+                            <div class="md:col-span-1 flex justify-end">
+                                <button onclick="resetReportFilters()" title="إعادة ضبط الفلاتر"
+                                    class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 px-3 rounded-2xl text-xs transition">
+                                    🔄 الكل
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-gray-100">
+                            <p class="text-xs font-bold text-gray-500">💡 يمكنك استخراج تقرير مفصل لموظف محدد أو اختيار «تقرير شامل لجميع موظفي المركز» لمقارنة الأداء العام.</p>
+                            <div class="flex flex-wrap gap-2.5 w-full sm:w-auto">
+                                <button id="btnExportPdf" onclick="exportToPDF()"
+                                    class="flex-1 sm:flex-none bg-primary hover:bg-green-800 text-white px-5 py-3 rounded-2xl font-extrabold text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-md">
+                                    <span>تصدير التقرير PDF</span> 📥
+                                </button>
+                                <button onclick="exportReportToExcel()"
+                                    class="flex-1 sm:flex-none bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-3 rounded-2xl font-extrabold text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-md">
+                                    <span>تصدير إكسل</span> 📊
+                                </button>
+                                <button onclick="openStatsModal()"
+                                    class="bg-white border-2 border-gray-200 hover:border-primary hover:text-primary text-gray-600 px-4 py-3 rounded-2xl font-bold transition flex items-center justify-center shadow-sm"
+                                    title="إحصائيات عامة للمركز">
+                                    <span class="text-lg">📈</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Printable Report Area -->
+                    <div id="reportPrintArea" class="bg-white border border-gray-100 p-6 md:p-10 rounded-3xl shadow-md hidden relative overflow-hidden">
+                        <div class="text-center mb-8 border-b border-gray-100 pb-6 relative z-10">
+                            <img src="logo.png"
+                                onerror="this.onerror=null;this.src='https://xkvxticrvhhehfigjlnt.supabase.co/storage/v1/object/public/attachments/branding/turath_logo.png';"
+                                alt="شعار جمعية إحياء التراث الإسلامي - محافظة الفروانية"
+                                class="w-24 h-24 object-contain mx-auto mb-3">
+                            <p class="text-sm font-bold text-primary mb-1">جمعية إحياء التراث الإسلامي - مركز محافظة الفروانية</p>
+                            <h2 id="reportMainHeading" class="text-2xl md:text-4xl font-extrabold text-primary mb-3">تقرير تقييم إنجاز التكاليف</h2>
+                            <p class="text-lg md:text-xl text-gray-600">النطاق: <span id="reportEmpName" class="font-black text-primary bg-primary/10 px-3 py-1 rounded-lg"></span></p>
+                            <div class="flex flex-wrap items-center justify-center gap-2 mt-2">
+                                <span id="reportDeptBadge" class="hidden text-xs font-extrabold bg-surface text-primary-dark px-3 py-1 rounded-full border border-line"></span>
+                                <span id="reportPeriodBadge" class="hidden text-xs font-extrabold bg-amber-50 text-amber-800 px-3 py-1 rounded-full border border-amber-200"></span>
+                            </div>
+                            <p class="text-xs md:text-sm text-gray-400 mt-3 font-mono" id="reportDate"></p>
+                        </div>
+
+                        <!-- 6 Executive KPI Summary Cards -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-8 text-center relative z-10">
+                            <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-2xl border-2 border-green-200 shadow-sm">
+                                <div class="text-xs font-extrabold text-green-800 mb-1">متوسط التقييم العام</div>
+                                <div id="reportAvgScore" class="text-2xl md:text-3xl font-black text-primary">0%</div>
+                            </div>
+                            <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-2xl border-2 border-yellow-200 shadow-sm">
+                                <div class="text-xs font-extrabold text-yellow-800 mb-1">متوسط السرعة</div>
+                                <div id="reportAvgSpeed" class="text-2xl md:text-3xl font-black text-primary">0<span class="text-sm text-yellow-700">/30</span></div>
+                            </div>
+                            <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-2xl border-2 border-gray-200 shadow-sm">
+                                <div class="text-xs font-extrabold text-gray-700 mb-1">إجمالي التكاليف</div>
+                                <div id="reportTotalAllTasks" class="text-2xl md:text-3xl font-black text-gray-800">0</div>
+                            </div>
+                            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 rounded-2xl border-2 border-emerald-200 shadow-sm">
+                                <div class="text-xs font-extrabold text-emerald-800 mb-1">منجزة ومُقيمة ✅</div>
+                                <div id="reportTotalTasks" class="text-2xl md:text-3xl font-black text-emerald-700">0</div>
+                            </div>
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-2xl border-2 border-blue-200 shadow-sm">
+                                <div class="text-xs font-extrabold text-blue-800 mb-1">جاري / للمراجعة ⏳</div>
+                                <div id="reportActiveTasks" class="text-2xl md:text-3xl font-black text-blue-700">0</div>
+                            </div>
+                            <div class="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-2xl border-2 border-red-200 shadow-sm">
+                                <div class="text-xs font-extrabold text-red-800 mb-1">متأخرة / متوقفة ⚠️</div>
+                                <div id="reportLateTasks" class="text-2xl md:text-3xl font-black text-red-600">0</div>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto rounded-2xl border border-gray-100 shadow-sm relative z-10">
+                            <table class="w-full text-right border-collapse bg-white">
+                                <thead>
+                                    <tr id="reportTableHeadRow" class="bg-gray-50 text-gray-700">
+                                        <th class="whitespace-nowrap p-3.5 border-b-2 border-gray-200 font-extrabold text-xs md:text-sm">رقم التكليف</th>
+                                        <th class="p-3.5 border-b-2 border-gray-200 font-extrabold text-xs md:text-sm">عنوان التكليف والجهة</th>
+                                        <th class="whitespace-nowrap p-3.5 border-b-2 border-gray-200 font-extrabold text-center text-xs md:text-sm">الحالة والموعد</th>
+                                        <th class="whitespace-nowrap p-3.5 border-b-2 border-gray-200 font-extrabold text-center text-xs md:text-sm">السرعة (30)</th>
+                                        <th class="whitespace-nowrap p-3.5 border-b-2 border-gray-200 font-extrabold text-center text-xs md:text-sm">الجودة (70)</th>
+                                        <th class="whitespace-nowrap p-3.5 border-b-2 border-gray-200 font-extrabold text-center bg-gray-100 text-xs md:text-sm">الإجمالي</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportTableBody" class="divide-y divide-gray-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: CONTROL PANEL (EMPLOYEES & DEPARTMENTS MANAGEMENT) -->
+                <div id="tabContentSettings" class="hidden space-y-6">
+
+                    <!-- Executive Control Panel Header & Sub-Navigation -->
+                    <div class="bg-gradient-to-l from-primary-dark via-primary to-green-700 text-white p-6 rounded-3xl shadow-md relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b-4 border-secondary">
+                        <div class="relative z-10">
+                            <h2 class="text-2xl font-extrabold flex items-center gap-2.5">
+                                <span class="bg-white/15 p-2 rounded-xl text-2xl">⚙️</span>
+                                <span>لوحة التحكم وإدارة بيانات النظام</span>
+                            </h2>
+                            <p class="text-amber-200/90 text-xs md:text-sm font-bold mt-1 mr-12">
+                                أي موظف تضيفه هنا يمكنه الدخول فوراً للمنصة برقمه الوظيفي، وأي جهة تضيفها تظهر مباشرة في قائمة التكاليف
+                            </p>
+                        </div>
+
+                        <!-- Sub-View Switcher Pills -->
+                        <div class="relative z-10 flex flex-wrap items-center gap-2 bg-black/20 p-1.5 rounded-2xl backdrop-blur-sm w-full md:w-auto">
+                            <button onclick="switchControlPanelSubTab('employees')" id="cpTabEmployeesBtn"
+                                class="flex-1 md:flex-none bg-white text-primary font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl shadow-sm transition flex items-center justify-center gap-2">
+                                <span>👥 الموظفين</span>
+                                <span id="cpEmpCountBadge" class="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs font-black">0</span>
+                            </button>
+                            <button onclick="switchControlPanelSubTab('departments')" id="cpTabDepartmentsBtn"
+                                class="flex-1 md:flex-none text-white hover:bg-white/10 font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl transition flex items-center justify-center gap-2">
+                                <span>🏢 الجهات والأقسام</span>
+                                <span id="cpDeptCountBadge" class="bg-white/20 text-white px-2 py-0.5 rounded-full text-xs font-black">0</span>
+                            </button>
+                            <button onclick="switchControlPanelSubTab('both')" id="cpTabBothBtn"
+                                class="flex-1 md:flex-none text-white hover:bg-white/10 font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl transition flex items-center justify-center gap-1.5">
+                                <span>👁️ عرض الكل</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 1: EMPLOYEES MANAGEMENT (Full Width, Spacious & Organized) -->
+                    <div id="cpEmployeesSection" class="bg-white p-6 md:p-8 rounded-3xl border border-line shadow-sm space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
+                            <div>
+                                <h3 class="text-xl font-extrabold text-primary flex items-center gap-2">
+                                    <span>👥</span>
+                                    <span>إدارة بيانات الموظفين وأرقام الدخول</span>
+                                </h3>
+                                <p class="text-xs text-gray-500 mt-1 font-medium">أدخل الاسم الثلاثي والرقم الوظيفي (الذي يسجل به الموظف دخوله) ورقم الواتساب</p>
+                            </div>
+                            <span class="inline-flex items-center gap-1.5 bg-green-50 text-green-800 border border-green-200 px-3.5 py-1.5 rounded-full text-xs font-extrabold">
+                                <span>✅</span>
+                                <span>تفعيل فوري للدخول بالرقم الوظيفي</span>
+                            </span>
+                        </div>
+
+                        <!-- Add/Edit Employee Luxury Form Box -->
+                        <div id="empFormCard" class="bg-gradient-to-b from-surface to-white p-5 md:p-6 rounded-2xl border-2 border-primary/15 shadow-sm space-y-4 transition-all">
+                            <div class="flex items-center justify-between">
+                                <span id="empFormModeTitle" class="text-sm font-extrabold text-primary flex items-center gap-1.5">
+                                    <span>➕</span>
+                                    <span>إضافة موظف جديد للنظام</span>
+                                </span>
+                                <button onclick="resetEmployeeForm()" id="btnCancelEditEmp"
+                                    class="hidden bg-red-50 hover:bg-red-100 text-red-600 font-bold py-1.5 px-3.5 rounded-xl text-xs transition">
+                                    ✕ إلغاء وضع التعديل
+                                </button>
+                            </div>
+
+                            <input type="hidden" id="editEmpOriginalId" value="">
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                <div class="md:col-span-5">
+                                    <label class="block text-xs font-extrabold text-gray-700 mb-1.5">👤 اسم الموظف الكامل <span class="text-red-500">*</span></label>
+                                    <input type="text" id="settingEmpName" placeholder="مثال: عبدالله سالم مهوس"
+                                        onkeypress="if(event.key === 'Enter') saveEmployeeFromSettings()"
+                                        class="w-full min-w-0 rounded-xl border-2 border-gray-200 bg-white py-3 px-4 text-sm font-bold text-ink focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition">
+                                </div>
+                                <div class="md:col-span-3">
+                                    <label class="block text-xs font-extrabold text-gray-700 mb-1.5">🆔 الرقم الوظيفي (للدخول) <span class="text-red-500">*</span></label>
+                                    <input type="text" id="settingEmpId" placeholder="مثال: 400152"
+                                        onkeypress="if(event.key === 'Enter') saveEmployeeFromSettings()"
+                                        class="w-full min-w-0 rounded-xl border-2 border-gray-200 bg-white py-3 px-4 text-sm font-extrabold text-center text-primary focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-mono transition">
+                                </div>
+                                <div class="md:col-span-4">
+                                    <label class="block text-xs font-extrabold text-gray-700 mb-1.5">📱 رقم التلفون (واتساب) <span class="text-red-500">*</span></label>
+                                    <input type="text" id="settingEmpPhone" placeholder="مثال: 96566695443 أو 66695443" dir="ltr"
+                                        onkeypress="if(event.key === 'Enter') saveEmployeeFromSettings()"
+                                        class="w-full min-w-0 rounded-xl border-2 border-gray-200 bg-white py-3 px-4 text-sm font-bold text-center text-gray-800 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-mono transition">
+                                </div>
+                            </div>
+
+                            <div class="pt-1 flex flex-col sm:flex-row items-center justify-between gap-3">
+                                <p class="text-[11px] font-bold text-gray-400">💡 ملاحظة: إذا كتبت رقم التلفون من 8 أرقام كويتية سيضيف النظام مفتاح الدولة (965) تلقائياً.</p>
+                                <button onclick="saveEmployeeFromSettings()" id="btnSaveEmployee"
+                                    class="w-full sm:w-auto min-w-[220px] bg-gradient-to-l from-primary-dark via-primary to-green-600 hover:from-primary hover:to-primary-dark text-white font-extrabold py-3 px-6 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+                                    <span>➕ حفظ واعتماد بيانات الموظف</span>
+                                </button>
+                            </div>
+                            <div id="settingEmpMsg" class="hidden p-3 rounded-xl text-xs font-bold text-center"></div>
+                        </div>
+
+                        <!-- Search Bar for Employees in Control Panel -->
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                            <div class="relative w-full sm:max-w-md">
+                                <input type="search" id="cpEmpSearchInput" oninput="renderSettingsLists()"
+                                    placeholder="ابحث عن موظف بالاسم أو الرقم الوظيفي أو الهاتف..."
+                                    class="w-full min-w-0 rounded-2xl border-2 border-gray-100 bg-surface/70 py-2.5 px-4 pr-10 text-sm font-bold text-gray-700 focus:outline-none focus:border-primary focus:bg-white transition">
+                                <span class="absolute right-3.5 top-2.5 text-base opacity-50">🔍</span>
+                            </div>
+                            <div class="text-xs font-extrabold text-gray-500 bg-gray-100 px-3.5 py-2 rounded-xl">
+                                قائمة الموظفين المسجلين بالمنصة
+                            </div>
+                        </div>
+
+                        <!-- Employees Grid (2 Columns on Desktop for Clean Executive Look) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 max-h-[520px] overflow-y-auto p-1" id="settingsEmployeesList"></div>
+                    </div>
+
+                    <!-- SECTION 2: DEPARTMENTS / REQUESTERS MANAGEMENT (Full Width, Grid Cards) -->
+                    <div id="cpDepartmentsSection" class="hidden bg-white p-6 md:p-8 rounded-3xl border border-line shadow-sm space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
+                            <div>
+                                <h3 class="text-xl font-extrabold text-primary flex items-center gap-2">
+                                    <span>🏢</span>
+                                    <span>إدارة الجهات والأقسام المعتمدة</span>
+                                </h3>
+                                <p class="text-xs text-gray-500 mt-1 font-medium">الأقسام المضافة أو المعدلة هنا تظهر فوراً في القائمة المنسدلة (الجهة الطالبة للتكليف)</p>
+                            </div>
+                        </div>
+
+                        <!-- Add / Edit Department Form -->
+                        <div id="deptFormCard" class="bg-gradient-to-b from-surface to-white p-5 rounded-2xl border-2 border-primary/15 space-y-3 transition-all">
+                            <div class="flex items-center justify-between">
+                                <label id="deptFormModeTitle" class="block text-xs font-extrabold text-primary flex items-center gap-1.5">
+                                    <span>➕</span>
+                                    <span>إضافة قسم أو جهة جديدة <span class="text-red-500">*</span></span>
+                                </label>
+                                <button onclick="resetDepartmentForm()" id="btnCancelEditDept"
+                                    class="hidden bg-red-50 hover:bg-red-100 text-red-600 font-bold py-1.5 px-3.5 rounded-xl text-xs transition">
+                                    ✕ إلغاء وضع التعديل
+                                </button>
+                            </div>
+                            <input type="hidden" id="editDeptOriginalId" value="">
+                            <input type="hidden" id="editDeptOriginalName" value="">
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                <input type="text" id="settingDeptName" placeholder="مثال: قسم العلاقات العامة والإعلام..."
+                                    onkeypress="if(event.key === 'Enter') addDepartmentFromSettings()"
+                                    class="flex-1 min-w-0 rounded-xl border-2 border-gray-200 bg-white py-3 px-4 text-sm font-bold text-ink focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition">
+                                <button onclick="addDepartmentFromSettings()" id="btnAddDept"
+                                    class="bg-gradient-to-l from-primary-dark via-primary to-green-600 hover:from-primary hover:to-primary-dark text-white font-extrabold px-6 py-3 rounded-xl text-sm transition shadow-md whitespace-nowrap flex items-center justify-center gap-2">
+                                    <span>➕ إضافة القسم للقائمة</span>
+                                </button>
+                            </div>
+                            <div id="settingDeptMsg" class="hidden p-3 rounded-xl text-xs font-bold text-center"></div>
+                        </div>
+
+                        <!-- Departments Grid (3 Columns on Desktop) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 max-h-[480px] overflow-y-auto p-1" id="settingsDepartmentsList"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- EMPLOYEE TASK DETAILS SECTION -->
+            <div id="employeeSection" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+                    <!-- 1. Task Info Card (Top on Mobile, Right Top on Desktop) -->
+                    <div class="order-1 lg:col-span-8">
+                        <div class="bg-white border-2 border-primary/15 p-5 md:p-6 rounded-3xl shadow-sm relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-full h-1.5 bg-gradient-to-l from-primary via-secondary to-primary"></div>
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                                <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                    🎯 <span id="empTaskTitle" class="text-primary text-2xl font-extrabold">العنوان</span>
+                                </h2>
+                                <div class="inline-flex items-center gap-2">
+                                    <span id="empTaskStatusBadge" class="text-[11px] px-3 py-1 rounded-full font-bold shadow-sm border border-gray-100 hidden"></span>
+                                    <span id="empTaskTimeBadge" class="text-[11px] px-3 py-1 rounded-full font-bold shadow-sm border border-gray-100 hidden"></span>
+                                </div>
+                            </div>
+
+                            <div id="empUrgencyBanner" class="hidden mb-4 p-3 rounded-xl font-bold text-center border"></div>
+
+                            <!-- Info Bar -->
+                            <div class="flex flex-wrap items-center gap-3 bg-surface p-3.5 rounded-2xl border border-line text-sm font-bold text-gray-700 mb-4">
+                                <div class="flex items-center gap-1"><span>🏢</span> الجهة: <span id="empTaskRequester" class="text-primary">...</span></div>
+                                <span class="text-gray-300 hidden md:inline">|</span>
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <span>📅</span> التسليم: <span id="empTaskDueDate" class="text-red-600">...</span>
+                                    <span id="empOriginalDueDateBadge" class="hidden text-[11px] bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-lg font-extrabold"></span>
+                                </div>
+                                <span class="text-gray-300 hidden md:inline">|</span>
+                                <div class="flex items-center gap-1"><span>⚡</span> الأولوية: <span id="empTaskPriority" class="text-yellow-600">...</span></div>
+                            </div>
+
+                            <p id="empTaskDesc" class="text-gray-700 leading-relaxed whitespace-pre-wrap bg-white p-4 rounded-2xl border border-gray-100 min-h-[100px]">وصف التكليف يظهر هنا...</p>
+
+                            <div id="empAttachmentContainer" class="hidden mt-4"></div>
+                            <p class="text-xs text-gray-400 mt-4 text-left font-mono">ID: <span id="empTaskId">TASK-12345</span></p>
+                        </div>
+                    </div>
+
+                    <!-- 2. Chat History (Middle on Mobile above Reply Box, Left Sticky Column on Desktop) -->
+                    <div class="order-2 lg:col-span-4 lg:row-span-2 flex flex-col h-[460px] lg:h-[calc(100vh-100px)] lg:sticky lg:top-6">
+                        <div class="bg-white border-2 border-primary/15 rounded-3xl shadow-sm flex flex-col h-full overflow-hidden">
+                            <div class="bg-gradient-to-l from-primary-dark to-primary p-4 text-white border-b-2 border-secondary">
+                                <h3 class="font-bold text-lg flex items-center gap-2">
+                                    <span class="text-2xl">💬</span> السجل الزمني للتكليف
+                                </h3>
+                            </div>
+                            <div id="chatHistory" class="flex-1 p-4 space-y-4 overflow-y-auto bg-[#efeae2]"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Reply Box (Bottom on Mobile right under Chat, Right Bottom on Desktop) -->
+                    <div class="order-3 lg:col-span-8">
+                        <div class="bg-white border-2 border-primary/15 p-5 md:p-6 rounded-3xl shadow-sm relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-full h-1.5 bg-gradient-to-l from-primary via-secondary to-primary"></div>
+                            <h3 class="font-extrabold text-lg mb-4 text-primary flex items-center gap-2">🚀 تحديث الإنجاز والرد</h3>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block font-bold text-gray-700 mb-2">رسالتك / تحديثك (إجباري) <span class="text-red-500">*</span></label>
+                                    <textarea id="empReplyMsg" rows="3"
+                                        class="w-full rounded-xl border border-gray-200 bg-gray-50 text-sm shadow-inner transition duration-150 py-3 px-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary focus:bg-white resize-none"
+                                        placeholder="اكتب هنا تفاصيل إنجازك أو التحديات بكل شفافية..."></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-600 mb-2">📎 إرفاق ملف مباشر (اختياري)</label>
+                                    <input type="file" id="empFile"
+                                        class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition cursor-pointer bg-gray-50 rounded-xl border border-gray-200">
+                                </div>
+
+                                <div class="pt-4 border-t border-gray-100 flex flex-col md:flex-row gap-3">
+                                    <div class="flex-1">
+                                        <label class="block text-xs font-bold text-gray-500 mb-1">حالة التكليف الآن:</label>
+                                        <select id="empStatusSelect" onchange="toggleEmpExtensionDateInput()"
+                                            class="w-full rounded-xl border border-gray-200 bg-gray-50 text-sm font-bold py-3 px-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary focus:bg-white cursor-pointer">
+                                            <option value="جاري العمل">جاري العمل 🏃</option>
+                                            <option value="متوقف لعائق">متوقف لعائق ✋</option>
+                                            <option value="طلب تمديد موعد">طلب تمديد الموعد ⏳</option>
+                                            <option value="مرفوض/اعتذار">اعتذار ❌</option>
+                                            <option value="جاهز للمراجعة">جاهز للمراجعة ✅</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-1 flex items-end">
+                                        <button id="btnSubmitEmpReply" onclick="submitEmpReply()"
+                                            class="w-full bg-gradient-to-l from-primary-dark via-primary to-green-600 hover:from-primary hover:to-primary-dark text-white font-extrabold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
+                                            <span>إرسال التحديث</span>
+                                            <span class="text-xl">🚀</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Proposed Extension Date Picker (Appears when employee selects طلب تمديد موعد) -->
+                                <div id="empRequestedExtensionBox" class="hidden bg-amber-50/90 border-2 border-amber-200 p-4 rounded-2xl space-y-2" onclick="safeShowDatePicker('empRequestedDueDate')">
+                                    <label class="block text-xs font-extrabold text-amber-900 cursor-pointer flex items-center gap-1.5">
+                                        <span>📅</span>
+                                        <span>حدد التاريخ الجديد المطلوب للتمديد: <span class="text-red-500">*</span></span>
+                                    </label>
+                                    <input type="date" id="empRequestedDueDate" onclick="event.stopPropagation(); safeShowDatePicker(this)"
+                                        class="w-full rounded-xl border-2 border-amber-300 bg-white py-2.5 px-4 text-sm font-extrabold text-center text-gray-800 focus:outline-none focus:border-primary cursor-pointer">
+                                </div>
+
+                                <div id="replyMsg" class="hidden p-4 rounded-xl font-bold text-sm text-center mt-4"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FLOATING LUXURY HERITAGE TOAST CONTAINER -->
+    <div id="heritageToastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2.5 w-[92%] max-w-md pointer-events-none"></div>
+
+    <!-- MODAL: SEND INTERNAL MESSAGE BETWEEN EMPLOYEES -->
+    <div id="sendMessageModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl relative border-2 border-secondary/40">
+            <button onclick="closeSendMessageModal()"
+                class="absolute top-4 left-4 w-9 h-9 rounded-full bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 font-bold text-xl flex items-center justify-center transition">&times;</button>
+
+            <div class="mb-6">
+                <h3 class="text-2xl font-extrabold text-primary flex items-center gap-2">
+                    <span>✉️</span>
+                    <span>إرسال رسالة لموظف</span>
+                </h3>
+                <p class="text-xs text-gray-500 font-bold mt-1">سيتم حفظ الرسالة والمرفق وتوجيهك لإشعار الزميل عبر الواتساب</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- 1. Message Title -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1.5">1. عنوان الرسالة <span class="text-red-500">*</span></label>
+                    <input type="text" id="empMsgTitle"
+                        class="w-full rounded-2xl border-2 border-gray-200 bg-white py-3 px-4 text-sm font-bold focus:outline-none focus:border-primary"
+                        placeholder="اكتب عنوان الرسالة...">
+                </div>
+
+                <!-- 2. Receiver Dropdown (Integrated Searchable Multi-Select + Manual Input) -->
+                <div class="relative" id="empMsgReceiverWrapper">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-sm font-bold text-gray-700">2. الطرف المستقبل للرسالة (موظف أو أكثر) <span class="text-red-500">*</span></label>
+                        <span id="empMsgRoutingHint" class="text-[11px] font-extrabold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full">اختر موظفاً أو عدة موظفين</span>
+                    </div>
+                    <div id="empMsgMultiSelectToggle" onclick="openEmpMsgReceiverDropdownAndFocus(event)"
+                        class="w-full rounded-2xl border-2 border-gray-200 bg-white py-2 px-3 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 cursor-text flex flex-wrap items-center gap-1.5 min-h-[50px] transition">
+                        <div id="empMsgSelectedChips" class="flex flex-wrap items-center gap-1.5"></div>
+                        <input type="text" id="empMsgSearchInput"
+                            onfocus="openEmpMsgReceiverDropdown()"
+                            oninput="filterEmpMsgReceiversList(this.value)"
+                            onkeydown="handleEmpMsgSearchKeydown(event)"
+                            placeholder="اكتب اسم الموظف أو اختر من القائمة..."
+                            autocomplete="off"
+                            class="flex-1 min-w-[150px] bg-transparent border-0 outline-none text-sm font-bold text-ink placeholder:text-gray-400 py-1 px-1">
+                        <button type="button" onclick="event.stopPropagation(); toggleEmpMsgReceiverDropdown()"
+                            class="text-gray-400 hover:text-primary px-1.5 py-1 text-xs transition flex-shrink-0" id="empMsgDropdownIcon" title="فتح / إغلاق القائمة">▼</button>
+                    </div>
+                    <div id="empMsgReceiverDropdown"
+                        class="hidden absolute z-50 w-full mt-1.5 bg-white border-2 border-primary/25 rounded-2xl shadow-2xl max-h-60 overflow-y-auto p-3">
+                        <div class="flex flex-wrap justify-between items-center gap-2 border-b border-gray-100 pb-2 mb-2 sticky top-0 bg-white z-10">
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="selectAllEmpMsgReceivers(true)"
+                                    class="text-xs bg-primary/10 text-primary font-extrabold px-3 py-1 rounded-lg hover:bg-primary/20 transition">تحديد الكل</button>
+                                <button type="button" onclick="selectAllEmpMsgReceivers(false)"
+                                    class="text-xs bg-red-50 text-red-600 font-extrabold px-3 py-1 rounded-lg hover:bg-red-100 transition">إلغاء الكل</button>
+                            </div>
+                            <span id="empMsgSelectedCountBadge" class="text-[11px] font-extrabold text-primary bg-surface px-2.5 py-0.5 rounded-full border border-line">0 محدد</span>
+                        </div>
+                        <div id="empMsgCheckboxesContainer" class="flex flex-col gap-1.5"></div>
+                        <div id="empMsgCustomAddBox" class="hidden mt-2 pt-2 border-t border-dashed border-gray-200"></div>
+                    </div>
+                </div>
+
+                <!-- 3. Message Content Box -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1.5">3. محتوى الرسالة <span class="text-red-500">*</span></label>
+                    <textarea id="empMsgContent" rows="4"
+                        class="w-full rounded-2xl border-2 border-gray-200 bg-white py-3 px-4 text-sm font-medium focus:outline-none focus:border-primary"
+                        placeholder="اكتب تفاصيل رسالتك هنا..."></textarea>
+                </div>
+
+                <!-- 4. Attachment -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1.5">4. إضافة مرفق (اختياري)</label>
+                    <input type="file" id="empMsgFile"
+                        class="w-full text-xs text-gray-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer bg-surface rounded-2xl border border-gray-200 p-1">
+                </div>
+
+                <!-- 5. Send Button -->
+                <div class="pt-2">
+                    <button onclick="submitInternalMessage()" id="btnSendInternalMsg"
+                        class="w-full bg-gradient-to-l from-primary-dark via-primary to-green-600 hover:from-primary hover:to-primary-dark text-white font-extrabold py-4 rounded-2xl text-base shadow-lg transition flex items-center justify-center gap-2">
+                        <span>إرسال وتوجيه للواتساب</span>
+                        <span>📱</span>
+                    </button>
+                </div>
+
+                <div id="empMsgStatusAlert" class="hidden p-3 rounded-xl text-xs font-bold text-center"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Stats Modal -->
+    <div id="statsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4"></div>
+
+    <!-- Evaluation Modal -->
+    <div id="evalModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-2xl w-full shadow-2xl relative max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-start mb-4 border-b pb-4">
+                <h3 class="text-2xl font-bold text-primary">التقييم النهائي للتكليف</h3>
+                <div id="speedScoreDisplay" class="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-2 rounded-xl text-center">
+                    <div class="text-xs font-bold opacity-80 mb-1">سرعة الإنجاز الآلية</div>
+                    <div id="speedScoreText" class="text-2xl font-extrabold">30 <span class="text-sm">/ 30</span></div>
+                </div>
+            </div>
+
+            <p class="text-sm text-gray-500 mb-6">يرجى الإجابة على الأسئلة التالية لتحديد نسبة الـ 70% المخصصة للمدير.</p>
+
+            <div class="overflow-y-auto pr-2 space-y-4 mb-6" style="max-height: 40vh;">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">1. جودة المخرجات وتلبية المطلوب</label>
+                    <select id="q1" onchange="calculateLiveScore()" class="w-full rounded-md border border-line bg-white text-sm text-ink shadow-sm py-2 px-3">
+                        <option value="10">ممتاز (10)</option>
+                        <option value="5">جيد (5)</option>
+                        <option value="0">ضعيف (0)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">2. الابتكار والقيمة المضافة</label>
+                    <select id="q2" onchange="calculateLiveScore()" class="w-full rounded-md border border-line bg-white text-sm text-ink shadow-sm py-2 px-3">
+                        <option value="10">نعم (10)</option>
+                        <option value="0">لا (0)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">3. الدقة والخلو من الأخطاء</label>
+                    <select id="q3" onchange="calculateLiveScore()" class="w-full rounded-md border border-line bg-white text-sm text-ink shadow-sm py-2 px-3">
+                        <option value="10">خالٍ تماماً (10)</option>
+                        <option value="5">أخطاء بسيطة (5)</option>
+                        <option value="0">مليء بالأخطاء (0)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">4. الالتزام بالتعليمات والهوية</label>
+                    <select id="q4" onchange="calculateLiveScore()" class="w-full rounded-md border border-line bg-white text-sm text-ink shadow-sm py-2 px-3">
+                        <option value="10">التزام تام (10)</option>
+                        <option value="5">جزئياً (5)</option>
+                        <option value="0">لا (0)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">5. مستوى التواصل والمتابعة</label>
+                    <select id="q5" onchange="calculateLiveScore()" class="w-full rounded-md border border-line bg-white text-sm text-ink shadow-sm py-2 px-3">
+                        <option value="10">ممتاز (10)</option>
+                        <option value="5">مقبول (5)</option>
+                        <option value="0">سيء/لم يتجاوب (0)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">6. الاعتمادية وحل العوائق</label>
+                    <select id="q6" onchange="calculateLiveScore()" class="w-full rounded-md border border-line bg-white text-sm text-ink shadow-sm py-2 px-3">
+                        <option value="10">اعتمد على نفسه (10)</option>
+                        <option value="5">جزئياً (5)</option>
+                        <option value="0">أشغل الإدارة كثيراً (0)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">7. التقييم العام للجهد</label>
+                    <select id="q7" onchange="calculateLiveScore()" class="w-full rounded-md border border-line bg-white text-sm text-ink shadow-sm py-2 px-3">
+                        <option value="10">جهد استثنائي (10)</option>
+                        <option value="5">جهد طبيعي (5)</option>
+                        <option value="0">جهد ضعيف (0)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-auto border-t pt-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="font-bold text-gray-500">النتيجة النهائية للموظف:</div>
+                    <div id="totalScoreDisplay" class="text-2xl md:text-3xl font-extrabold text-primary">100%</div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button id="btnSubmitEval" onclick="submitEvaluation()"
+                        class="flex-1 bg-primary hover:bg-green-800 text-white font-extrabold rounded-xl py-3.5 px-4 transition">🌟 اعتماد وإغلاق نهائي</button>
+                    <button type="button" onclick="applyDetailedEvalToForm()"
+                        class="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-extrabold rounded-xl py-3.5 px-4 transition">✓ تطبيق الدرجة بالصفحة</button>
+                    <button onclick="closeEvalModal()"
+                        class="px-5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl py-3.5 transition">إلغاء</button>
+                </div>
+                <div id="evalMsg" class="hidden p-4 rounded-xl font-bold text-sm mt-4 text-center"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./tasks_logic.js?v=3.6"></script>
+</body>
+
+</html>
